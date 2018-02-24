@@ -1,0 +1,23 @@
+{
+  "name": "blog",
+  "version": "1.0.0",
+  "description": "webpack+redux",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heyunjiang/Blog.git"
+  },
+  "keywords": [
+    "webpack",
+    "redux"
+  ],
+  "author": "heyunjiang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/heyunjiang/Blog/issues"
+  },
+  "homepage": "https://github.com/heyunjiang/Blog#readme"
+}
