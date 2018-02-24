@@ -2,10 +2,7 @@
   "name": "blog",
   "version": "1.0.0",
   "description": "webpack+redux",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/heyunjiang/Blog.git"
@@ -19,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/heyunjiang/Blog/issues"
   },
-  "homepage": "https://github.com/heyunjiang/Blog#readme"
+  "homepage": "https://github.com/heyunjiang/Blog#readme",
+  "devDependencies": {
+    "webpack": "^3.11.0"
+  }
 }
