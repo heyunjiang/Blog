@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "webpack+redux",
   "scripts": {
-    "dev": "webpack-dev-server",
-    "build": "webpack --config webpack.config.js",
+    "dev": "webpack-dev-server --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
     "watch": "webpack --watch",
     "server": "node server.js"
   },
