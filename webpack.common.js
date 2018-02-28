@@ -23,6 +23,7 @@ module.exports = {
    },
    output: {
      filename: '[name].bundle.js',
+     chunkFilename: '[name].bundle.js', //非入口文件直接引入的，即动态引入的bundle文件
      path: path.resolve(__dirname, 'dist')
    }
 };
