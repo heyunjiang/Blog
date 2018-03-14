@@ -12,7 +12,7 @@
 
 [flex布局](css/flex.md)
 
-> flex api 归纳
+> flex 能用到的都在这里了
 
 ## ecmascript
 

@@ -4,6 +4,8 @@
 
 `import styles from "./style.css"`
 
+`import "./style.css"`
+
 > 说明：css-loader内置了css module，但是也可以使用 `react-css-modules` 来使用css module
 
 ## 规范要求

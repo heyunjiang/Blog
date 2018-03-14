@@ -6,51 +6,51 @@
 
 ## 实现代码
 
-```
-		const fileData = yield call( downloadFileStream, payload)
-        if(fileData.statusCode == 200){
-          try{
-            if(typeof(fileData.data)=='object'&&fileData.data.url&&fileData.data.url.indexOf('http')!=-1){
-                //检测是否是ios
-                if(!!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)&&document.body.clientWidth < 769){
-                  window.location.href = fileData.data.url
-                }
-                let tempLink = document.createElement('a');
-                tempLink.style.display = 'none';
-                tempLink.href = fileData.data.url;
-                tempLink.setAttribute('download', '');
-                if (typeof tempLink.download === 'undefined') {
-                  tempLink.setAttribute('target', '_blank');
-                }
-                document.body.appendChild(tempLink);
-                tempLink.click();
-                document.body.removeChild(tempLink);
-            }
-            //错误提示
-            if(typeof(fileData.data)=='object'&&fileData.data.lstFail&&fileData.data.lstSucc){
-              if(fileData.data.lstFail.length>0){
-                let errorMessage = '', succ = [], fail = []
-                fileData.data.lstSucc.forEach(item=>{
-                  succ.push(item.docName)
-                })
-                if(succ.length>0){
-                  errorMessage += (succ.join(',')+'能下载，')
-                }
+```javascript
+const fileData = yield call( downloadFileStream, payload)
+if(fileData.statusCode == 200){
+  try{
+    if(typeof(fileData.data)=='object'&&fileData.data.url&&fileData.data.url.indexOf('http')!=-1){
+      //检测是否是ios
+      if(!!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)&&document.body.clientWidth < 769){
+        window.location.href = fileData.data.url
+      }
+      let tempLink = document.createElement('a');
+      tempLink.style.display = 'none';
+      tempLink.href = fileData.data.url;
+      tempLink.setAttribute('download', '');
+      if (typeof tempLink.download === 'undefined') {
+        tempLink.setAttribute('target', '_blank');
+      }
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+    }
+    //错误提示
+    if(typeof(fileData.data)=='object'&&fileData.data.lstFail&&fileData.data.lstSucc){
+      if(fileData.data.lstFail.length>0){
+        let errorMessage = '', succ = [], fail = []
+        fileData.data.lstSucc.forEach(item=>{
+          succ.push(item.docName)
+          })
+          if(succ.length>0){
+            errorMessage += (succ.join(',')+'能下载，')
+          }
 
-                fileData.data.lstFail.forEach(item=>{
-                  errorMessage += (item.docName+':'+item.failReason+' ')
-                })
-                message.error(errorMessage)
-              }
-            }else{message.error('服务器返回数据格式错误')}
+          fileData.data.lstFail.forEach(item=>{
+            errorMessage += (item.docName+':'+item.failReason+' ')
+            })
+            message.error(errorMessage)
+          }
+          }else{message.error('服务器返回数据格式错误')}
           }catch(e){
             message.error(e)
           }
-        }else {
-          let msg
-          fileData.statusCode>=500&&fileData.statusCode<600?msg='服务器错误':msg = fileData.message
-          message.error(msg)
-        }
+          }else {
+            let msg
+            fileData.statusCode>=500&&fileData.statusCode<600?msg='服务器错误':msg = fileData.message
+            message.error(msg)
+          }
 ```
 
 ## 注意点

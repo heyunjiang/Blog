@@ -18,8 +18,8 @@ display新属性值
 1. `flex-direction`: row | row-reverse | column | column-reverse (方向)
 2. `flex-wrap`: nowrap | wrap | wrap-reverse (是否换行)
 3. `flex-flow`: row nowrap (前2个的合写版本，默认水平横轴换行)
-4. `justify-content`: flex-start | flex-end | center | space-between | space-around (在水平主轴上对齐方式)
-5. `align-items`: flex-start | flex-end | center | baseline | stretch (在垂直交叉轴上对齐方式)
+4. `justify-content`: flex-start | flex-end | center | space-between | space-around (在主轴上对齐方式)
+5. `align-items`: flex-start | flex-end | center | baseline | stretch (在次轴上对齐方式)
 6. `align-content`: flex-start | flex-end | center |stretch | space-between | space-around (多个轴线在空间上对齐方式)
 
 > 注意：若设置 `flex-direction: column`，则此时主轴为交叉轴，操作 `justify-content` 则变为垂直方向的对齐方式
