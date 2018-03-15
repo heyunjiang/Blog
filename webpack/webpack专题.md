@@ -8,6 +8,7 @@
 6. 输出bundle：可以通过设置多个入口文件控制输出多个bundle，以达到分离chunk目的
 7. 开发时错误定位: 使用 `source map`
 8. tree-shaking：删除代码中从来没有用到的代码。(前提：使用es6的import、export，和第三方压缩精简工具，比如uglifyjs)
+9. chunk: 由多个模块组合成一个chunk，构建出来的项目包含多个chunk
 
 ## -4048
 
@@ -35,7 +36,7 @@
 3. `uglifyjs-webpack-plugin`--压缩并精简代码
 4. `webpack.optimize.CommonsChunkPlugin`--提取公共代码到指定文件中，用于缓存
 
-## 深入webpack
+## 深入webpack--基础功能
 
 ### 一 runtime
 
@@ -110,7 +111,7 @@ import(/* webpackChunkName: "print" */ './print').then(module => {
 });
 ```
 
-### 七 构建缓存
+### 七 客户端缓存
 
 构建场景：确保webpack编译生成的文件能够被客户端缓存，在文件内容发生变化后，能够请求到新的文件
 
@@ -135,4 +136,75 @@ new webpack.optimize.CommonsChunkPlugin({
 前后2次使用 `CommonsChunkPlugin` 的顺序要保证一直，因为webpack是根据解析顺序来控制hash值生成的
 
 ### 八 创建library
+
+### 九 设置mode
+
+从 `webpack4` 开始，webpack配置支持mode，参数为：'none | development | production'
+
+开启之后，会明显提升构建速度
+
+## 深入webpack--api
+
+### cli api
+
+`webpack -h` 列出所有配置项
+
+使用这些api，可以实现统计配置、缓存设置、debug设置等辅助功能
+
+### 包含统计信息的文件
+
+`webpack --profile --json > compilation-stats.json`
+
+这个json统计信息文件，包含了构建时间、chunks、module、错误信息等
+
+### 模块方法
+
+在平常编写模块、组件的时候，可以使用一下模块方法或属性
+
+1. import()：动态加载
+2. require.cache：缓存的模块数组，传入模块id可以获取对应模块缓存
+3. require.resolve()：获取模块id
+4. require.ensure()：异步加载，已经被 `import()` 替代
+5. 标签模块：使用 `LabeledModulesPlugin` 插件，可以实现webpack的标签式模块导入导出
+6. require.context()：指定一系列完整依赖，便于后面模块解析(优化解析)
+
+比如： 
+
+```javascript
+var context = require.context('components', true, /\.html$/);
+var componentA = context.resolve('componentA');
+```
+
+格式：`require.context(directory:String, includeSubdirs:Boolean /* 可选的，默认值是 true */, filter:RegExp /* 可选的 */)`
+
+目的：提升模块解析速度
+
+7. require.include()：增加entry chunk，优化其他 `chunk` 模块依赖，提取公共模块
+8. require.resolveWeak()：require.resolve的弱引用
+
+> require.resolve获取到的模块会引入到bundle中，用于直接模块操作
+> 而require.resolveWeak不会，用于逻辑判断
+
+### 模块变量
+
+这些变量，会在webpack编译的时候，替换为真正的功能，这里作为语法糖类似的存在
+
+有es6(commonjs)、nodejs、webpack 3个类型模块变量
+
+1. module.loaded：模块正在执行/执行完成
+2. module.hot：是否启用HMR
+3. module.id
+4. module.exports
+5. exports：module.exports的引用简称
+6. global
+7. process
+8. __dirname (2短下划线)
+9. __filename
+10. __resourceQuery：当前模块被引用时，传参获取
+11. __webpack_public_path__：output.publicPath
+12. 其他webpack特有内置变量
+
+### nodejs api
+
+使用这些api，可以自定义构建或开发流程，所有报告和错误处理都自行实现，也就是构建 `属于自己风格的打包器` 了
 
