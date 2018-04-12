@@ -83,8 +83,8 @@ ECMAScript 文档并不是旨在帮助脚本程序员；编写脚本时请参考
 6. uneval()--源代码->字符串
 7. decodeURI
 8. encodeURI
-9. decodeURIComponent
-10. encodeURIComponent
+9. decodeURIComponent: 将%20的转成空格、加号的等
+10. encodeURIComponent: 空格、加号等转成对应的%20等
 
 # javascript new Date()
 
