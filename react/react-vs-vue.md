@@ -125,6 +125,7 @@ export default {
 2. 指令：v-if、v-modal等
 3. computed
 4. watch
+5. slot内容分发
 
 ## 其他小点
 
