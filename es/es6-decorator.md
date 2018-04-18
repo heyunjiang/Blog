@@ -14,6 +14,8 @@ time: 2018.4.17
 2. 对类的属性修饰 (方法也是类的属性，类的属性的值有bool、number、function等，就是js的7大类型)
 3. 不能用于函数，这个就是跟高阶组件最大的区别
 
+**core-decorators** : 可用的第三方模块，提供常用的几种decorator：this绑定、readonly、父类方法覆盖判断
+
 **基本格式**
 
 ```javascript
@@ -90,6 +92,57 @@ function readonly(target, name, descriptor){
 2. name: 修饰的属性名称，这里是 `name`
 3. descriptor: 修饰的属性的描述对象(descriptor包含了属性的枚举、值等)
 
+### 4. decorator不可用于函数
+
+阮一峰大神说的是存在函数提升，在声明函数的时候，decorator还没有被赋值，所以不可以作用于函数。
+
+> 注：在使用 `babel-plugin-transform-decorators` 的时候，提示错误: `Leading decorators must be attached to a class declaration`，看来decorator还是只支持修饰类
+
+没有搞太懂，去查了下资料
+
+这种说法是不严谨的, 如果 `const func = @someDecorator('abc') (x, y) => { return x + y };`，这种写法，应该就可以了(但是还不如直接使用HOC了)
+
+**decorator不适用于函数的情况**
+
+> 说明：当被修饰的函数 `foo` 属于直接声明函数时，那么就不适用
+
+```javascript
+var counter = 0;
+
+var add = function () {
+  counter++;
+};
+
+@add
+function foo() {
+}
+```
+
+想要对函数进行处理，直接使用HOC包装就可以了，例如
+
+```javascript
+function doSomething(name) {
+  console.log('Hello, ' + name);
+}
+
+function loggingDecorator(wrapped) {
+  return function() {
+    console.log('Starting');
+    const result = wrapped.apply(this, arguments);
+    console.log('Finished');
+    return result;
+  }
+}
+
+const wrapped = loggingDecorator(doSomething);
+```
+
+### 5. mixin & trait
+
+2者主要功能：都是修饰器，可以为类增加属性，扩展类
+
+但是trait更能强大，mixin自己写，trait使用第三方库 `traits-decorator` ，它提高了防止同名方法重复、排除方法及方法别名等功能
+
 ### decorator vs HOC(高阶组件)
 
 **相同点**
@@ -99,4 +152,7 @@ function readonly(target, name, descriptor){
 
 **不同点**
 
-1. decorator只能作用于类，不能作用于普通方法，这是由es6限制了的，而HOC可以作用于普通方法 
+1. decorator只能作用于类，不能作用于普通方法，这是由es6及 `babel-plugin-transform-decorators` 限制了的，而HOC可以作用于普通方法 
+2. 问题: decorator和HOC是否会对被修饰(组装)的方法的this指向问题，需要待尝试
+
+> 绑定运算符（::）
