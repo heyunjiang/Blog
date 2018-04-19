@@ -21,12 +21,13 @@
   - 功能清单、事件队列
   - cli工具
 - 框架
-  - [dva源码解读](react/dva源码解读.md)
+  - ✔ [dva源码解读](react/dva源码解读.md)
   - vue源码解读
   - vue vs react : 虚拟dom、数据流
   - vue 双向绑定原理
 - 项目经验
   - 开发规范
+  - 开发调试-从console.log到打断点
 - 设计模式、技巧
   - 高阶组件
 - 新技术
