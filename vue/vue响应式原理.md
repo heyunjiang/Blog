@@ -71,16 +71,15 @@ Vue.component('example', {
 
 **为什么说vue属于细粒度数据相应机制，react是很粗糙吗?**
 
-之所以说vue是细粒度，因为其对每个实例的根数据都采用响应式数据，每次`getter/setter`都是触发watcher(缓存是在watcher时缓存的)，然后通知render方法执行异步更新。
+之所以说vue是细粒度，因为其对每个实例的根数据都采用响应式数据，每次`getter/setter`都是触发watcher(缓存是在watcher时缓存的)，然后通知render方法执行异步更新，每个组件都是独立的，控制更加精细。
 
-再说react，react是通过`setState`更新数据，在每次`setState`时更新state，然后判断virtual dom是否需要更新
+再说react，react是通过`setState`更新数据，在每次`setState`时更新state，然后判断virtual dom是否需要更新，react的组件更新，都会把该组件下所有子组件全都更新，所以粒度大，相对vue更粗糙。
 
 **vue 这种机制比 react 更加高效吗？**
 
 这里的高效，说的是状态更新的高效
 
-不知道
-
+由于每次更新只需要更新对应的组件，不会更新该组件下所有子组件，所以更加高效
 
 ## 题外
 

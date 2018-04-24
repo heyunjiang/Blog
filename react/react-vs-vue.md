@@ -3,16 +3,40 @@
  * 归纳 react 和 vue的异同点
  * 背景: 友云设采用react全家桶，微信采用vue基础部分，对于react和vue都有一个大致的掌握，这里总结一下，做个区分
  * time: 2018.4.12
+ * update: 2018.4.24
  */
 ```
 
+## 概要
+
+1. 数据流
+2. 组件
+2.1 构建方式
+2.2 组件格式
+2.3 生命周期
+3. 虚拟dom
+4. 事件
+5. 特性
+5.1 react
+5.2 vue
+6. 其他小点
+
 ## 数据流
 
-默认情况下，react采用单向数据流，修改state只能通过 `setState()` 方法操作
+默认情况下，react采用**单向数据流**，修改state只能通过 `setState()` 方法操作
 
-默认情况下，vue采用双向数据绑定，可以直接修改state `this.data = newData`
+默认情况下，vue采用**双向数据绑定**，可以直接修改state `this.data = newData`
+
+都是响应式数据：当state数据变化时，会去判断并更新virtual dom，只是vue是细粒度，react是粗粒度
+
+如果采用状态管理，比如react-redux，vue-vuex，那么它们的数据状态更新都只能通过`reducer`或`mutations`来更新数据，都属于单向数据了
 
 > 注意: 在2者封装组件时，因为传递的props都是只读的，不允许直接修改，但是react可以直接在 `jsx` 中使用 pops，但是vue在使用的时候要注意，不能将 props 通过 `v-modal` 方式绑定到组件上，因为这样会直接修改 props， 从而系统报错
+
+> vue双向数据绑定原理：响应式数据，通过为根属性添加getter/setter，达到数据watcher，实现组件细粒度更新
+
+> 源码阅读问题：vue和react是怎样进行virtual dom更新，react重新渲染整个子树的流程是怎么样的，vue是怎么追踪到每一个组件的；vm是怎么映射到真实dom的
+
 
 ## 组件
 
@@ -119,6 +143,9 @@ export default {
 
 ### react
 
+1. react-native
+2. jsx
+
 ### vue 
 
 1. mixin
@@ -130,4 +157,6 @@ export default {
 ## 其他小点
 
 1. vue-class react-className
-2. 
+2. 2者都是将注意力集中在核心库，将其他功能如路由和状态管理交给相关库
+3. vue 上手快，react 学习成本高(jsx, es6)
+4. 
