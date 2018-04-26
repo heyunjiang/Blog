@@ -222,7 +222,7 @@ export function defineReactive (
       /*如果原本对象拥有getter方法则执行*/
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
-        /*进行依赖收集*/
+        /*进行依赖收集，为自己添加了观察者, watcher*/
         dep.depend()
         if (childOb) {
           /*子对象进行依赖收集，其实就是将同一个watcher观察者实例放进了两个depend中，一个是正在本身闭包中的depend，另一个是子元素的depend*/
@@ -579,9 +579,11 @@ export default class Watcher {
 ```
 
 ****
-总结归纳：vue为data对象的每一个根属性都添加了观察者，每个属性都添加了依赖订阅, Dep 是一个发布者，用于发布订阅.
+这里采用的是观察者模式，与发布/订阅模式不同
 
-还是有点模糊
+总结归纳：vue为data对象的每一个根属性都 new 了一个发布者，当调动该对象的set方法时，会主动去通知观察者执行更新
+
+观察者模式与发布/订阅模式不同，2者调度中心不同，发布订阅由中间事件传递，观察者由绑定基础对象自己通知观察者更新
 ****
 
 ### vue virtual dom 模块
