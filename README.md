@@ -23,13 +23,16 @@
 - 框架
   - ✔ [dva源码解读](react/dva源码解读.md)
   - vue源码解读
-  - vue vs react : 虚拟dom、数据流
+  - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流
   - ✔ [vue 双向绑定原理](vue/vue响应式原理.md)
 - 项目经验
   - 开发规范
   - 开发调试-从console.log到打断点
 - 设计模式、技巧
   - 高阶组件
+  - Observer
+  - mediator
+  - 工厂
 - 新技术
   - webAssembly
   - pwa
