@@ -20,6 +20,7 @@
 - webpack
   - ✔ [webpack基础](webpack/webpack专题.md)
   - webpack 扩展、封装
+  - babel plugin
 - nodejs
   - 功能清单、事件队列
   - [cli工具](nodejs/cli工具.md)
