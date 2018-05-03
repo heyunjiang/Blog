@@ -7,7 +7,8 @@
 - css
   - ✔ [cssModule](css/cssModule.md)
   - ✔ [flex布局](css/flex.md)
-- es6
+- es
+  - ✔ [js基础](es/深入理解javascript.md)
   - ✔ [decorator](es/es6-decorator.md)
   - promise、generator、async
   - proxy、reflect
@@ -17,13 +18,15 @@
   - 数值、函数、对象、数组、正则的扩展
   - es7,8,9新语法
   - 编码: decodeURIComponent、atob
-- webpack
+- 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
   - webpack 扩展、封装
+  - rollup基础
+  - fis基础
   - babel plugin
 - nodejs
   - 功能清单、事件队列
-  - [cli工具](nodejs/cli工具.md)
+  - ✔ [cli工具](nodejs/cli工具.md)
 - 框架
   - ✔ [dva源码解读](react/dva源码解读.md)
   - [vue源码解读](vue/sourceCodeAnalysis.md)
