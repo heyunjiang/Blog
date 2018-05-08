@@ -39,7 +39,7 @@
   - [日常感悟](software/项目开发的日常感悟.md)
   - 开发调试-从console.log到打断点
 - 设计模式、技巧
-  - 高阶组件
+  - [高阶组件](designModal/HOC.md)
   - [Observer模式](designModal/从vue响应式数据看观察者模式.md)
   - mediator
   - 工厂
