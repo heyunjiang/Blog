@@ -23,7 +23,7 @@
   - webpack 扩展、封装
   - rollup基础
   - fis基础
-  - babel plugin
+  - ✔ [babel plugin](webpack/babel.md)
 - nodejs
   - 功能清单、事件队列
   - ✔ [cli工具](nodejs/cli工具.md)
