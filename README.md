@@ -43,6 +43,12 @@
   - [Observer模式](designModal/从vue响应式数据看观察者模式.md)
   - mediator
   - 工厂
+- 规范
+  - W3C标准
+  - ES规范
+- 可视化
+  - webGL
+  - canvas
 - docker
   - docker基础
 - 新技术
