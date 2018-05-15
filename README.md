@@ -7,6 +7,8 @@
 - css
   - ✔ [cssModule](css/cssModule.md)
   - ✔ [flex布局](css/flex.md)
+  - [cssReset](css/cssReset.md)
+  - [w3c标准](css/w3c标准.md)
 - es
   - ✔ [js基础](es/深入理解javascript.md)
   - ✔ [decorator](es/es6-decorator.md)
