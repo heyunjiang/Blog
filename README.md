@@ -10,7 +10,7 @@
   - [cssReset](css/cssReset.md)
   - [w3c标准](css/w3c标准.md)
 - es
-  - ✔ [js基础](es/深入理解javascript.md)
+  - [js基础](es/深入理解javascript.md)
   - ✔ [decorator](es/es6-decorator.md)
   - promise、generator、async
   - proxy、reflect
