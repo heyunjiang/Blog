@@ -106,9 +106,20 @@ boolean, number, string, null, undefined, object, symbol
 
 > 什么是引用类型？
 
+```javascript
+const arr = [{"hello": 'world'}, {"hello": 'world'}]
+console.log(arr === arr, arr[0] === arr[1]) //true, false
+```
+
+> 记一句：Set去重内部采用 `Same-value-zero equality` 算法，类似 `===` 区别是其NaN等于自身
+
 ### 2.4 原型链
 
 继承等
+
+**关键词**：`构造函数`、`原型`、`实例`、`原型链`
+
+> 原型：也称为实例原型，是一个对象，构造函数的 `prototype` 属性指向的就是原型，由构造函数创建的实例有个 `__proto__` 属性，指向的也是原型
 
 ### 2.5 内置对象
 
@@ -135,6 +146,14 @@ boolean, number, string, null, undefined, object, symbol
 encodeURI：
 
 encodeURIComponent：
+
+### 2.8 闭包及应用场景
+
+归纳：闭包就是在函数作用域外能够访问到函数作用域内的变量
+
+好处：隐藏具体实现细节
+
+应用场景：面向对象应用、立即执行函数(提前验证)
 
 ## 3. 客户端的 javascript
 
