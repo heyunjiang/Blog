@@ -1,22 +1,22 @@
-## js 基本类型、引用类型、参数类型
+# js 基本类型、引用类型、参数类型
 
 关键词：`类型`、`内存`、`指针`
 
-**7大变量类型**
+## 7大变量类型
 
 boolean, number, string, null, undefined, object, symbol
 
-**值类型与引用类型**
+## 值类型与引用类型
 
 值类型：boolean, number, string, null, undefined, symbol
 
 引用类型：object (object, function, array)
 
-**什么是引用类型？**
+## 什么是引用类型？
 
 答：引用类型的数据，其真实值在内存中分配一个地址001，然后我们访问的都是这个001地址，就是说为我们的变量分配的值是这个地址001，它作为一个指针，指向真实值。
 
-**如何理解js中参数都是按值传递**
+## 如何理解js中参数都是按值传递
 
 原则：在javascript中的参数传递都是按值传递
 
