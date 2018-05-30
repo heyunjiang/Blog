@@ -26,7 +26,7 @@ ECMAScript 文档并不是旨在帮助脚本程序员；编写脚本时请参考
 
 错误处理机制（throw， try/catch 以及用户自定义错误类型的能力）
 
-### 2.3 7大基本类型
+### 2.3 7大变量类型
 
 boolean, number, string, null, undefined, object, symbol
 
@@ -34,18 +34,9 @@ boolean, number, string, null, undefined, object, symbol
 
 引用类型：object (object, function, array)
 
-> 什么是引用类型？
-
-```javascript
-const arr = [{"hello": 'world'}, {"hello": 'world'}]
-console.log(arr === arr, arr[0] === arr[1]) //true, false
-```
-
 > 记一句：Set去重内部采用 `Same-value-zero equality` 算法，类似 `===` 区别是其NaN等于自身
 
 ### 2.4 原型链
-
-继承等
 
 **关键词**：`构造函数`、`原型`、`实例`、`原型链`
 
