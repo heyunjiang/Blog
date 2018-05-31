@@ -50,9 +50,9 @@ boolean, number, string, null, undefined, object, symbol
 
 ### 2.7 编码规则
 
-基本原则：采用unicode编码
+基本原则：采用unicode字符集
 
-> unicode是国际通用编码，编码为unicode编码，分为utf-8,utf-16,utf-32；它的字符集叫unicode字符集
+> unicode是国际通用字符集，编码为utf编码，分为utf-8,utf-16,utf-32；它的字符集叫unicode字符集
 
 **charAt,charCodeAt,codePointAt**
 
@@ -91,8 +91,7 @@ javascript + fr等对象(nodejs)
 
 返回今年剩余天数
 
-```
-
+```javascript
 	var today = new Date();
 	var endYear = new Date(1995, 11, 31, 23, 59, 59, 999); // 设置日和月，注意，月份是0-11
 	endYear.setFullYear(today.getFullYear()); // 把年设置为今年

@@ -12,6 +12,10 @@
 - es
   - [js基础](es/深入理解javascript.md)
   - ✔ [decorator](es/es6-decorator.md)
+  - ✔ [深入js-编码规则](es/深入js-编码规则.md)
+  - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
+  - ✔ [深入js-参数类型](es/深入js-参数类型.md)
+  - ✔ [深入js-原型与继承](es/深入js-原型与继承.md)
   - promise、generator、async
   - proxy、reflect
   - set、map
