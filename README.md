@@ -16,6 +16,8 @@
   - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
   - ✔ [深入js-参数类型](es/深入js-参数类型.md)
   - ✔ [深入js-原型与继承](es/深入js-原型与继承.md)
+  - ✔ [深入js-执行上下文](es/深入js-执行上下文.md)
+  - [深入js-this](es/深入js-this.md)
   - promise、generator、async
   - proxy、reflect
   - set、map
