@@ -19,7 +19,7 @@
   - ✔ [深入js-执行上下文](es/深入js-执行上下文.md)
   - ✔ [深入js-闭包](es/深入js-闭包.md)
   - [深入js-this](es/深入js-this.md)
-  - [深入js-正则表达式](es/深入js-正则表达式.md)
+  - ✔ [深入js-正则表达式](es/深入js-正则表达式.md)
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
   - promise、generator、async
   - proxy、reflect

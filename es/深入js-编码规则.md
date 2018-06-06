@@ -1,5 +1,13 @@
 # 编码规则
 
+目录
+
+1. 基础知识
+2. 编码类型
+3. javascript 中的编码
+4. 中文编码
+5. 数组及字符串的 `length`
+
 这里为什么要总结这篇文章，因为编码在平时用的很少，但是也算是弥补了自己内心对js编码这一块的空缺，让自己以后面对编码不再恐惧，自己也明白了js采用unicode字符集和utf-16编码
 
 **关键词**：字节、fromCodePoint、codePointAt、encodeURI、encodeURIComponent
