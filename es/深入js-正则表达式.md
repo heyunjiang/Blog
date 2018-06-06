@@ -84,3 +84,11 @@ var str = "www.baidu.com/pathname?hello=world#fragment"
 var parse_url = /^(?:([a-zA-Z]*):)?(?:\/{0,3})?([0-9\.a-zA-Z]+)(?::(\d*))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:\#(.*))?$/
 parse_url.exec(str) // return  arr
 ```
+
+### 寻找单词重复出现次数
+
+```javascript
+var str = '我 you 我 he yy'
+var parse_same = /([A-Za-z\u00C0-\u1FFF\u2800-\uFFFD]+)\s+/gi
+console.log(parse_same.exec(str))
+```
