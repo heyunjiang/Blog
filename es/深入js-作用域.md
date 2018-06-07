@@ -1,6 +1,6 @@
 # 词法作用域
 
-作用域定义、作用域链、静态/动态作用域
+作用域定义、作用域链、静态/动态作用域、变量
 
 表象解释：javascript采用词法作用域
 
@@ -105,6 +105,9 @@ let特性：
 3. 不绑定全局变量，只在该作用域及子作用域内可访问
 4. for循环对let特殊处理，创建一个隐藏的作用域
 
+> 说明：尽量避免在块级作用域内使用函数声明，因为不同浏览器对其处理方式不同；最好使用函数表达式，即采用let赋值方式
+> const: 保存的是它内存地址对应的值不变，如果是对象，它内存地址对应的值也是一个地址，所以使用const声明的对象，可以修改对象的属性值的
+
 ### 6.1 块级作用域 vs 非块级作用域 (var vs let&const)
 
 1.变量提升
@@ -125,7 +128,19 @@ var value = "global";
 
 结果：都不会打印 global , 都会报错：`Uncaught ReferenceError: value is not defined`
 
-分析：如果 let 和 const 换成 var，都会输出 `undefined`；js引擎在扫描代码发现生命变量时，遇到 var ，就将其提升到作用域顶部，遇到 `const | let`，则将它们放入暂时性死区。当访问暂时性死区的变量的时候，就会报错，只有执行过变脸声明语句后，才会从暂时性死区中移除。这里的 `console.log(value)` 语句，首先会去访问本作用域内的变量，会访问到暂时性死区。
+分析：如果 let 和 const 换成 var，都会输出 `undefined`；js引擎在扫描代码发现生命变量时，遇到 var ，就将其提升到作用域顶部，遇到 `const | let`，则将它们放入暂时性死区。
+当访问暂时性死区的变量的时候，就会报错，只有执行过变脸声明语句后，才会从暂时性死区中移除。这里的 `console.log(value)` 语句，首先会去访问本作用域内的变量，会访问到暂时性死区。
+
+```javascript
+// 暂时性死区例子1
+typeof x; // ReferenceError
+let x;
+```
+
+```javascript
+// 暂时性死区例子2
+let x = x; // ReferenceError
+```
 
 2.重复声明
 
@@ -227,5 +242,22 @@ funcs[0](); // 0
 ```
 
 每次循环，也为其创建一个单独的函数作用域，用以临时保存i的值
+
+### 7 es6声明变量的6种方法
+
+var、function、let、const、import、class
+
+### 8 获取全局对象的方法
+
+因为在不同环境(浏览器、node、webWorker)中，顶层对象不同
+
+```javascript
+var getGlobal = function () {
+  if (typeof self !== 'undefined') { return self; }
+  if (typeof window !== 'undefined') { return window; }
+  if (typeof global !== 'undefined') { return global; }
+  throw new Error('unable to locate global object');
+};
+```
 
 > 相关文章：[深入js-执行上下文](./深入js-执行上下文.md)

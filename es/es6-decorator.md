@@ -1,4 +1,4 @@
-## decorator 学习总结
+# decorator 学习总结
 
 time: 2018.4.17
 
@@ -77,6 +77,7 @@ class Person {
   name() { return `${this.first} ${this.last}` }
 }
 ```
+
 这里的 readonly 修饰类Person的name属性，它是怎么定义的呢？
 
 ```javascript

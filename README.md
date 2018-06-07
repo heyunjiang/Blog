@@ -4,31 +4,26 @@
 
 个人实践，并深入分析之后总结
 
+> 说明：写(复制)这些文章，目的是让自己对js基础知识掌握更全面。这里总结的是自己不是很熟或者陌生的知识点，如果说熟悉了的，平常用到的，就不总结了。
+> 不着急总结全部知识，每个知识追求细枝末节，希望掌握全面
+
 - css
   - ✔ [cssModule](css/cssModule.md)
   - ✔ [flex布局](css/flex.md)
   - [cssReset](css/cssReset.md)
   - [w3c标准](css/w3c标准.md)
 - es
-  - [js基础](es/深入理解javascript.md)
-  - ✔ [decorator](es/es6-decorator.md)
+  - [es2015-解构赋值](es/es6-解构赋值.md)
+  - ✔ [es2015-decorator](es/es6-decorator.md)
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
   - ✔ [深入js-参数类型](es/深入js-参数类型.md)
   - ✔ [深入js-原型与继承](es/深入js-原型与继承.md)
   - ✔ [深入js-执行上下文](es/深入js-执行上下文.md)
   - ✔ [深入js-闭包](es/深入js-闭包.md)
-  - [深入js-this](es/深入js-this.md)
   - ✔ [深入js-正则表达式](es/深入js-正则表达式.md)
+  - [深入js-this](es/深入js-this.md)
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
-  - promise、generator、async
-  - proxy、reflect
-  - set、map
-  - symbol
-  - 解构赋值
-  - 数值、函数、对象、数组、正则的扩展
-  - es7,8,9新语法
-  - 编码: decodeURIComponent、atob
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
   - webpack 扩展、封装
@@ -46,6 +41,8 @@
   - 校验：eslint
   - 测试：mocha, karma, jest, enzyme
   - 模拟: mock
+- 浏览器
+  - 常用bom api
 - 项目经验
   - [日常感悟](software/项目开发的日常感悟.md)
   - 开发调试-从console.log到打断点
