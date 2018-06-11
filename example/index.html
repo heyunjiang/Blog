@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+  <title>worker</title>
+</head>
+<body>
+  <script>
+    if(window.Worker) {
+        const myWorker = new Worker("./worker.js");
+        myWorker.onerror = function(e) {
+            console.log(e)
+        }
+    }
+  </script>
+</body>
+</html>

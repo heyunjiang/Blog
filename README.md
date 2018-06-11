@@ -43,6 +43,7 @@
   - 模拟: mock
 - 浏览器
   - 常用bom api
+  - [webWorkers](browserAPI/webWorkers.md)
 - 项目经验
   - [日常感悟](software/项目开发的日常感悟.md)
   - 开发调试-从console.log到打断点
