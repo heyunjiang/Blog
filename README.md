@@ -13,7 +13,7 @@
   - [cssReset](css/cssReset.md)
   - [w3c标准](css/w3c标准.md)
 - es
-  - [es2015-解构赋值](es/es6-解构赋值.md)
+  - ✔ [es2015-解构赋值](es/es6-解构赋值.md)
   - ✔ [es2015-decorator](es/es6-decorator.md)
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
