@@ -34,7 +34,28 @@ s.includes('Hello', 0) // true
 
 1. 如果使用模板字符串表示多行字符串，所有的空格、缩进、换行都会被保留在输出之中
 2. `trim()` 方法可以消除首尾换行和空格
-3. `${}` 用于嵌入变量
+3. `${}` 用于嵌入变量(任何js表达式都行)
+4. 支持嵌套
+
+```javascript
+// 嵌套例子
+let arr = ['hello', 'cheng', 'du']
+
+console.log(`<ul>
+  <li>first</li>
+  <li>second</li>
+  ${arr.map(item=>{
+    return `<li>${item}</li>`
+  })}
+</ul>`.trim())
+
+// 结果，多了逗号，可以采用数组.join方法去掉逗号，这里默认增加逗号
+<ul>
+  <li>first</li>
+  <li>second</li>
+  <li>hello</li>,<li>cheng</li>,<li>du</li>
+</ul>
+```
 
 ## 3 模板编译
 

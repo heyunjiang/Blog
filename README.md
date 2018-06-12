@@ -34,6 +34,7 @@
 - nodejs
   - 功能清单、事件队列
   - ✔ [cli工具](nodejs/cli工具.md)
+  - ✔ [npm发包](nodejs/npm发包.md)
 - 框架
   - ✔ [dva源码解读](react/dva源码解读.md)
   - [vue源码解读](vue/sourceCodeAnalysis.md)
