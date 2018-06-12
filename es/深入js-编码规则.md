@@ -108,6 +108,27 @@ javascript 采用 unicode 字符集，utf-16 编码
 
 `encodeURIComponent` ：对URI整体编码，用1到4个转义序列来表示这些需要编码的字符，但是它能替换 `& + = #` 等。它会将参数当做uri的尾部参数进行编码
 
+### 3.4 Unicode 正规化
+
+`normalize`
+
+> normalize方法不能识别中文
+
+`'\u01D1'.normalize() === '\u004F\u030C'.normalize()` // `Ǒ`
+
+```javascript
+// 标准等价合成
+'\u004F\u030C'.normalize('NFC') // Ǒ
+'\u004F\u030C'.normalize('NFC').length // 1
+'\u004F\u030C'.normalize('NFC')[0] // Ǒ
+
+// 标准等价分解
+'\u01D1'.normalize('NFD') // Ǒ
+'\u01D1'.normalize('NFD').length // 2
+'\u01D1'.normalize('NFD')[0] // O
+'\u01D1'.normalize('NFD')[1] // ˇ
+```
+
 **2者相同点**
 
 都是对URI编码

@@ -15,6 +15,7 @@
 - es
   - ✔ [es2015-解构赋值](es/es6-解构赋值.md)
   - ✔ [es2015-decorator](es/es6-decorator.md)
+  - [es2015-模板字符串](es/es6-模板字符串.md)
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
   - ✔ [深入js-参数类型](es/深入js-参数类型.md)
