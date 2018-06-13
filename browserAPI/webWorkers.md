@@ -4,6 +4,13 @@ designer: heyunjiang
 time: 2018.6.11
 update: 2018.6.11
 
+目录
+
+1. web workers 功能简介
+2. 大体api
+3. 专用 worker 、 shared worker 例子
+4. service worker
+
 **学习目标(要解决什么问题)**：为了实现pwa
 
 ## 1 web workers 功能简介
@@ -28,7 +35,7 @@ worker线程中，能够使用大部分window对象提供的方法和属性，�
 4. chrome workers(just for firefox)
 5. 音频 workers
 
-## 2 api
+## 2 大体api
 
 通用
 
@@ -50,7 +57,7 @@ worker 线程
 1. close()
 2. importScripts('foo.js', 'bar.js')
 
-## 3 例子
+## 3 专用 worker 、 shared worker 例子
 
 ```javascript
 // shared worker 线程： 根据端口来进行通信
@@ -91,19 +98,217 @@ service worker 作为pwa应用最重要的一环。
 
 实现功能：充当web应用程序和浏览器之间的代理，也可以充当浏览器和网络之间的代理。旨在创建离线应用，拦截网络请求，网络可用时更新本地资源。附加功能有消息推送、设备后台同步api
 
+单个 service worker 可以控制很多页面。每个你的 scope 里的页面加载完的时候，安装在页面的 service worker 可以控制它。牢记你需要小心 service worker 脚本里的全局变量： 每个页面不会有自己独有的worker
+
 同其他workers的区别
 
-1. 只能在https环境下
-2. 设计为完全异步，不能操作xhr、localStorage等同步api
+1. 只能在 `https` 环境下
+2. 设计为 `完全异步`，不可以使用 `localstorage` 与 `xhr`，可以使用 `indexDB` 和 `fetch`
 
-问题：service worker能使用 `indexedDB` 吗？
+### 4.1 service worker 创建步骤
 
-猜想：应该也不能，它不能操作同步api
+1 注册
 
-### 4.2 开发步骤
+`navigator.serviceWorker.register('service-worker.js', {scope: './'}).then(function(reg){})`
+
+如果注册成功，则返回一个 `promise`。然后注册的 `service worker` 线程独立运行。scope表示 service worker 要控制的子目录，路径相对于 `origin`，不是当前js文件， `service-worker.js` 也一样
+
+2 安装
+
+运行注册service worker的主线程所在页面开始安装service worker。开始安装到安装成功，会触发事件：`install`。
+
+可以在 `worker线程` 里面监听事件，并 **处理 indexDB 和 缓存站点资源了**
+
+3 激活
+
+当 service worker 安装完成后，会接收到一个激活事件: `activate`。
+
+onactivate 主要用途是 **清理先前版本的service worker 脚本中使用的资源**。
+
+4 重新加载页面
+
+重新加载页面，保证 `service worker` 能完全控制页面
+
+****
+
+主线程支持状态判断
+
+1. reg.installing
+2. reg.waiting
+3. reg.active
+
+service worker 支持事件列表
+
+1. install
+2. activate
+3. message
+4. fetch
+5. sync
+6. push
+
+### 4.2 示例代码
+
+app.js // 主线程
+
+```javascript
+// 代码1：主线程获取或注册 service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw-test/sw.js', { scope: '/sw-test/' }).then(function(reg) {
+
+    if(reg.installing) {
+      console.log('Service worker installing');
+    } else if(reg.waiting) {
+      console.log('Service worker installed');
+    } else if(reg.active) {
+      console.log('Service worker active');
+    }
+
+  }).catch(function(error) {
+    // registration failed
+    console.log('Registration failed with ' + error);
+  });
+}
+```
+
+sw.js // service worker 线程
+
+`cache` 作为 service worker 作用域的一个全局变量
+
+`caches` 作为 service worker 作用域的一个全局变量，原名 `CacheStorage`
+
+`promise.catch` 就是在没有联网的时候触发，可以自定义返回数据
+
+```javascript
+// 代码2：service worker 缓存文件
+self.addEventListener('install', function(event) {
+  // waitUntil 保证缓存数据成功前，service worker 不会 install 完成
+  event.waitUntil(
+    // v1 表示当前 service worker 激活使用的版本
+    caches.open('v1').then(function(cache) {
+      return cache.addAll([
+        '/sw-test/',
+        '/sw-test/index.html',
+        '/sw-test/style.css',
+        '/sw-test/app.js',
+        '/sw-test/image-list.js',
+        '/sw-test/star-wars-logo.jpg',
+        '/sw-test/gallery/bountyHunters.jpg',
+        '/sw-test/gallery/myLittleVader.jpg',
+        '/sw-test/gallery/snowTroopers.jpg'
+      ]);
+    })
+  );
+});
+
+// 代码3：service worker 拦截请求
+self.addEventListener('fetch', function(event) {
+  event.respondWith(caches.match(event.request).then(function(response) {
+    // service worker 保证 caches.match() 总是会 resolves
+    // 但是返回 response 可能为 undefined
+    if (response !== undefined) {
+      return response;
+    } else {
+      return fetch(event.request).then(function (response) {
+        // response 只会被使用一次
+        // 保存 clone 版本到 cache 中
+        // 然后返回 response
+        let responseClone = response.clone();
+        caches.open('v1').then(function (cache) {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      }).catch(function () {
+        // 如果网络错误，则返回默认配置
+        return caches.match('/sw-test/gallery/myLittleVader.jpg');
+      });
+    }
+  }));
+});
+```
+
+问题：上面例子实现了数据缓存、拦截请求，以及处理断网状态如何返回数据，那么如何更新缓存中的数据呢？
+
+答：每次都让其执行fetch，失败再读取缓存。或许上面处理例子可以改写为
+
+```javascript
+// 代码4：service worker 能更新缓存的拦截请求
+self.addEventListener('fetch', function(event) {
+  event.respondWith(caches.match(event.request).then(function(response) {
+    let responsePre = response
+    return fetch(event.request).then(function (response) {
+      let responseClone = response.clone();
+      caches.open('v1').then(function (cache) {
+        cache.put(event.request, responseClone);
+      });
+      return response;
+    }).catch(function () {
+      if (responsePre !== undefined) {
+        return responsePre
+      } else {
+        return caches.match('/sw-test/gallery/myLittleVader.jpg');
+      }
+    });
+  }));
+});
+```
+
+### 4.3 更新 service worker
+
+先安装：如果有旧版的 worker 已经被安装，那么在刷新页面的时候，新版本的 worker 虽然会被安装，但是不会被激活。
+
+后激活：当没有任何已加载的页面在使用旧版的 worker 的时候，新版本才会被激活
+
+再清理：当新的service worker激活之后，需要清理之前版本缓存
+
+```javascript
+// 代码5：service worker 更新激活时清理缓存
+self.addEventListener('activate', function(event) {
+  var cacheWhitelist = ['v2'];
+
+  event.waitUntil(
+    caches.keys().then(function(keyList) {
+      return Promise.all(keyList.map(function(key) {
+        if (cacheWhitelist.indexOf(key) === -1) {
+          return caches.delete(key);
+        }
+      }));
+    })
+  );
+});
+```
+
+### 4.4 注意事项
+
+1. 必须在 `https` 环境下运行项目
+2. service worker文件的地址也要相对于 `origin` ，scope也一样，但是要求必须在应用目录之下
+
+### 4.5 问题
+
+**问**：为什么不可以使用localstorage？为什么它就是同步的？为什么就可以使用indexDB？这几种存储方式之间有什么异同？
+
+**问**：为什么不能使用xhr，能够使用fetch？这2者有什么区别？
+
+答：xhr采用的是传统回调函数写法，虽然是异步请求，但是是同步操作与响应。fetch返回的是promise，也是异步请求，但是是异步操作与响应。axois中使用的就是promise搭起基于xhr的异步桥梁。
 
 参考文章：
 
 [mdn service workers](https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API/Using_Service_Workers)
 
 [github sw](https://github.com/mdn/sw-test/)
+
+[axios源码分析](https://www.cnblogs.com/wwwweb/p/axios.html)
+
+[service worker && cachestorage](http://www.zhangxinxu.com/wordpress/2017/07/service-worker-cachestorage-offline-develop/)
+
+****
+
+练习：
+
+1. 借助 github 的 https实现 service worker
+2. 练习 caches。分析localstorage、sessionstorage、cachestorage之间差异
+
+练习应用场景
+
+做一个pwa应用
+
+1. 定时获取天气信息，并实现消息推送：Push Notification
