@@ -234,7 +234,7 @@ self.addEventListener('fetch', function(event) {
 // 代码4：service worker 能更新缓存的拦截请求
 self.addEventListener('fetch', function(event) {
   event.respondWith(caches.match(event.request).then(function(response) {
-    let responsePre = response
+    let responsePre = response&&response.clone()||null;
     return fetch(event.request).then(function (response) {
       let responseClone = response.clone();
       caches.open('v1').then(function (cache) {
@@ -242,7 +242,7 @@ self.addEventListener('fetch', function(event) {
       });
       return response;
     }).catch(function () {
-      if (responsePre !== undefined) {
+      if (responsePre !== null) {
         return responsePre
       } else {
         return caches.match('/sw-test/gallery/myLittleVader.jpg');
