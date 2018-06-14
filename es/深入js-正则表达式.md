@@ -5,6 +5,7 @@
 1. 基本语法
 2. 捕获型分组与非捕获型分组的差别
 3. 常用实例
+4. exec
 
 ## 1 基本语法
 
@@ -28,8 +29,21 @@
 
 ### 1.1 构建方式
 
-1. 对象字面量: `var regexp = /^1\d{10}$/`
-2. RegExp对象: `var regexp = new RegExp("\d{11}", 'g')`
+#### 1.1.1 对象字面量
+
+var regexp = /^1\d{10}$/
+
+#### 1.1.2 RegExp对象
+
+参数是字符串
+
+var regexp = new RegExp("\d{11}", 'g')
+
+参数是正则表达式
+
+var regexp = new RegExp(/^[xyz]+/, 'g')
+
+注意：如果第一个参数后面有修饰符，比如 `/^[xyz]+/gi` ，然后第二个参数 `g` 会覆盖掉前面的修饰符
 
 ### 1.2 执行方式
 
@@ -61,6 +75,28 @@ text : 表示匹配，成功返回布尔值
 20. \u : unicode 字符
 21. | : 取或运算符
 
+### 1.4 修饰符
+
+1. g : 全局
+2. m : 表示多行，每行都执行一次匹配
+3. i : 忽略大小写
+4. u : 支持unicode，能正确处理四个字节的 UTF-16 编码
+5. y : 同 `g` 修饰符类似，也是全局匹配。区别是g是上次匹配之后剩余位置存在匹配就行，y要求必须从上次匹配结束位置开始进行匹配，也叫做 `sticky(粘连)` 匹配
+
+```javascript
+var s = 'aaa_aa_a';
+var r1 = /a+/g;
+var r2 = /a+/y;
+
+r1.exec(s) // ["aaa"]
+r2.exec(s) // ["aaa"]
+
+r1.exec(s) // ["aa"]
+r2.exec(s) // null，因为这里是以 _ 开头的
+```
+
+> 可以使用 RegExp.prototype.unicode 来判断一个正则表达式是否设置了u属性修饰符
+
 ## 2 捕获型分组与非捕获型分组的差别
 
 1. 写法: 捕获型分组： `(\d{11})` , 非捕获型分组： `(?:(\w)*)`
@@ -69,7 +105,7 @@ text : 表示匹配，成功返回布尔值
 
 ## 3 常用实例
 
-### 匹配11位手机号码
+### 3.1 匹配11位手机号码
 
 ```javascript
 var number = "18224487974";
@@ -77,7 +113,7 @@ var parse_number = /^1\d{10}$/
 parse_number.test(number) // true
 ```
 
-### 匹配网址
+### 3.2 匹配网址
 
 ```javascript
 var str = "www.baidu.com/pathname?hello=world#fragment"
@@ -85,10 +121,30 @@ var parse_url = /^(?:([a-zA-Z]*):)?(?:\/{0,3})?([0-9\.a-zA-Z]+)(?::(\d*))?(?:\/(
 parse_url.exec(str) // return  arr
 ```
 
-### 寻找单词重复出现次数
+### 3.3 寻找单词重复出现次数
 
 ```javascript
 var str = '我 you 我 he yy'
 var parse_same = /([A-Za-z\u00C0-\u1FFF\u2800-\uFFFD]+)\s+/gi
 console.log(parse_same.exec(str))
 ```
+
+## 4 exec
+
+之前写 `exec` 匹配的时候，以为匹配一次就结束了。后面看到es6的y修饰符的时候，才知道匹配可以执行多次
+
+```javascript
+// exec 多次匹配
+var s = 'aaa_aa_a';
+var r1 = /a+/g;
+
+r1.exec(s) // ['aaa']
+r1.exec(s) // ['aa']
+r1.exec(s) // ['a']
+r1.exec(s) // null
+r1.exec(s) // ['aaa']
+```
+
+每次执行 `exec` 匹配的时候，会保存字符串上次匹配到的位置，然后下一次匹配会从上一次匹配结束的位置开始。如果上一次匹配返回的结果是 `null` 那么下次匹配又会从头开始
+
+> 可以在第一次匹配的时候，指定 `r1.lastIndex` 值，表示从哪个位置开始匹配

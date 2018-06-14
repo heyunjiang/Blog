@@ -309,6 +309,6 @@ self.addEventListener('activate', function(event) {
 
 练习应用场景
 
-做一个pwa应用
+做一个pwa应用，就在我的手写签章里面实现
 
 1. 定时获取天气信息，并实现消息推送：Push Notification
