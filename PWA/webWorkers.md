@@ -2,7 +2,7 @@
 
 designer: heyunjiang
 time: 2018.6.11
-update: 2018.6.11
+update: 2018.6.19
 
 目录
 
@@ -10,6 +10,7 @@ update: 2018.6.11
 2. 大体api
 3. 专用 worker 、 shared worker 例子
 4. service worker
+5. 应用场景
 
 **学习目标(要解决什么问题)**：为了实现pwa
 
@@ -100,18 +101,22 @@ service worker 作为pwa应用最重要的一环。
 
 单个 service worker 可以控制很多页面。每个你的 scope 里的页面加载完的时候，安装在页面的 service worker 可以控制它。牢记你需要小心 service worker 脚本里的全局变量： 每个页面不会有自己独有的worker
 
-同其他workers的区别
+`service worker` 特性
 
-1. 只能在 `https` 环境下
-2. 设计为 `完全异步`，不可以使用 `localstorage` 与 `xhr`，可以使用 `indexDB` 和 `fetch`
+1. 只能在 `https` 环境下( `localhost` 或者 `127.0.0.1` 也是 ok 的)
+2. 设计为 `完全异步`，依赖 `promise` ，不可以使用 `localstorage` 与 `xhr`，可以使用 `indexDB` 和 `fetch`
+3. service worker 的缓存机制依赖 `cache api` 实现
+4. 依赖 `fetch` (fetch在主流浏览器中都已经实现了，可以替代xhr)
 
 ### 4.1 service worker 创建步骤
 
-1 注册
+1 注册或获取
 
 `navigator.serviceWorker.register('service-worker.js', {scope: './'}).then(function(reg){})`
 
-如果注册成功，则返回一个 `promise`。然后注册的 `service worker` 线程独立运行。scope表示 service worker 要控制的子目录，路径相对于 `origin`，不是当前js文件， `service-worker.js` 也一样
+如果注册成功，则返回一个 `promise`。然后注册的 `service worker` 线程独立运行。
+
+scope表示 `service worker` 要控制的子目录，路径相对于 `origin`，不是当前js文件， `service-worker.js` 也一样
 
 2 安装
 
@@ -289,6 +294,14 @@ self.addEventListener('activate', function(event) {
 **问**：为什么不能使用xhr，能够使用fetch？这2者有什么区别？
 
 答：xhr采用的是传统回调函数写法，虽然是异步请求，但是是同步操作与响应。fetch返回的是promise，也是异步请求，但是是异步操作与响应。axois中使用的就是promise搭起基于xhr的异步桥梁。
+
+### 5 应用场景
+
+pwa、数据mock、网速很差或者离线情况是保证良好用户体验
+
+### 6 调试
+
+chrome -> Application -> Service Workers
 
 参考文章：
 
