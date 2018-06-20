@@ -16,6 +16,8 @@
 
 ### 1.3 所有浏览器存储比较
 
+数据来源于[lavas](https://lavas.baidu.com/pwa/offline-and-cache-loading/web-storage/overview)
+
 | API     | 数据模型  |  持久化  | 浏览器支持 | 事务处理 | 异步/同步 |
 | -------- | :-----: | :----:   | :----:    | :----:  | :----:    |
 | file system | 字节流 | 设备 | 52% | 不支持 | 异步 |

@@ -5,7 +5,7 @@
 1. 基本语法
 2. 捕获型分组与非捕获型分组的差别
 3. 常用实例
-4. exec
+4. 正则表达式多次匹配
 
 ## 1 基本语法
 
@@ -45,13 +45,27 @@ var regexp = new RegExp(/^[xyz]+/, 'g')
 
 注意：如果第一个参数后面有修饰符，比如 `/^[xyz]+/gi` ，然后第二个参数 `g` 会覆盖掉前面的修饰符
 
-### 1.2 执行方式
+### 1.2 RegExp对象方法
 
-exec : 表示匹配，成功返回数组
+1. RegExp.prototype.exec: 表示匹配，成功返回数组
+2. RegExp.prototype.text: 表示匹配，成功返回布尔值
+3. RegExp.prototype[Symbol.match]：字符串的match方法调用对象，每次取出一个匹配
+4. RegExp.prototype[Symbol.replace]：字符串的replace方法调用对象
+5. RegExp.prototype[Symbol.search]：字符串的search方法调用对象
+6. RegExp.prototype[Symbol.split]：字符串的split方法调用对象
+7. RegExp.prototype[Symbol.matchAll]：字符串的matchAll方法调用对象，直接取出所有匹配
 
-text : 表示匹配，成功返回布尔值
+### 1.3 正则表达式属性
 
-### 1.3 常见字符
+由对象字面量或RegExp对象构建的正则表达式，都有如下属性
+
+1. RegExp.prototype.unicode： 来判断一个正则表达式是否设置了u属性修饰符
+2. RegExp.prototype.sticky： 来判断一个正则表达式是否设置了y属性修饰符
+3. RegExp.prototype.flags: 返回所有的修饰符
+4. RegExp.prototype.dotAll：来判断一个正则表达式是否设置了s属性修饰符
+5. RegExp.prototype.lastIndex: 表示下次匹配开始位置
+
+### 1.4 常见字符
 
 1. ^ : 字符串开头
 2. $ : 字符串结尾
@@ -74,16 +88,33 @@ text : 表示匹配，成功返回布尔值
 19. \1 \2 \3 : 表示对捕获型分组的引用
 20. \u : unicode 字符
 21. | : 取或运算符
+22. \p{} : 匹配unicode 某种属性的对应字符
+23. \P{} : 不匹配unicode 某种属性的对应字符
 
-### 1.4 修饰符
+> 不可以单独使用 `\p`，必须加描述 `\p{Script=Greek}`
+
+### 1.5 修饰符
 
 1. g : 全局
 2. m : 表示多行，每行都执行一次匹配
 3. i : 忽略大小写
 4. u : 支持unicode，能正确处理四个字节的 UTF-16 编码
-5. y : 同 `g` 修饰符类似，也是全局匹配。区别是g是上次匹配之后剩余位置存在匹配就行，y要求必须从上次匹配结束位置开始进行匹配，也叫做 `sticky(粘连)` 匹配
+5. y : 同 `g` 修饰符类似，也是全局匹配。区别是g是上次匹配之后剩余位置存在匹配就行，y要求必须从上次匹配结束位置开始进行匹配，也叫做 `sticky(粘连)` 匹配(可以理解为 `y` 修饰符隐含了头部匹配表示 `^`)
+6. s : 让 `.` 能够代表任意的单个字符(除开始符 ^、结束符 $)，包括4字节的utf-16字符、行终止符
+
+> 行终止符：换行符、回车符、行分隔符、段分隔符
+
+### 1.6 g 与 y 异同
+
+相同点：都是全局匹配
+
+不同点：
+
+1. `y` 每次匹配时从上次匹配结束位置匹配， `g` 则是每次匹配时剩余匹配字符串存在匹配则行
+2. 对于 `replace` 、 `match` 等方法，使用 `g` 会一次性全部匹配，使用 `y` 则每次匹配一轮，然后需要手动多次匹配
 
 ```javascript
+// 针对不同点1
 var s = 'aaa_aa_a';
 var r1 = /a+/g;
 var r2 = /a+/y;
@@ -95,7 +126,34 @@ r1.exec(s) // ["aa"]
 r2.exec(s) // null，因为这里是以 _ 开头的
 ```
 
-> 可以使用 RegExp.prototype.unicode 来判断一个正则表达式是否设置了u属性修饰符
+```javascript
+// 针对不同点2
+var regg = /a/g
+'aaxa'.replace(regg,'-') // '--x-'
+
+var regy = /a/y
+'aaxa'.replace(regy,'-') // '-axa'
+'aaxa'.replace(regy,'-') // 'a-xa'
+'aaxa'.replace(regy,'-') // 'aaxa' 就是没有替换
+
+var reggy = /a/gy
+'aaxa'.replace(reggy,'-') // '--xa'
+```
+
+**总结**：g可以用于全局匹配，但是 y 属于 `伪全局匹配` ， y 是粘连匹配，且需要多次手动匹配，不具备 g 完整的全局匹配
+
+### 1.7 匹配分组设置名称
+
+```javascript
+const RE_DATE = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/;
+
+const matchObj = RE_DATE.exec('1999-12-31');
+const year = matchObj.groups.year; // 1999
+const month = matchObj.groups.month; // 12
+const day = matchObj.groups.day; // 31
+```
+
+为 `matchObj` 增加了一个新属性 `groups`
 
 ## 2 捕获型分组与非捕获型分组的差别
 
@@ -129,7 +187,7 @@ var parse_same = /([A-Za-z\u00C0-\u1FFF\u2800-\uFFFD]+)\s+/gi
 console.log(parse_same.exec(str))
 ```
 
-## 4 exec
+## 4 正则表达式多次匹配
 
 之前写 `exec` 匹配的时候，以为匹配一次就结束了。后面看到es6的y修饰符的时候，才知道匹配可以执行多次
 
@@ -145,6 +203,10 @@ r1.exec(s) // null
 r1.exec(s) // ['aaa']
 ```
 
-每次执行 `exec` 匹配的时候，会保存字符串上次匹配到的位置，然后下一次匹配会从上一次匹配结束的位置开始。如果上一次匹配返回的结果是 `null` 那么下次匹配又会从头开始
+当正则表达式存在 `g` 或 `y` 的时候，每次执行 `exec` 匹配，会保存字符串上次匹配到的位置，然后下一次匹配会从上一次匹配结束的位置开始(匹配的还是原字符串，只是正则对象的 `lastIndex` 值变化了)。如果上一次匹配返回的结果是 `null` 那么下次匹配又会从头开始
+
+如果正则表达式不存在 `g` 或 `y`，那么它就不会多次匹配，每次匹配的时候，都是从头开始
+
+> String.prototype.replace也是可以匹配多次的
 
 > 可以在第一次匹配的时候，指定 `r1.lastIndex` 值，表示从哪个位置开始匹配
