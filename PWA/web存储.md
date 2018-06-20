@@ -32,3 +32,15 @@
 从上表可以看出：localstorage、sessionstorage属于同步存储，而cachestorage属于异步存储，这也是 `service worker` 只能使用 `cachestorage` 的原因
 
 对于大部分存储，可以通过查看 chrome -> Application ，可以看到这些存储数据
+
+### 1.4 cookie 的用途
+
+cookie以前用做存储简单数据，现在cookie只用作http数据存储，让无状态的http协议保存一些信息，在每次浏览器发起请求都附带发送到服务器。
+
+cookie目前用途：会话状态管理(通常用户登录状态、token值)
+
+## 2 pwa 中的存储
+
+具有明确uri的资源：cache api
+
+所有其他数据：indexedDB

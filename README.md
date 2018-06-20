@@ -45,7 +45,10 @@
   - 模拟: mock
 - 浏览器
   - 常用bom api
+  - [web 存储](PWA/web存储.md)
+- pwa
   - ✔ [webWorkers](PWA/webWorkers.md)
+  - [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
 - 项目经验
   - [日常感悟](software/项目开发的日常感悟.md)
   - 开发调试-从console.log到打断点
@@ -64,7 +67,6 @@
   - docker基础
 - 新技术
   - webAssembly
-  - [利用github实现一个pwa应用](PWA/利用github实现一个pwa应用.md)
 
 ## 其他技术杂项
 
