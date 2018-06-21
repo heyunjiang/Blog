@@ -48,7 +48,7 @@
   - [web 存储](PWA/web存储.md)
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md)
-  - [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
+  - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
 - 项目经验
   - [日常感悟](software/项目开发的日常感悟.md)
   - 开发调试-从console.log到打断点

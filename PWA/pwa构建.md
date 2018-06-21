@@ -10,6 +10,14 @@ progressive web app
 1. pwa 特性
 2. pwa 中的存储
 3. 将站点添加到首屏
+4. 实现缓存
+
+待实现功能：
+
+1. 消息推送
+2. https 实现
+3. App Shell
+4. CSP
 
 ## 1 pwa 特性
 
@@ -39,15 +47,15 @@ progressive web app
   "short_name": "password", // 图标下的名称
   "icons": [
     {
-  	  "src": "/android-chrome-192x192.png",
-  	  "sizes": "192x192",
-  	  "type": "image/png"
-  	},
-  	{
-  	  "src": "/android-chrome-512x512.png",
-  	  "sizes": "512x512",
-  	  "type": "image/png"
-  	}
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ],
   "start_url": "./index.html", // 默认加载页
   "theme_color": "#181743", // 主题
@@ -67,33 +75,42 @@ progressive web app
 
 `<link rel="manifest" href="/manifest.json">`
 
+### 3.3 引导用户添加到主屏幕
+
+奈何这是浏览器自己实现的，目前我也控制不了
+
+1. manifest 文件完整
+2. 至少2次访问，间隔不少于5s
+
 ## 4 实现缓存
 
 通过 `service worker` + `cache storage` 实现缓存(可以查看[web存储](./web存储.md))
 
-主线程注册 service worker
+### 4.1 主线程注册 service worker
 
 ```javascript
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw-test/sw.js', { scope: '/sw-test/' }).then(function(reg) {
-    if(reg.installing) {
-      console.log('Service worker installing');
-    } else if(reg.waiting) {
-      console.log('Service worker installed');
-    } else if(reg.active) {
-      console.log('Service worker active');
-    }
-  }).catch(function(error) {
-    // registration failed
-    console.log('Registration failed with ' + error);
-  });
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw-test/sw.js', { scope: '/sw-test/' }).then(function(reg) {
+      if(reg.installing) {
+        console.log('Service worker installing');
+      } else if(reg.waiting) {
+        console.log('Service worker installed');
+      } else if(reg.active) {
+        console.log('Service worker active');
+      }
+    }).catch(function(error) {
+      // registration failed
+      console.log('Registration failed with ' + error);
+    });
+  }
 }
 ```
 
-service worker 线程代码
+### 4.2 service worker 执行缓存
 
 ```javascript
-const version = 'v1'
+const version = 'v2'
 const cachedFiles = [
   '/',
   '/index.html',
@@ -101,11 +118,7 @@ const cachedFiles = [
 ]
 
 self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(version).then(function(cache) {
-      return cache.addAll(cachedFiles);
-    })
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('fetch', function(event) {
@@ -132,7 +145,32 @@ self.addEventListener('fetch', function(event) {
 
 ```
 
-现在实现了基本的缓存，还需要更新
+### 4.3 缓存更新
+
+更新主要是用于清除之前service worker缓存的文件，我要缓存新文件了
+
+```javascript
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then(function (cacheList) {
+        return Promise.all(
+          cacheList.map(function (cacheName) {
+            if (cacheName !== version) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      ])
+    );
+});
+```
+
+### 4.4 ajax 数据处理
+
+对于具有明确 uri 的资源，采用 cache api 实现缓存(ajax请求数据可以缓存)，对于其他数据，使用 indexedDB
 
 > 关键点：在执行添加到主屏幕之前，要保证service worker的缓存执行完毕，这就需要做个引导添加，时机如何选择呢？如果缓存没有执行完毕，那么添加到主屏幕的应用，下次打开方式还是通过浏览器打开的。
 

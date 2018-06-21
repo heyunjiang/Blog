@@ -151,7 +151,20 @@ service worker 支持事件列表
 5. sync
 6. push
 
-### 4.2 示例代码
+### 4.2 service worker 生命周期
+
+6个阶段
+
+register -> installing -> installed -> activating -> activated -> redundant
+
+1. `register`: 在主线程中进行注册
+2. `installing`：安装时会触发 `install` 事件，该事件包含2个方法：`event.waitUntil` 和 `self.skipWaiting`。 `self.skipWaiting` 用于跳过 waiting 状态，直接进入 `activating`
+3. `installed`: 安装成功后，waiting, 等待其他的service worker线程关闭，然后它才能进入激活
+4. `activating`: 激活中，当其他的service worker线程(控制该客户端的)关闭后，允许当前service worker的安装、激活。激活中会触发 `activate` 事件，该事件包含2个方法：`event.waitUntil` 和 `self.clients.claim`。 `self.clients.claim` 用于取得页面的控制权，其他的service worker就强制进入 `redundant`
+5. `activated`: 激活后，然后处理 `activate` 的回掉事件，例如 `fetch` 、 `sync` 、 `push`
+6. `redundant`: 结束
+
+### 4.3 示例代码
 
 app.js // 主线程
 
@@ -257,7 +270,7 @@ self.addEventListener('fetch', function(event) {
 });
 ```
 
-### 4.3 更新 service worker
+### 4.4 更新 service worker
 
 先安装：如果有旧版的 worker 已经被安装，那么在刷新页面的时候，新版本的 worker 虽然会被安装，但是不会被激活。
 
@@ -282,12 +295,12 @@ self.addEventListener('activate', function(event) {
 });
 ```
 
-### 4.4 注意事项
+### 4.5 注意事项
 
 1. 必须在 `https` 环境下运行项目
 2. service worker文件的地址也要相对于 `origin` ，scope也一样，但是要求必须在应用目录之下
 
-### 4.5 问题
+### 4.6 问题
 
 **问**：为什么不可以使用localstorage？为什么它就是同步的？为什么就可以使用indexDB？这几种存储方式之间有什么异同？
 
