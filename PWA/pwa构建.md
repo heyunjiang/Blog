@@ -56,7 +56,10 @@ progressive web app
 }
 ```
 
-关键点：图标及图标尺寸，浏览器会从 icons 中选择最接近 128dp 的图片作为启动画面图像
+关键点：
+
+1. 图标及图标尺寸，浏览器会从 icons 中选择最接近 128dp 的图片作为启动画面图像
+2. 桌面图标：html 中的 `meta` 值一定要跟 `manifest` 中的值一致
 
 ### 3.2 引入 manifest.json
 
@@ -65,6 +68,73 @@ progressive web app
 `<link rel="manifest" href="/manifest.json">`
 
 ## 4 实现缓存
+
+通过 `service worker` + `cache storage` 实现缓存(可以查看[web存储](./web存储.md))
+
+主线程注册 service worker
+
+```javascript
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw-test/sw.js', { scope: '/sw-test/' }).then(function(reg) {
+    if(reg.installing) {
+      console.log('Service worker installing');
+    } else if(reg.waiting) {
+      console.log('Service worker installed');
+    } else if(reg.active) {
+      console.log('Service worker active');
+    }
+  }).catch(function(error) {
+    // registration failed
+    console.log('Registration failed with ' + error);
+  });
+}
+```
+
+service worker 线程代码
+
+```javascript
+const version = 'v1'
+const cachedFiles = [
+  '/',
+  '/index.html',
+  '/app.js'
+]
+
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    caches.open(version).then(function(cache) {
+      return cache.addAll(cachedFiles);
+    })
+  );
+});
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(caches.match(event.request).then(function(response) {
+    if (response !== undefined) {
+      return response;
+    } else {
+      return fetch(event.request).then(function (response) {
+        if(!response || response.status !== 200) {
+          return response
+        }
+
+        let responseClone = response.clone();
+        caches.open(version).then(function (cache) {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      }).catch(function (e) {
+        return e;
+      });
+    }
+  }));
+});
+
+```
+
+现在实现了基本的缓存，还需要更新
+
+> 关键点：在执行添加到主屏幕之前，要保证service worker的缓存执行完毕，这就需要做个引导添加，时机如何选择呢？如果缓存没有执行完毕，那么添加到主屏幕的应用，下次打开方式还是通过浏览器打开的。
 
 ****
 
