@@ -79,11 +79,11 @@ boolean, number, string, null, undefined, object, symbol
 
 ### 1.2 函数
 
-#### 1.2.1 函数参数默认值
+#### 1.2.1 函数length属性变化
 
 采用解构赋值方式设置参数默认值可以查看[解构赋值](./es6-解构赋值.md)部分
 
-length:
+length属性值变化:
 
 1. 在设置了参数默认值后，函数的length属性值是未设置默认值的参数个数
 2. 在使用了rest之后，函数的length属性值是不包含rest的个数
@@ -105,6 +105,305 @@ length:
 返回值：如果返回值不是对象，则可以不用大括号，否则需要大括号(array、object、function需要)
 
 参数：1个参数可以不用括号，0个或多个参数需要括号
+
+使用箭头函数的注意事项：
+
+1. 函数体内的 `this` 对象，属于在函数定义的时候的对象，属于静态对象，需要沿着作用域链向上查找this
+2. 箭头函数不可以被实例化，不能使用 `new`(因为箭头函数没有this，它的this就是函数外部的this)
+3. 函数体内不再存在 `arguments` 对象，通常使用 `rest` 替代
+4. 箭头函数不可以作为 `generator` 函数，内部不可以使用 `yield` 命令
+5. 箭头函数不可以使用 `call`、`apply`、`bind`、`super`等
+
+使用箭头函数的好处：`this` 固化，利于封装回调函数，让对象内部this始终指向该对象；箭头函数通常不用作方法函数(类似 obj.func())
+
+```javascript
+// 箭头函数this
+// ES6
+function foo() {
+  setTimeout(() => {
+    console.log('id:', this.id);
+  }, 100);
+}
+
+// ES5
+function foo() {
+  var _this = this;
+  setTimeout(function () {
+    console.log('id:', _this.id);
+  }, 100);
+}
+```
+
+#### 1.2.4 双冒号运算符
+
+```javascript
+foo::bar;
+// 等同于
+bar.bind(foo);
+```
+
+#### 1.2.5 函数尾调用
+
+> ES6规定：所有ECMAScript的实现，都必须部署尾调用优化。es6的尾调用优化只有在严格模式下开启生效，函数不能设置参数默认值、rest参数、解构赋值
+
+**尾调用**：在函数 `return` 执行的最后一步，一定是返回的一个函数的执行，如果最后一步不是函数的执行，那就不是尾调用
+
+```javascrip
+// 尾调用
+function f(x){
+  return g(x);
+}
+
+非尾调用
+function f(x){
+  return g(x) + 1;
+}
+```
+
+**尾调用优化**：相比普通函数，尾调用在执行的时候，js引擎在运行的时候，不会保存外部函数的作用环境，从而实现了内存优化。普通模式(非严格模式)实现尾调用优化，采用循环(for, while)，不保存每次函数的执行环境
+
+**尾递归**：原理同尾调用优化，节省内存
+
+```javascript
+// 非尾递归，每次递归需要保存上次函数的运行环境，因为上个函数还未运行结束
+function factorial(n) {
+  if (n === 1) return 1;
+  return n * factorial(n - 1);
+}
+factorial(5) // 120
+
+// 尾递归
+function factorial(n, total) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+factorial(5, 1) // 120
+```
+
+### 1.3 array
+
+#### 1.3.1 iterator
+
+iterator： 调用 `Symbol.iterator`
+
+任何实现了 `iterator` 接口的对象(arguments、document.getElements、map、set、generator)，都可以用 `...` 将其转为真正的数组
+
+#### 1.3.2 Array.from()
+
+Array.from: 调用 `Symbol.iterator` || `length`
+
+任何实现了 `iterator` 接口的对象，以及类似数组的对象(具有length属性，object如果赋予length属性，也是类似数组的对象)，都可以采用 `Array.from` 将其转为真正的数组。
+
+第二个参数，用于对每个元素进行处理
+
+```javascript
+Array.from(arrayLike, x => x * x);
+// 等同于
+Array.from(arrayLike).map(x => x * x);
+
+Array.from([1, 2, 3], (x) => x * x)
+// [1, 4, 9]
+```
+
+#### 1.3.3 Array.of()
+
+返回一个数组
+
+```javascript
+// Array.of()
+Array.of(3, 11, 8) // [3,11,8]
+Array.of(3) // [3]
+Array.of(3).length // 1
+
+// Array()
+Array() // []
+Array(3) // [, , ,]
+Array(3, 11, 8) // [3, 11, 8]
+```
+
+Array.of() vs Array(): `Array()` 存在重载，参数个数的不同，实现结果也不同
+
+> Array 与 new Array() 实现结果一致
+
+#### 1.3.4 copyWithin()
+
+在当前数组内部，将制定位置的成员复制到其他位置，替换元素，然后返回当前数组，会修改原数组
+
+```javascript
+[1, 2, 3, 4, 5].copyWithin(0, 3, 4)
+// [4, 5, 3, 4, 5]
+```
+
+第一个参数：开始替换的位置
+
+第二个参数：开始读取数据的位置，可选
+
+第三个参数：结束读取数组的位置，可选
+
+> 说明：开始替换的位置，不需要说明要替换多少个数组元素，替换掉的数组元素个数由后面2个参数决定；替换前后数组元素个数总数不变
+
+#### 1.3.5 find() findIndex()
+
+这2个函数，查找元素，与 indexOf() 不同的是，这2者的第一个参数必须是函数
+
+```javascript
+[1, 4, -5, 10].find((n) => n < 0) // -5
+```
+
+这2个函数，查找到第一个返回值为 `true` 的成员，并返回该成员。区别是，如果没有查找到，find返回 `undefined`，findIndex返回 `-1`
+
+#### 1.3.6 fill()
+
+用于初始化数组，设置默认填充值
+
+```javascript
+new Array(3).fill(7)
+// [7, 7, 7]
+```
+
+注意：
+
+1. 调用fill方法，会抹去原数组所有原始值
+2. 可以设置填充的起始值: `['a', 'b', 'c'].fill(7, 1, 2) // ['a', 7, 'c']`
+3. 如果填充值为对象：填充的就是该对象的 `内存地址` ，以后修改每个元素，都会影响到所有填充的元素
+
+#### 1.3.7 includes()
+
+用于代替 indexOf
+
+比 indexOf 好的原因
+
+1. 更加语义化：返回布尔值
+2. 能识别 `NaN`
+
+#### 1.3.8 数组空位
+
+`Array(3) // [empty x 3]`: 构造了3个空位
+
+es5: 处理不一致，例如 forEach 会跳过空位， map 会跳过空位，但是会保留这个值， join 会将空位视为 `undefined`
+
+es6: 空位一律处理成 `undefined`
+
+### 1.4 object
+
+#### 1.4.1 属性名表达式
+
+可以采用如下方式定义对象
+
+```javascript
+let propKey = 'foo';
+
+let obj = {
+  [propKey]: true,
+  ['a' + 'bc']: 123
+}
+```
+
+> 注意：不能将属性名表达式与对象简洁表示混合使用，否则报错 `const baz = { [foo] }`
+
+#### 1.4.2 对象方法的 name 属性
+
+函数的 `name` 属性，返回函数名；对象方法的 `name` 属性，通常也是返回方法名(此处方法也是函数)
+
+以下3种方式不同
+
+1 `get/set`
+
+直接访问属性的name报错，因为这里的foo属性返回值是 `undefined`，foo的真实值是它的返回值
+
+```javascript
+const obj = {
+  get foo() {},
+  set foo(x) {}
+};
+
+obj.foo.name
+// TypeError: Cannot read property 'name' of undefined
+
+const descriptor = Object.getOwnPropertyDescriptor(obj, 'foo');
+
+descriptor.get.name // "get foo"
+descriptor.set.name // "set foo"
+```
+
+2 `bind/Function`
+
+```javascript
+(new Function()).name // "anonymous"
+
+var doSomething = function() {};
+doSomething.bind().name // "bound doSomething"
+```
+
+3 `Symbol`
+
+```javascript
+const key1 = Symbol('description');
+const key2 = Symbol();
+let obj = {
+  [key1]() {},
+  [key2]() {},
+};
+obj[key1].name // "[description]"
+obj[key2].name // ""
+```
+
+#### 1.4.3 Object.is()
+
+用于判断2个值是否相等，类似 `===`
+
+`==` vs `===` : 前者会隐式转换类型
+
+`===` vs `Object.is()`: 后者在 `===` 的基础之上，增加了 `NaN` 等于自身，并且 `+0` 不等于 `-0`
+
+`==` vs `Object.is()`: 后者不会隐式转换，并且 `+0` 不等于 `-0`， `NaN` 等于自身
+
+#### 1.4.4 Object.assign()
+
+对象合并：将源对象的所有可枚举属性都合并/覆盖到目标对象上去
+
+注意事项
+
+1. 如果传入一个对象参数，就返回这个对象
+2. 如果传入不是对象参数，那么转换成对象(该方法保证返回对象，只是返回的是该参数原有对象形式的对象)
+3. 如果第一个参数传入 `null` 或 `undefined` ，报错
+4. `Object.assign({}, 'hello')`: 第二个参数只有是对象或者字符串时才起效，数字、null、undefined、function等都无效
+5. 属于浅拷贝(如果源对象的某属性是对象，那么拷贝的也只是这个对象的引用，如果需要深度复制，还是需要自己手写)，继承属性不拷贝，也不拷贝不可枚举的属性
+6. Object.assign只能进行值的复制，如果要复制的值是一个取值函数，那么将求值后再复制
+7. 可以接受多个参数，用以实现多个对象的合并
+
+#### 1.4.5 对象属性的可枚举性和遍历
+
+可枚举性：可以控制该属性，是否允许别人看到
+
+采用 `Object.getOwnPropertyDescriptor` 获取对象属性的描述对象
+
+```javascript
+let obj = { foo: 123 };
+Object.getOwnPropertyDescriptor(obj, 'foo')
+//  {
+//    value: 123,
+//    writable: true,
+//    enumerable: true,
+//    configurable: true
+//  }
+```
+
+如果设置对象属性描述对象的 `enumerable` 值为 false，那么下列操作就会忽略这个属性
+
+1. for...in 循环
+2. Object.keys()
+3. Json.stringify()
+4. Object.assing()
+
+下列操作可以获取到 `enumerable` 值为 false 的属性
+
+1. Object.getOwnPropertyNames
+2. Reflect.ownKeys
+
+#### 1.4.6 Object.getOwnPropertyDescriptors
+
+获取对象所有属性(非继承)的描述对象集合，该集合是个对象，不是数组
 
 ## 2 值类型与引用类型
 
