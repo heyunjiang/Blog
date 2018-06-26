@@ -400,10 +400,63 @@ Object.getOwnPropertyDescriptor(obj, 'foo')
 
 1. Object.getOwnPropertyNames
 2. Reflect.ownKeys
+3. Object.getOwnPropertyDescriptors
+
+> es6 规定： __proto__ 属性只需浏览器部署，其他环境可以不用部署
 
 #### 1.4.6 Object.getOwnPropertyDescriptors
 
 获取对象所有属性(非继承)的描述对象集合，该集合是个对象，不是数组
+
+创建该方法的目的：解决 `Object.assign()` 无法复制 get/set 属性的问题
+
+使用方式1: 结合 `Object.defineProperties`，实现复制
+
+```javascript
+const source = {
+  set foo(value) {
+    console.log(value);
+  }
+};
+
+const target2 = {};
+Object.defineProperties(target2, Object.getOwnPropertyDescriptors(source));
+Object.getOwnPropertyDescriptor(target2, 'foo')
+// { get: undefined,
+//   set: [Function: set foo],
+//   enumerable: true,
+//   configurable: true }
+```
+
+使用方式2：结合 `Object.create`，实现clone
+
+```javascript
+const source = {
+  set foo(value) {
+    console.log(value);
+  }
+};
+
+const target2 = Object.create(Object.getPrototypeOf(source), Object.getOwnPropertyDescriptors(source));
+Object.getOwnPropertyDescriptor(target2, 'foo')
+// { get: undefined,
+//   set: [Function: set foo],
+//   enumerable: true,
+//   configurable: true }
+```
+
+使用方式3：结合 `Object.create`，实现继承
+
+```javascript
+const obj = Object.create(
+  prot,
+  Object.getOwnPropertyDescriptors({
+    foo: 123,
+  })
+);
+```
+
+> 上面实现的本质： 1. 继承就是一个对象获取另一个对象的属性  2. getOwnPropertyDescriptors 获取到的属性描述集合， defineProperties 和 create 的第二个参数恰好可以用而已  3. getOwnPropertyDescriptors 实现了另一种读取对象属性的方式
 
 ## 2 值类型与引用类型
 
