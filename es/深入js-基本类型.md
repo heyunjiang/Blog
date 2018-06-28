@@ -12,6 +12,8 @@
 
 boolean, number, string, null, undefined, object, symbol
 
+Symbol 单独拿出去总结的 [es6-Symbol](./es6-Symbol.md)
+
 ### 1.1 number
 
 #### 1.1.1 number 一些知识点
@@ -428,6 +430,8 @@ Object.getOwnPropertyDescriptor(target2, 'foo')
 //   configurable: true }
 ```
 
+> 问：为什么这就是复制，可以称为继承吗？答：最多称为浅继承，而且这个复制也只是浅复制，不能复制原型上的属性。这里如果说是继承，那么也只继承了它的自身属性，可以称为浅继承。要实现真实继承，使用 `Object.create`
+
 使用方式2：结合 `Object.create`，实现clone
 
 ```javascript
@@ -457,6 +461,49 @@ const obj = Object.create(
 ```
 
 > 上面实现的本质： 1. 继承就是一个对象获取另一个对象的属性  2. getOwnPropertyDescriptors 获取到的属性描述集合， defineProperties 和 create 的第二个参数恰好可以用而已  3. getOwnPropertyDescriptors 实现了另一种读取对象属性的方式
+
+#### 1.4.7 __proto__
+
+1. 规定：浏览器必须部署，非浏览器不用部署
+2. 实例.__proto__ = 构造器.prototype
+3. Object.__proto__ === null
+4. Object.setPrototypeOf() : 用于设置对象的原型，也可以使用 `.__proto__ =` 来设置原型(非对象转为对象，undefined和null不能转，报错)
+5. Object.getPrototypeOf() : 返回第一个参数的原型(非对象转为对象，undefined和null不能转，报错)
+
+#### 1.4.8 super 关键字
+
+`this` 关键字，总是指向当前对象，`super` 关键字，总是指向当前对象的原型
+
+**使用限制**：super 只能用在对象的方法之中，这个方法就是对象的简写方法
+
+```javascript
+// 写法一：唯一正确
+const obj = {
+  foo: 'world',
+  find() {
+    return super.foo;
+  }
+}
+// 写法二：报错
+const obj = {
+  foo: 'world',
+  find: () => {
+    return super.foo;
+  }
+}
+```
+
+问：为什么写法二就不行呢？
+
+#### 1.4.9 Object.keys Object.values Object.entries
+
+都属于对象的遍历，但是都只是遍历对象自身的属性，不包含原型、 `enumerable` 为 `false`、`Symbol` 的属性。
+
+#### 1.4.10 对象的扩展运算符 ...
+
+1. 只能拷贝可枚举的属性
+2. 只能写在最后 ： `let { x, ...newObj } = o;`
+3. 属于浅复制，如果对象属性是一个对象，那么使用...之后的新对象，是对这个对象的引用
 
 ## 2 值类型与引用类型
 
