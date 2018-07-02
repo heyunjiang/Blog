@@ -34,7 +34,7 @@
   - ✔ [npm发包](nodejs/npm发包.md)
 - 浏览器
   - [深入浏览器-dom](browser/深入浏览器-dom.md)
-  - 深入浏览器-bom
+  - [深入浏览器-bom](browser/深入浏览器-bom.md)
   - [web 存储](PWA/web存储.md)
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
@@ -53,6 +53,8 @@
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md)
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
+- git
+  - ✔ [常见问题及答案](git/常见问题及答案.md)
 - 项目经验
   - [日常感悟](software/项目开发的日常感悟.md)
   - 开发调试-从console.log到打断点
