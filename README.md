@@ -7,6 +7,8 @@
 > 说明：写(复制)这些文章，目的是让自己对js基础知识掌握更全面。这里总结的是自己不是很熟或者陌生的知识点，如果说熟悉了的，平常用到的，就不总结了。
 > 不着急总结全部知识，每个知识追求细枝末节，希望掌握全面
 
+- html
+  - ✔ [深入html-标签语义化](html/深入html-标签语义化.md)
 - css
   - ✔ [cssModule](css/cssModule.md)
   - ✔ [flex布局](css/flex.md)
@@ -26,16 +28,20 @@
   - ✔ [深入js-正则表达式](es/深入js-正则表达式.md)
   - [深入js-this](es/深入js-this.md)
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
+- nodejs
+  - 功能清单、事件队列
+  - ✔ [cli工具](nodejs/cli工具.md)
+  - ✔ [npm发包](nodejs/npm发包.md)
+- 浏览器
+  - [深入浏览器-dom](browser/深入浏览器-dom.md)
+  - 深入浏览器-bom
+  - [web 存储](PWA/web存储.md)
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
   - webpack 扩展、封装
   - rollup基础
   - fis基础
   - ✔ [babel plugin](webpack/babel.md)
-- nodejs
-  - 功能清单、事件队列
-  - ✔ [cli工具](nodejs/cli工具.md)
-  - ✔ [npm发包](nodejs/npm发包.md)
 - 框架
   - ✔ [dva源码解读](react/dva源码解读.md)
   - [vue源码解读](vue/sourceCodeAnalysis.md)
@@ -44,9 +50,6 @@
   - 校验：eslint
   - 测试：mocha, karma, jest, enzyme
   - 模拟: mock
-- 浏览器
-  - 常用bom api
-  - [web 存储](PWA/web存储.md)
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md)
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)

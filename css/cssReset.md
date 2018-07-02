@@ -21,27 +21,3 @@
 **firefox57.0.4**
 
 1. body {display: block;margin: 8px;}
-
-### 3. doctype
-
-`document type`
-
-作用：让宿主环境按照指定规则解析 html 与 css
-
-说明：它不是一个标签，而是一个指令
-
-**html4 与 html5的重大区别**
-
-html4需要对DTD进行引用，DTD有transitional、strict、frameset 3种值
-
-html5不要说明DTD，也没有DTD，它只有一个值，只需要 `<!DOCTYPE HTML>` 或 `<!doctype html>`
-
-因为html4是基于 SGML，html5没有基于它
-
-**关于SGML**
-
-SGML：标准通用标记语言
-
-html4和xml都是基于它来的
-
-html5不是基于sgml的
