@@ -25,6 +25,16 @@
 15. `embed` 引入的内容，插件、pdf
 16. `i` 斜体
 17. `del ins` 删除、插入文字，多用在商品打折
+18. `meter` html5 自带的进度条，度量衡(磁盘空间使用情况或磁盘查询结果)
+19. `progress`html5 自带的进度条，任务进度
+20. `noscript` 当浏览器不支持脚本时需要显示的文字
+21. `time` 日期语义化标签
+
+不常用标签
+
+1. ruby: 定义 ruby 注释
+2. rp: ruby 的注释，如果浏览器不支持 ruby，则会显示 rp 标签内的html文字
+3. rt: 定义 ruby 的发音
 
 ### 1.1 块级元素、行内元素、空元素
 
@@ -78,12 +88,27 @@ base, col, area, embed...
 20. `samp` 计算机样式文本
 21. `kbd` 键盘文本
 22. `var` pre 或 code 中使用，斜体
+23. `mark` 突出显示文本，有黄色背景色
+24. `section` 定义文档中的节，比如章节、页眉、页脚或其他部分
+25. `big | small` 使用大号、小号文本
+26. `strike` 删除线
+27. `sub | sup` 下标、上标，通常用在数学公式中
+28. `tt` 规定设备将 tt 标签中的内容实现等宽展示
+29. `u` 下划线
+30. `wbr` 单词换行，除ie外，其他浏览器都支持
 
 ### 1.4 table
 
-1. `table, tbody, tr, th, td, col, colgroup` 表格专用。tbody：添加了这个标签，只有在完整加载表格之后才显示，否则加载一部分就显示一部分
+1. `table, tr, th, td, col, colgroup` 表格专用。tbody：添加了这个标签，只有在完整加载表格之后才显示，否则加载一部分就显示一部分
 2. `table 的 summary 属性` 用于在 table 中增强可读性，不会显示在浏览器中
 3. `table 的 caption` 表格标题，位于表格正上方
+4. `thead tbody tfoot`
+
+table.cellpadding: 规定单元边沿与内容之间的空白距离
+
+table.cellspacing: 规定单元格之间的空白
+
+th.colspan、th.rowspan
 
 ### 1.5 form
 
@@ -91,12 +116,30 @@ base, col, area, embed...
 2. `input type name value` 输入框
 3. `textarea rows cols` 文本域
 4. `input type=radio/checkbox value name checked=checked` 单选/复选框
-5. `select option value selected=selected`下拉列表框
-6. `select multipe=multiple`多选，按住ctrl多选
-7. `input type=submit|reset` 提交 | 重置
-8. `label` 用于点击该标签时，触发此标签所绑定的控件点击属性
-9. `fieldset` 表单组件分组，附带默认边框等属性样式
-10. `legend` 表单组件分组，分组命名，配合 fieldset 使用
+5. `select option value selected=selected` 下拉列表框
+6. `select multipe=multiple` 多选，按住ctrl多选
+7. `optgroup` 组合 select 的 option，自带样式
+8. `input type=submit|reset` 提交 | 重置
+9. `label` 用于点击该标签时，触发此标签所绑定的控件点击属性
+10. `fieldset` 表单组件分组，附带默认边框等属性样式
+11. `legend` 表单组件分组，分组命名，配合 fieldset 使用
+12. `textarea` 基本属性不说了，他的 `wrap` 属性，规定提交表单时，文本域如何换行 `hard | soft`
+
+#### 1.5.1 select
+
+select.autofocus: 在页面加载后自动获得焦点
+
+select.disabled: 禁用下拉列表
+
+select.required: 必填
+
+select.multiple
+
+select.name
+
+select.form
+
+select.size: 规定下拉列表中可选项的数目
 
 ### 1.6 布局
 
@@ -105,8 +148,9 @@ base, col, area, embed...
 3. `footer` 页脚
 4. `div p span`
 5. `ul li ol dl dt dd`
+6. `main`
 
-### 1.7 head 里面使用的标签
+### 1.7 link、meta、script、style
 
 #### 1.7.1 link
 
@@ -124,6 +168,38 @@ link.hreflang: 规定被链接文档中文本的语言，language_code
 
 link.sizes: 规定被链接资源的尺寸，仅当 link.rel === icon 起效
 
+#### 1.7.2 meta
+
+meta: 提供页面的元信息，为网站提供基本信息，包括描述、作者、关键词、http头部信息
+
+meta.content: 定义与 `http-equiv | name` 属性相关的元信息
+
+meta.http-equiv: 可选值： `content-type | expires | refresh | set-cookie`，把 `content` 属性关联到 http 头部。指示服务器要发送给浏览器的http头部中，需要添加哪些字段，比如 `<meta http-equiv="expires" content="31 Dec 2008">` ，表示 `expires:31 Dec 2008`
+
+meta.name: 可选值： `author | description | keywords | generator | revised | others`，把 `content` 属性关联到一个名称
+
+meta.charset: html5不支持
+
+meta.scheme: 定义用于翻译 content 属性值的格式
+
+[参考](https://github.com/joshbuchea/HEAD)，需要用到的东西都可以进去查看，我构建 [pwa](../PWA/pwa构建.md) 应用的时候，就去里面查看了 ios app 需要哪些 meta
+
+#### 1.7.3 script
+
+script.async: 异步执行脚本
+
+script.charset: 脚本字符编码
+
+script.defer: 脚本执行延迟，在页面加载完成之后才执行
+
+script.src: url
+
+#### 1.7.4 style
+
+style.type: `text/css` MIME
+
+style.media: `screen | tty | tv | projection | handheld | print | braille | aural | all`，位样式表规定不同的媒介类型
+
 > 2018.7.3 14:03 总结到 link 标签
 
 ## 2 html5 种常用标签使用规范
@@ -136,7 +212,7 @@ link.sizes: 规定被链接资源的尺寸，仅当 link.rel === icon 起效
 
 语义标签：strong, h1, em, strong, mark, del, ins, code, dfn, samp, var ...
 
-样式标签：b, i, u, s, pre ...
+样式标签：b, i, u, pre ...
 
 > 注意：也可以使用 css 的 font 一系列属性来设置文本样式
 
