@@ -5,6 +5,9 @@
 1. 常用标签
 2. html5 种常用标签使用规范
 3. 如何理解html语义化
+4. 用标签鉴别 h5
+5. html xhtml dhtml
+6. html5 新特性
 
 ## 1 常用标签
 
@@ -96,6 +99,7 @@ base, col, area, embed...
 28. `tt` 规定设备将 tt 标签中的内容实现等宽展示
 29. `u` 下划线
 30. `wbr` 单词换行，除ie外，其他浏览器都支持
+31. `time` 日期语义化标签
 
 ### 1.4 table
 
@@ -124,6 +128,8 @@ th.colspan、th.rowspan
 10. `fieldset` 表单组件分组，附带默认边框等属性样式
 11. `legend` 表单组件分组，分组命名，配合 fieldset 使用
 12. `textarea` 基本属性不说了，他的 `wrap` 属性，规定提交表单时，文本域如何换行 `hard | soft`
+
+> 关闭自动输入： `autocomplete = off`
 
 #### 1.5.1 select
 
@@ -240,3 +246,28 @@ html4 及 xml 是基于标准通用标记语言 SGML，html 4的 doctype 有3种
 
 1. doctype值： html
 2. 使用 h5 标签： article、address等
+
+## 5 html xhtml dhtml
+
+html: html4 html5
+
+xhtml: 由 html4 向 html5 过渡的一个版本，支持 xml ， doctype dtd 有3种值，基于 sgml
+
+dhtml: html4 + css + js + dom
+
+## 6 html5 新特性
+
+html5 不采用 sgml 作为父集， 它实现的主要功能有：图像、位置、存储、多任务
+
+1. 绘画：canvas
+2. 音频、视频：video, audio
+3. 存储：localstorage, sessionstorage
+4. 新技术(解决方案)：websocket, webworker, geolocation
+5. 语义化标签：article, header, footer, nav, section
+6. form 控件: calendar, date, time, email, url, search
+
+移除的元素：frame, frameset, noframes, basefont, big, center, font, s, strike, tt, u
+
+> 注意： iframe 还是保留的
+
+兼容不支持html5的浏览器： html5shim (原理 createElement 、添加默认样式)
