@@ -35,6 +35,7 @@
 - 浏览器
   - [深入浏览器-dom](browser/深入浏览器-dom.md)
   - [深入浏览器-bom](browser/深入浏览器-bom.md)
+  - ✔ [深入浏览器-浏览器](browser/深入浏览器-浏览器.md)
   - [web 存储](PWA/web存储.md)
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
