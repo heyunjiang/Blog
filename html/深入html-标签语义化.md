@@ -192,13 +192,19 @@ meta.scheme: 定义用于翻译 content 属性值的格式
 
 #### 1.7.3 script
 
-script.async: 异步执行脚本
+没有 `async` 和 `defer` 的情况下，浏览器渲染引擎解析html时，遇到 script 标签，将会阻塞当前html的解析，转而加载script，请求到js文件资源，并交由js解释器解释执行，执行完毕之后再由渲染引擎继续解析html
+
+script.async: 异步执行脚本。浏览器解析html时，遇到 async 标签，将会新开线程请求并执行js，保持与html并行进行。适用场景：文中不操作dom的js；文末操作dom的js，多个js实现并行获取，多个js无前置关系。如果有前置关系，则不能设置 `async` 属性，因为可能造成出错，前置还未请求回来，后面的js就在执行了。
 
 script.charset: 脚本字符编码
 
-script.defer: 脚本执行延迟，在页面加载完成之后才执行
+script.defer: 脚本执行延迟，在页面加载完成之后才执行，但是请求是和html解析并行进行的。
 
 script.src: url
+
+async vs defer: 相同点是请求资源都是与html解析并行进行的；不同点是 async 在请求到资源文件后就立马异步执行，而 defer 是请求到资源文件后，要等待html解析完成之后再执行。
+
+![async-defer](../browser/async-defer.jpg)
 
 #### 1.7.4 style
 
