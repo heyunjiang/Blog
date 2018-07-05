@@ -198,7 +198,7 @@ script.async: 异步执行脚本。浏览器解析html时，遇到 async 标签�
 
 script.charset: 脚本字符编码
 
-script.defer: 脚本执行延迟，在页面加载完成之后才执行，但是请求是和html解析并行进行的。
+script.defer: 脚本执行延迟，在dom解析完成之后，触发 DOMContentLoaded 事件前执行才执行，但是请求是和html解析并行进行的。
 
 script.src: url
 
