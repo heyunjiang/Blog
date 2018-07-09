@@ -1,6 +1,27 @@
 # 深入浏览器-dom
 
-## 1 常见 dom 操作api
+document object model
+
+## 1 dom 大全归纳
+
+### 1.1 dom 基础知识
+
+1. 每个 window 对象，都有一个 `document` 属性，指向的是 `dom tree`
+2. dom tree 的根节点是 `html`
+3. 文本节点：除了元素节点外，文本也是节点(在现代浏览器中文本节点与元素节点处理方式有何异同？)
+4. 属性节点：元素节点里面的属性，也称为属性节点
+
+例如
+
+`<a href="https://github.com/heyunjiang">heyunjiang</a>`
+
+元素节点：`a` ，属性节点：`href` ，文本节点：`heyunjiang`
+
+### 1.2 节点属性
+
+1. nodeName : 文本节点始终是 `#text`
+2. nodeValue : 文本节点是文本本身；属性节点是属性值
+3. nodeType : 元素节点 -> 1，属性节点 -> 2，文本节点 -> 3，注释节点 -> 8
 
 ## 2 不常见 dom 操作api
 
