@@ -2,6 +2,15 @@
 
 document object model
 
+目录
+
+- 1 dom 大全归纳
+  - 1.1 dom 基础知识
+  - 1.2 节点属性
+  - 1.3 常用 dom api
+- 2 不常见 dom 操作api
+  - 2.1 浏览器可见性 api
+
 ## 1 dom 大全归纳
 
 ### 1.1 dom 基础知识
@@ -22,6 +31,19 @@ document object model
 1. nodeName : 文本节点始终是 `#text`
 2. nodeValue : 文本节点是文本本身；属性节点是属性值
 3. nodeType : 元素节点 -> 1，属性节点 -> 2，文本节点 -> 3，注释节点 -> 8
+4. innerHTML
+
+### 1.3 常用 dom api
+
+操作方式 `node.`
+
+1. appendChild() removeChild() replaceChild() insertBefore()
+2. innerHTML
+3. style : 获取或设置样式
+4. document.documentElement: 全部文档
+5. document.body: 文档主体
+
+> 注意：没有 insertAfter()
 
 ## 2 不常见 dom 操作api
 
