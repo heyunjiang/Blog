@@ -8,6 +8,7 @@ document object model
   - 1.1 dom 基础知识
   - 1.2 节点属性
   - 1.3 常用 dom api
+  - 1.4 常用 dom api 对比
 - 2 不常见 dom 操作api
   - 2.1 浏览器可见性 api
 
@@ -35,15 +36,50 @@ document object model
 
 ### 1.3 常用 dom api
 
-操作方式 `node.`
+element api
 
-1. appendChild() removeChild() replaceChild() insertBefore()
+1. appendChild() removeChild() replaceChild() insertBefore() *没有 insertAfter()*
 2. innerHTML
-3. style : 获取或设置样式
-4. document.documentElement: 全部文档
-5. document.body: 文档主体
+3. style, className, id, lang, title: 长点常用属性快捷访问或设置方式
+4. `attributes`: 节点属性集合，NamedNodeMap
+5. childNodes, `hasChildNodes`: 节点的后代节点集合，NodeList
+6. clientHeight, clientWidth: 元素可见高度、宽度
+7. cloneNode(): 克隆节点及其后代，可选参数-boolean，true表示属性一并 clone
+8. `compareDocumentPosition()`: a.compareDocumentPosition(b)，比较a,b两个节点的位置关系
+9. contentEditable, dir, `isContentEditable()`
+10. firstChild
+11. getAttribute(), `getAttributeNode()`: 前者获取对应属性节点的值，后者获取对应属性节点
+12. hasAttribute(), `hasAttributes()`: 前者判断是否有某个属性，后者判断是否有属性
+13. 
 
-> 注意：没有 insertAfter()
+document api
+
+1. `document.documentElement`, document.body, document.head *没有 document.html*
+2. 文档对象集合：document.all, document.anchors, document.forms, document.images, document.links
+3. 文档属性结合：document.cookie, document.domain, document.lastModified, `document.referrer` (表示从哪儿来的), document.title, document.URL
+4. 文档对象方法：document.open, document.close, document.write, document.writeln
+5. document.documentElement.isDefaultNamespace(namespace)：检查 namespace 是否是默认的命名空间
+
+#### 1.3.1 compareDocumentPosition 值说明
+
+1. `1` 不在同一文档中
+2. `2` b 在 a 之前
+3. `4` b 在 a 之后
+4. `8` b 包含 a
+5. `16` a 包含 b
+6. `32` 待定
+
+问题：以下输出为什么是10, 10又代表什么
+
+```javascript
+<div id="hello"><p id="world">fa</p></div>
+
+console.log(document.getElementById('world').compareDocumentPosition(document.getElementById('hello')))
+```
+
+### 1.4 常用 dom api 对比
+
+clientHeight vs offsetHeight
 
 ## 2 不常见 dom 操作api
 
@@ -55,25 +91,24 @@ document object model
 
 总共3部分组成
 
-#### 2.1.1 document.hidden
+1 document.hidden
 
 布尔值，表示当前页面是否处于浏览器最小化、后台标签页、预渲染状态中(浏览器被其他软件遮盖不算，因为浏览器只能判断自身bom、dom变化)
 
-#### 2.1.2 document.visibilityState
+2 document.visibilityState
 
-4个值
+四个值
 
 1. hidden: 浏览器最小化、后台标签页
 2. visible: 当前标签页
 3. prerender: 浏览器预渲染，页面还不可见
 4. unloaded: 页面正在从内存中卸载
 
-#### 2.1.3 document.onvisibilitychange
+3 document.onvisibilitychange
 
 当浏览器可见性变化的时候，触发的事件
 
 ## 参考文章
 
-1. [markyun-blog](https://github.com/markyun/My-blog/tree/master/Front-end-Developer-Questions/Questions-and-Answers)
-2. [what-happens-when](https://github.com/skyline75489/what-happens-when-zh_CN)
-3. [w3school](http://www.w3school.com.cn/tags/index.asp)
+1. [w3school](http://www.w3school.com.cn/tags/index.asp)
+2. [mdn-element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element)
