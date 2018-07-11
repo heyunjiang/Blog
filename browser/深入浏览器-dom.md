@@ -78,9 +78,13 @@ document object model
 
 问：为什么 html 的 `namespaceURI` 总是 `http://www.w3.org/1999/xhtml`?
 
-三：attributes api
+三：attributes api (属性节点 api)
 
-element.attributes，返回该节点的所有属性节点结合，伪数组，伪数组方法
+element.getAttributeNode(); // 必须加参数
+
+element.attributes，返回该节点的所有属性节点结合，伪数组;
+
+伪数组方法
 
 1. getNamedItem()
 2. item(): 同 `[0]`
@@ -90,10 +94,12 @@ element.attributes，返回该节点的所有属性节点结合，伪数组，�
 
 每一个属性节点有下列属性或方法
 
-1. isId
-2. name
+1. name
+2. namespaceURI
 3. value
 4. specified
+5. localName
+6. prefix
 
 #### 1.3.1 compareDocumentPosition 值说明
 
@@ -127,9 +133,14 @@ console.log(document.getElementById('world').compareDocumentPosition(document.ge
 
 解决方式：
 
-#### 1.3.4 节点移动
+#### 1.3.4 节点之间自由移动
 
-firstChild
+1. 下一个兄弟：nextSibling、nextElementSibling
+2. 上一个兄弟：previousSibling、previousElementSibling
+3. 所有孩子：childNodes
+4. 第一个孩子：firstChild、firstElementChild
+5. 最后一个孩子：lastChild、lastElementChild
+6. 父亲：parentNode
 
 #### 1.3.5 节点详细位置属性
 
