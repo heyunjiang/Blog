@@ -2,6 +2,13 @@
 
 document object model
 
+学习总结计划
+
+1. ✔ w3school dom： element, document, attribute, event
+2. mdn 补漏
+3. 完善 1.4 常用 dom api 对比
+4. dom 4 学习总结
+
 目录
 
 - 1 dom 大全归纳
@@ -9,6 +16,7 @@ document object model
   - 1.2 节点属性
   - 1.3 常用 dom api
   - 1.4 常用 dom api 对比
+  - 1.5 常用 dom event api
 - 2 不常见 dom 操作api
   - 2.1 浏览器可见性 api
 
@@ -31,12 +39,12 @@ document object model
 
 1. nodeName : 文本节点始终是 `#text`
 2. nodeValue : 文本节点是文本本身；属性节点是属性值
-3. nodeType : 元素节点 -> 1，属性节点 -> 2，文本节点 -> 3，注释节点 -> 8
+3. nodeType : 元素节点 -> 1，属性节点 -> 2，文本节点 -> 3，注释节点 -> 8, 根节点 -> 9
 4. innerHTML
 
 ### 1.3 常用 dom api
 
-element api
+一：element api
 
 1. appendChild() removeChild() replaceChild() insertBefore() *没有 insertAfter()*
 2. innerHTML
@@ -47,18 +55,45 @@ element api
 7. cloneNode(): 克隆节点及其后代，可选参数-boolean，true表示属性一并 clone
 8. `compareDocumentPosition()`: a.compareDocumentPosition(b)，比较a,b两个节点的位置关系
 9. contentEditable, dir, `isContentEditable()`
-10. firstChild
-11. getAttribute(), `getAttributeNode()`: 前者获取对应属性节点的值，后者获取对应属性节点
+10. firstChild, lastChild, nextSibling, previousSibling, parentNode
+11. getAttribute(), `getAttributeNode()`, removeAttribute(), `removeAttributeNode()`, setAttribute(), `setAttributeNode()`
 12. hasAttribute(), `hasAttributes()`: 前者判断是否有某个属性，后者判断是否有属性
-13. 
+13. `isEqualNode()`: a.isEqualNode(b)，比较a,b两个节点是否相等
+14. `isSameNode()`: a.isSameNode(b)，判断2个节点是否是同一节点
+15. `normalize()`: 移除节点内部空的文本节点，连接相邻的文本节点(主要用于合并相邻文本节点)
+16. `ownerDocument`: 返回节点所属 dom tree
+17. `item()`: childNodes[0] === childNodes.item(0)
+18. `textContent`: 返回节点及所有子节点的文本内容，包括 script 的内容
+19. offsetHeight, offsetWidth, offsetLeft, offsetParent, offsetTop
+20. scrollHeight, scrollWidth, scrollLest, scrollTop
 
-document api
+二：document api
 
 1. `document.documentElement`, document.body, document.head *没有 document.html*
 2. 文档对象集合：document.all, document.anchors, document.forms, document.images, document.links
 3. 文档属性结合：document.cookie, document.domain, document.lastModified, `document.referrer` (表示从哪儿来的), document.title, document.URL
 4. 文档对象方法：document.open, document.close, document.write, document.writeln
 5. document.documentElement.isDefaultNamespace(namespace)：检查 namespace 是否是默认的命名空间
+6. document.documentElement.namespaceURI: 任意节点都可以访问
+
+问：为什么 html 的 `namespaceURI` 总是 `http://www.w3.org/1999/xhtml`?
+
+三：attributes api
+
+element.attributes，返回该节点的所有属性节点结合，伪数组，伪数组方法
+
+1. getNamedItem()
+2. item(): 同 `[0]`
+3. length
+4. removeNamedItem()
+5. setNamedItem()
+
+每一个属性节点有下列属性或方法
+
+1. isId
+2. name
+3. value
+4. specified
 
 #### 1.3.1 compareDocumentPosition 值说明
 
@@ -77,9 +112,80 @@ document api
 console.log(document.getElementById('world').compareDocumentPosition(document.getElementById('hello')))
 ```
 
+#### 1.3.2 isEqualNode 条件
+
+判断2个节点是否相等，需要满足下列条件
+
+1. 节点类型相同
+2. 拥有相同的 nodeName, nodeValue, localName, nameSpaceURI
+3. 所有后台均为相同的子节点
+4. 拥有相同的属性和属性值(次序可以不一致)
+
+#### 1.3.3 firstChild, lastChild, nextSibling, previousSibling
+
+这4个dom属性，会把空格、回车(换行符)当做文本节点来处理
+
+解决方式：
+
+#### 1.3.4 节点移动
+
+firstChild
+
+#### 1.3.5 节点详细位置属性
+
+offsetHeight
+
 ### 1.4 常用 dom api 对比
 
 clientHeight vs offsetHeight
+
+attribute vs property
+
+event.clientX vs event.screenX
+
+### 1.5 常用 dom event api
+
+event 句柄
+
+1. `onabort`: 图像的加载被中断
+2. `onerror`: 图像或文档加载出错
+3. `onload`: 图像或文档加载成功
+
+event 属性
+
+1. cancelBubble: ie
+2. fromElement: ie
+3. keyCode: ie
+4. offsetX, offsetY: ie
+5. returnValue: ie
+6. srcElement: ie
+7. toElement: ie
+8. x, y: ie
+9. bubbles: 是否是冒泡事件
+10. cancelable: 是否拥有可取消的默认动作
+11. currentTarget: 当前事件监听的元素
+12. target: 触发事件的元素
+13. eventPhase: 返回事件传播的当前阶段 捕获 -> 1, 正常 -> 2, 冒泡 -> 3
+14. timeStamp: 事件生成的日期和时间
+15. type: 事件名称
+
+event 方法
+
+1. initEvent(): 初始化 Event 对象
+2. preventDefault(): 阻止事件的默认行为
+3. stopPropagation(): 阻止冒泡
+
+鼠标属性
+
+1. altKey: 事件触发时，`ALT`是否被按下
+2. ctrlKey: 事件触发时，`CTRL`是否被按下
+3. metaKey: 事件触发时，`meta`是否被按下
+4. shiftKey: 事件触发时，`SHIFT`是否被按下
+5. button: 哪个鼠标按钮被点击
+6. clientX: 鼠标水平坐标
+7. clientY: 鼠标垂直坐标
+8. screenX: 鼠标水平坐标
+9. screenY: 鼠标垂直坐标
 
 ## 2 不常见 dom 操作api
 
