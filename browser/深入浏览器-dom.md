@@ -217,4 +217,4 @@ event 方法
 ## 参考文章
 
 1. [w3school](http://www.w3school.com.cn/tags/index.asp)
-2. [mdn-element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element)
+2. [mdn-dom](https://developer.mozilla.org/zh-CN/docs/Web/API/Document_Object_Model)
