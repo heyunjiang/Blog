@@ -1,6 +1,29 @@
 # 深入浏览器-dom
 
-document object model
+document object model: 是 html 和 xml 文档的编程接口，提供了对文档的 `结构化表述` ，定义了一种方式提供给程序对该结构进行访问，从而改变文档的结构、样式和内容。 `这个结构是一个集合` ，也称之为树，每个节点的值是一个对象，包含该节点的属性和方法。`dom` 将页面和程序语言连接起来。
+
+```javascript
+// dom tree example
+"people": {
+    "person": [{
+      "address": [{
+        "@street": "321 south st",
+        "@city": "denver",
+        "@state": "co",
+        "@country": "usa"
+      }, {
+        "@street": "123 main st",
+        "@city": "arlington",
+        "@state": "ma",
+        "@country": "usa"
+      }],
+      "@first-name": "eric",
+      "@middle-initial": "H",
+      "@last-name": "jung"
+    }
+  ]
+}
+```
 
 学习总结计划
 
@@ -16,9 +39,10 @@ document object model
   - 1.2 节点属性
   - 1.3 常用 dom api
   - 1.4 常用 dom api 对比
-  - 1.5 常用 dom event api
 - 2 不常见 dom 操作api
   - 2.1 浏览器可见性 api
+  - 2.2 Element.accessKey
+  - 2.3 Element.classList
 
 ## 1 dom 大全归纳
 
@@ -49,8 +73,8 @@ document object model
 1. appendChild() removeChild() replaceChild() insertBefore() *没有 insertAfter()*
 2. innerHTML
 3. style, className, id, lang, title: 长点常用属性快捷访问或设置方式
-4. `attributes`: 节点属性集合，NamedNodeMap
-5. childNodes, `hasChildNodes`: 节点的后代节点集合，NodeList
+4. `attributes`: 节点属性集合，伪数组， `NamedNodeMap`
+5. childNodes, `hasChildNodes`: 节点的后代节点集合， NodeList
 6. clientHeight, clientWidth: 元素可见高度、宽度
 7. cloneNode(): 克隆节点及其后代，可选参数-boolean，true表示属性一并 clone
 8. `compareDocumentPosition()`: a.compareDocumentPosition(b)，比较a,b两个节点的位置关系
@@ -101,60 +125,7 @@ element.attributes，返回该节点的所有属性节点结合，伪数组;
 5. localName
 6. prefix
 
-#### 1.3.1 compareDocumentPosition 值说明
-
-1. `1` 不在同一文档中
-2. `2` b 在 a 之前
-3. `4` b 在 a 之后
-4. `8` b 包含 a
-5. `16` a 包含 b
-6. `32` 待定
-
-问题：以下输出为什么是10, 10又代表什么
-
-```javascript
-<div id="hello"><p id="world">fa</p></div>
-
-console.log(document.getElementById('world').compareDocumentPosition(document.getElementById('hello')))
-```
-
-#### 1.3.2 isEqualNode 条件
-
-判断2个节点是否相等，需要满足下列条件
-
-1. 节点类型相同
-2. 拥有相同的 nodeName, nodeValue, localName, nameSpaceURI
-3. 所有后台均为相同的子节点
-4. 拥有相同的属性和属性值(次序可以不一致)
-
-#### 1.3.3 firstChild, lastChild, nextSibling, previousSibling
-
-这4个dom属性，会把空格、回车(换行符)当做文本节点来处理
-
-解决方式：
-
-#### 1.3.4 节点之间自由移动
-
-1. 下一个兄弟：nextSibling、nextElementSibling
-2. 上一个兄弟：previousSibling、previousElementSibling
-3. 所有孩子：childNodes
-4. 第一个孩子：firstChild、firstElementChild
-5. 最后一个孩子：lastChild、lastElementChild
-6. 父亲：parentNode
-
-#### 1.3.5 节点详细位置属性
-
-offsetHeight
-
-### 1.4 常用 dom api 对比
-
-clientHeight vs offsetHeight
-
-attribute vs property
-
-event.clientX vs event.screenX
-
-### 1.5 常用 dom event api
+四：dom event api
 
 event 句柄
 
@@ -198,7 +169,67 @@ event 方法
 8. screenX: 鼠标水平坐标
 9. screenY: 鼠标垂直坐标
 
+#### 1.3.1 compareDocumentPosition 值说明
+
+1. `1` 不在同一文档中
+2. `2` b 在 a 之前
+3. `4` b 在 a 之后
+4. `8` b 包含 a
+5. `16` a 包含 b
+6. `32` 待定
+
+问题：以下输出为什么是10, 10又代表什么
+
+```javascript
+<div id="hello"><p id="world">fa</p></div>
+
+console.log(document.getElementById('world').compareDocumentPosition(document.getElementById('hello')))
+```
+
+#### 1.3.2 isEqualNode 条件
+
+判断2个节点是否相等，需要满足下列条件
+
+1. 节点类型相同
+2. 拥有相同的 nodeName, nodeValue, localName, nameSpaceURI
+3. 所有后台均为相同的子节点
+4. 拥有相同的属性和属性值(次序可以不一致)
+
+#### 1.3.3 firstChild, lastChild, nextSibling, previousSibling, childNodes
+
+这5个dom属性，会把空格、回车(换行符)当做文本节点来处理
+
+解决方式: 都增加 `Element` ，比如 firstChild -> firstElementChild， childNodes -> children
+
+#### 1.3.4 节点之间自由移动
+
+1. 下一个兄弟：nextSibling、nextElementSibling
+2. 上一个兄弟：previousSibling、previousElementSibling
+3. 所有孩子：childNodes、children
+4. 第一个孩子：firstChild、firstElementChild
+5. 最后一个孩子：lastChild、lastElementChild
+6. 父亲：parentNode
+
+#### 1.3.5 节点详细位置属性
+
+offsetHeight
+
+### 1.4 常用 dom api 对比
+
+一 clientHeight vs offsetHeight
+
+答：clientHeight，只读属性，表示
+
+attribute vs property
+
+event.clientX vs event.screenX
+
 ## 2 不常见 dom 操作api
+
+属于对常见 dom api 的一个补充，多来自 mdn
+
+1. element.childElementCount: 返回后代元素节点个数，不包含文本节点
+2. element.children: 返回后代元素节点集合，伪数组， `HTMLCollection`
 
 ### 2.1 浏览器可见性 api
 
@@ -224,6 +255,30 @@ event 方法
 3 document.onvisibilitychange
 
 当浏览器可见性变化的时候，触发的事件
+
+### 2.2 Element.accessKey
+
+以下元素支持 accesskey 属性：a, area, button, input, label, legend, textarea
+
+通常按下快捷键的时候，让元素获得焦点
+
+chrome: `alt` + `accessKey`
+
+### 2.3 Element.classList
+
+返回元素的class集合，只读属性，伪数组， `DOMTokenList`
+
+方法：
+
+1. add( string ) : 为 DOMTokenList 添加指定的值
+2. remove( string ): 删除 DOMTokenList 中指定的值
+3. item( number ): 返回 DOMTokenList 索引的值
+4. toggle( string ): 如果 DOMTokenList 存在这个值，则删除，不存在则添加
+5. contains( string ): 判断 DOMTokenList 是否存在这个值
+
+兼容： ie10+
+
+> 伪数组：DOMTokenList, HTMLCollection, NamedNodeMap
 
 ## 参考文章
 
