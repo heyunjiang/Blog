@@ -90,6 +90,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 18. `textContent`: 返回节点及所有子节点的文本内容，包括 script 的内容
 19. offsetHeight, offsetWidth, offsetLeft, offsetParent, offsetTop
 20. scrollHeight, scrollWidth, scrollLest, scrollTop
+21. `getBoundingClientRect`: 返回元素大小及其相对于视口的位置，返回 `DOMRect` 对象
 
 二：document api
 
@@ -99,6 +100,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 4. 文档对象方法：document.open, document.close, document.write, document.writeln
 5. document.documentElement.isDefaultNamespace(namespace)：检查 namespace 是否是默认的命名空间
 6. document.documentElement.namespaceURI: 任意节点都可以访问
+7. `document.documentElement.contains(el)`: 判断 document 是否拥有 el 这个节点
 
 问：为什么 html 的 `namespaceURI` 总是 `http://www.w3.org/1999/xhtml`?
 
@@ -212,7 +214,11 @@ console.log(document.getElementById('world').compareDocumentPosition(document.ge
 
 #### 1.3.5 节点详细位置属性
 
-offsetHeight
+offsetHeight: 
+
+scrollHeight = scrollTop + clientHeight
+
+element.getBoundingClientRect(): 返回一个对象，包含 left, top, right, bottom，都是相对于视口左上角而言， left = 
 
 ### 1.4 常用 dom api 对比
 
@@ -228,8 +234,26 @@ event.clientX vs event.screenX
 
 属于对常见 dom api 的一个补充，多来自 mdn
 
+属性
+
 1. element.childElementCount: 返回后代元素节点个数，不包含文本节点
 2. element.children: 返回后代元素节点集合，伪数组， `HTMLCollection`
+3. element.onpointerover，同 onmouseover，它们之间区别：
+4. element.prefix: 命名空间前缀， `dom4`，`ie 不支持`
+5. element.shadowRoot、element.slot: 类似 vue 中的 slot， `高版本 chrome 支持`
+6. element.runtimeStyle、element.currentStyle: `ie6 支持`
+
+方法
+
+1. element.after(): 在元素 element 之后插入节点，解决没有 `inserAfter` 问题，`ie 不支持`
+2. element.before(): 在元素 element 之前插入节点，`ie 不支持`
+3. element.animate(): 让元素执行动画，`chrome、firefox支持`
+4. element.append(): 类似 appendChild() ，但是功能更强大，支持 DOMString、node、多个节点、无返回值， `ie 不支持`
+5. element.attachShadow(): 为节点添加 shadowRoot, `高版本 chrome 支持`
+6. element.closest(selectors): 返回特定选择器且离当前元素最近的祖先元素(可能是元素本身或null)，`ie 不支持`
+7. element.getAttributeNames()：获取节点所有属性名集合，`ie 不支持`
+8. element.getAttributeNodeNS(): 根据指定命名空间，返回节点对应的属性节点，同理还有 getAttributeNS(), setAttributeNS(), setAttributeNodeNS(), hasAttributeNS(), removeAttributeNS(), 但是没有 removeAttributeNodeNS() 和 hasAttributeNodeNS()
+9. 
 
 ### 2.1 浏览器可见性 api
 
