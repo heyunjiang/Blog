@@ -90,7 +90,15 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 18. `textContent`: 返回节点及所有子节点的文本内容，包括 script 的内容
 19. offsetHeight, offsetWidth, offsetLeft, offsetParent, offsetTop
 20. scrollHeight, scrollWidth, scrollLest, scrollTop
-21. `getBoundingClientRect`: 返回元素大小及其相对于视口的位置，返回 `DOMRect` 对象
+21. `getBoundingClientRect()`: 返回元素大小及其相对于视口的位置，返回 `DOMRect` 对象; 如果要相对于网页左上角的位置，可以加上 window.scrollTop 或 window.scrollLeft 的值
+22. `getClientRects()`: 返回元素 getBoundingClientRect() 集合，数组每一项代表每一行的 getBoundingClientRect() 数据。当元素为行内元素，然后跨行展示(多为span+文本)的时候，可以返回每一行数据的 getBoundingClientRect() 数据；当元素为块级元素，集合数组只有一项
+23. `insertAdjacentElement(position, element)`: 将目标元素插入到节点的相对位置， position 有4个值： beforebegin, afterend, afterbegin, beforeend
+24. `insertAdjacentHTML(position, text)`：类似 insertAdjacentElement ，只是它要求的是 element string 就行
+25. `insertAdjacentText(position, element)`: 同 insertAdjacentElement ，但是它 ie 不支持
+26. `matches(selectorString)`: 判断是否有对应子节点。selectorString 为 css 选择符。可以用 `matchesSelector()` 、 `querySelectorAll()` 替代判断， ie9+
+27. `requestFullscreen()`: 发出异步请求，让元素进入全屏模式。需要加浏览器前缀使用： `webkitRequestFullScreen` 、 `mozRequestFullScreen` 、 `msRequestFullscreen`
+
+> 视口：浏览器视口，就是浏览器标签栏以下的那个物理窗口
 
 二：document api
 
@@ -214,21 +222,55 @@ console.log(document.getElementById('world').compareDocumentPosition(document.ge
 
 #### 1.3.5 节点详细位置属性
 
-offsetHeight: 
+clientHeight: height + padding
+
+offsetHeight: height + padding + border + margin + 水平滚动条高度
 
 scrollHeight = scrollTop + clientHeight
 
-element.getBoundingClientRect(): 返回一个对象，包含 left, top, right, bottom，都是相对于视口左上角而言， left = 
+element.getBoundingClientRect(): 返回一个对象，包含 left, top, right, bottom[, width, height, x,y]，都是相对于视口左上角而言。这个方法主要用于做节点定位，相对于浏览器定位，类似于 fixed 定位那种，相对于浏览器操作的
+
+element.getClientRects(): 类似 getBoundingClientRect() ，但是当元素节点为行内元素，并且内容产生了换行，它就会返回每一行的 getBoundingClientRect() 数据。这个主要用于批量获取 getBoundingClientRect() 数据
+
+#### 1.3.6 节点插入、删除
+
+1. appendChild() removeChild() replaceChild() insertBefore() *没有 insertAfter()*
+2. innerHTML
+3. after() before() append() prepend() : ie 不支持
+4. insertAdjacentElement(position, element)、insertAdjacentHTML(position, element)
+5. insertAdjacentText(position, element)：ie 不支持
+6. replaceWith(): ie 不支持
+
+#### 1.3.7 节点选择 HTMLCollection
+
+1. getElementsByClassName()、getElementsByTagName()、getElementsByTagNameNS()
+2. getElementById()
+3. querySelector()、querySelectorAll()
+
+#### 1.3.8 节点全屏 api
+
+通常用于视频、音频的全屏播放
+
+[全屏api](https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API)
+
+不总结太多，以后用到再学
+
+1. element.requestFullscreen()
+2. element.exitFullscreen()
 
 ### 1.4 常用 dom api 对比
 
-一 clientHeight vs offsetHeight
+一 clientHeight vs offsetHeight vs scrollHeight
 
-答：clientHeight，只读属性，表示
+答：clientHeight: 只读属性，表示 css `height` + `padding`，不包括 border，margin，水平滚动条高度，通常用于展示区域内容占用了多少空间。
 
-attribute vs property
+offsetHeight: 只读属性，表示 `height` + `padding` + `border` + `margin` + `水平滚动条的高度`，通常用于展示节点占据的实际高度。offsetHeight 比 clientHeight 多了边框、外边距、水平滚动条高度。如果元素没有使用 `scale` 或类似的放大缩小属性，offsetHeight 与 getBoundingClientRect() 返回的高度一致，如果使用了放大或缩小属性，那么 offsetHeight 的值不变， `getBoundingClientRect()` 会返回实际渲染的高度，所以要操作浏览器物理定位，还是要使用 `getBoundingClientRect()`
 
-event.clientX vs event.screenX
+scrollHeight: 只读属性，表示元素内容区域的实际大小，会返回可滚动内容的所有height + padding
+
+二 attribute vs property
+
+三 event.clientX vs event.screenX
 
 ## 2 不常见 dom 操作api
 
@@ -248,12 +290,14 @@ event.clientX vs event.screenX
 1. element.after(): 在元素 element 之后插入节点，解决没有 `inserAfter` 问题，`ie 不支持`
 2. element.before(): 在元素 element 之前插入节点，`ie 不支持`
 3. element.animate(): 让元素执行动画，`chrome、firefox支持`
-4. element.append(): 类似 appendChild() ，但是功能更强大，支持 DOMString、node、多个节点、无返回值， `ie 不支持`
+4. element.append(... nodes): 类似 appendChild() ，但是功能更强大，支持 DOMString、node、多个节点、无返回值， `ie 不支持`
 5. element.attachShadow(): 为节点添加 shadowRoot, `高版本 chrome 支持`
 6. element.closest(selectors): 返回特定选择器且离当前元素最近的祖先元素(可能是元素本身或null)，`ie 不支持`
 7. element.getAttributeNames()：获取节点所有属性名集合，`ie 不支持`
 8. element.getAttributeNodeNS(): 根据指定命名空间，返回节点对应的属性节点，同理还有 getAttributeNS(), setAttributeNS(), setAttributeNodeNS(), hasAttributeNS(), removeAttributeNS(), 但是没有 removeAttributeNodeNS() 和 hasAttributeNodeNS()
-9. 
+9. element.prepend(... nodes): 在元素的第一个子节点前插入节点，同 element.append(... nodes) ， `ie 不支持`
+10. element.replaceWith(... nodes)：节点替换， `ie 不支持`
+11. element.requestFullscreen(): 发出异步请求，让元素进入全屏模式。
 
 ### 2.1 浏览器可见性 api
 

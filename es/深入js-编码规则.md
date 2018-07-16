@@ -104,9 +104,23 @@ javascript 采用 unicode 字符集，utf-16 编码
 
 ### 3.3 decodeURI、encodeURI、decodeURIComponent、encodeURIComponent
 
-`encodeURI` ：对URI整体编码，替换所有部分字符，不能被替换的 `& + = #` 等
+`encodeURI` ：对URI整体编码，替换所有部分字符，不能被替换的保留字符 `& + = #` 等，因为它会认为这些特殊字符有特殊意义
 
-`encodeURIComponent` ：对URI整体编码，用1到4个转义序列来表示这些需要编码的字符，但是它能替换 `& + = #` 等。它会将参数当做uri的尾部参数进行编码
+`encodeURIComponent` ：对URI整体编码，用1到4个转义序列来表示这些需要编码的字符，但是它能替换保留字符 `& + = #` 等。它会将参数当做uri的尾部参数进行编码，因为它认为这些都只是普通的 text 字符，不具备特殊意义
+
+**2者相同点**
+
+都是对URI编码
+
+**2者不同点**
+
+1. 编码范围不同(准确说对uri保留字符是否编码)： encodeURI 不会对 `; , / ? : @ & = + $ 字母 数字 - _ . ! ~ * ' ( ) #` 编码， encodeURIComponent 不会对 `字母、数字、(、)、.、!、~、*、'、-和_` 编码。所以 encodeURIComponent 编码范围更广
+
+2. 应用场景：如果需要在编码后，再使用这个url，那么使用 encodeURI ，如果需要对 uri 的参数进行编码，使用 encodeURIComponent
+
+> 问题：他们是将什么格式的编码转义成什么格式的编码？
+
+答：unicode -> 16进制的转义序列
 
 ### 3.4 Unicode 正规化
 
@@ -129,25 +143,11 @@ javascript 采用 unicode 字符集，utf-16 编码
 '\u01D1'.normalize('NFD')[1] // ˇ
 ```
 
-**2者相同点**
-
-都是对URI编码
-
-**2者不同点**
-
-1. 编码范围不同： encodeURI 不会对 `; , / ? : @ & = + $ 字母 数字 - _ . ! ~ * ' ( ) #` 编码， encodeURIComponent 不会对 `字母、数字、(、)、.、!、~、*、'、-和_` 编码。所以 encodeURIComponent 编码范围更广
-
-2. 应用场景：如果需要在编码后，再使用这个url，那么使用 encodeURI ，如果需要对 uri 的参数进行编码，使用 encodeURIComponent
-
-> 问题：他们是将什么格式的编码转义成什么格式的编码？
-
-答：unicode -> 16进制的转义序列
-
-### 3.4 escape、unescape
+### 3.5 escape、unescape
 
 针对字符串，已经被废弃，使用 encodeURI、encodeURIComponent 替代
 
-### 3.5 btoa、atob
+### 3.6 btoa、atob
 
 > 主要用于base64操作
 

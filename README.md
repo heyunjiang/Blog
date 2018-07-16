@@ -89,3 +89,5 @@
 [文件下载](other/download.md)
 
 > 通用型文件下载
+
+[常见 http 状态码、解释及解决方案](other/httpCode.md)
