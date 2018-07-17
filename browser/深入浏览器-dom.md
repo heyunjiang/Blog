@@ -98,6 +98,9 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 26. `matches(selectorString)`: 判断是否有对应子节点。selectorString 为 css 选择符。可以用 `matchesSelector()` 、 `querySelectorAll()` 替代判断， ie9+
 27. `requestFullscreen()`: 发出异步请求，让元素进入全屏模式。需要加浏览器前缀使用： `webkitRequestFullScreen` 、 `mozRequestFullScreen` 、 `msRequestFullscreen`
 28. `scrollIntoView()`: 让当前元素滚动到浏览器窗口的可视区域内
+29. `innerText`: 表示一个节点及其后代的渲染文本内容
+30. `getRootNode()`: 获取根节点，ie 不支持 (可以使用 ownerDocument 属性，都支持)
+31. `contains(el)`: 判断当前节点是否有 el 这个子节点，ie5+
 
 > 视口：浏览器视口，就是浏览器标签栏以下的那个物理窗口
 
@@ -242,6 +245,15 @@ element.getClientRects(): 类似 getBoundingClientRect() ，但是当元素节�
 5. insertAdjacentText(position, element)：ie 不支持
 6. replaceWith(...nodes): ie 不支持
 
+insertAdjacentHTML 的 `position` 取值
+
+1. beforebegin: 元素本身前面
+2. afterend: 元素本身后面
+3. afterbegin: 元素第一个子节点前面，难理解命名
+4. beforeend: 元素最后一个子节点后面，难理解命名
+
+主要使用的有： `appendChild()` `removeChild()` `replaceChild()` `insertAdjacentHTML(position, element)`
+
 #### 1.3.7 节点选择 HTMLCollection
 
 1. getElementsByClassName()、getElementsByTagName()、getElementsByTagNameNS()
@@ -280,6 +292,22 @@ scrollHeight: 只读属性，表示元素内容区域的实际大小，会返回
 二 attribute vs property
 
 三 event.clientX vs event.screenX
+
+四 Node.textContent vs Node.innerText vs innerHTML
+
+Node.textContent: 返回自身及后代所有元素的文本值，会获取 script 、 style 元素的内容， 会获取隐藏元素的文本，不会触发重绘，不会将文本解析为 html
+
+Node.innerText: 返回自身及后代所有元素的 **渲染** 文本内容属性， 会触发重绘，不会将文本解析为 html
+
+Node.innerHTML: 返回或插入 html 文本，会自动将文本解析为html
+
+> 第四点总结：如果只是设置节点的文本属性，直接使用 `textContent`，性能更好、更安全，因为省去了解析为html这一步；获取当前浏览器渲染的文本内容使用 `innerText` ；获取 dom tree 的所有文本内容使用 `textContent` ；插入或设置 html string 使用 `innerHTML`
+
+五 isEqualNode vs isSameNode
+
+isEqualNode: 判断2个节点是否特征相等，包括属性节点相同、内容相同、子节点相同，可以用去节点相同去重
+
+isSameNode： 判断2个节点是否是同一个节点
 
 ## 2 不常见 dom 操作api
 
