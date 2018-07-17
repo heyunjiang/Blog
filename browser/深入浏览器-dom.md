@@ -28,9 +28,10 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 学习总结计划
 
 1. ✔ w3school dom： element, document, attribute, event
-2. mdn 补漏
-3. 完善 1.4 常用 dom api 对比
-4. dom 4 学习总结
+2. ✔ mdn 补漏
+3. 回顾所有dom api
+4. 完善 1.4 常用 dom api 对比
+5. dom 4 学习总结
 
 目录
 
@@ -141,11 +142,19 @@ element.attributes，返回该节点的所有属性节点结合，伪数组;
 
 四：dom event api
 
-event 句柄
+HTMLElement，继承自 Element, Node, EventTarget 接口；通常用到的 `div, p` 等，继承自 HTMLElement
+
+event 句柄(执行方式 element.onxxx)
 
 1. `onabort`: 图像的加载被中断
 2. `onerror`: 图像或文档加载出错
 3. `onload`: 图像或文档加载成功
+4. `onanimationcancel`: 当动画意外中断时触发
+5. `onanimationiteration`: 当动画运行到最后一帧时触发 草案中， chrome -> webkit
+6. `onloadstart, onload, onloadend`：执行顺序依次是 'loadstart' fires first, then 'load', then 'loadend'
+7. `onselect, onselectionchange, onselectstart`: 当文字被选中时触发的事件
+8. `onresize`：通常绑定在 window 对象身上，表示窗口大小改变事件
+9. `onsubmit, onreset`： 用于表单
 
 event 属性
 
@@ -158,7 +167,7 @@ event 属性
 7. toElement: ie
 8. x, y: ie
 9. bubbles: 是否是冒泡事件
-10. cancelable: 是否拥有可取消的默认动作
+10. cancelable: 是否拥有可取消默认动作的权限，如果设置为 false ，那么就不能使用 preventDefault() ，否则报错
 11. currentTarget: 当前事件监听的元素
 12. target: 触发事件的元素
 13. eventPhase: 返回事件传播的当前阶段 捕获 -> 1, 正常 -> 2, 冒泡 -> 3
@@ -167,9 +176,14 @@ event 属性
 
 event 方法
 
-1. initEvent(): 初始化 Event 对象
+1. Event(typeArg, eventInit): 构造函数，自定义事件，使用 `dispatchEvent()` 触发，不支持ie
 2. preventDefault(): 阻止事件的默认行为
 3. stopPropagation(): 阻止冒泡
+4. stopImmediatePropagation()：阻止相同事件的其他侦听器被调用，就是说如果同一个元素上绑定了多个事件，原本会按照绑定顺序依次执行
+5. CustomEvent(typeArg, customEventInit)：创建一个自定义事件，继承自 `Event` 对象，使用 `dispatchEvent()` 触发，不支持ie
+6. createEvent(), initEvent()
+
+> 在 `非ie` 中，不再建议使用 createEvent() 与 initEvent() 创建自定义事件了；在 `ie` 中，必须使用 createEvent() 与 initEvent() 创建自定义事件
 
 鼠标属性
 
