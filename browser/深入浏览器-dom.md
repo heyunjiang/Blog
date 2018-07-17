@@ -97,6 +97,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 25. `insertAdjacentText(position, element)`: 同 insertAdjacentElement ，但是它 ie 不支持
 26. `matches(selectorString)`: 判断是否有对应子节点。selectorString 为 css 选择符。可以用 `matchesSelector()` 、 `querySelectorAll()` 替代判断， ie9+
 27. `requestFullscreen()`: 发出异步请求，让元素进入全屏模式。需要加浏览器前缀使用： `webkitRequestFullScreen` 、 `mozRequestFullScreen` 、 `msRequestFullscreen`
+28. `scrollIntoView()`: 让当前元素滚动到浏览器窗口的可视区域内
 
 > 视口：浏览器视口，就是浏览器标签栏以下的那个物理窗口
 
@@ -239,7 +240,7 @@ element.getClientRects(): 类似 getBoundingClientRect() ，但是当元素节�
 3. after() before() append() prepend() : ie 不支持
 4. insertAdjacentElement(position, element)、insertAdjacentHTML(position, element)
 5. insertAdjacentText(position, element)：ie 不支持
-6. replaceWith(): ie 不支持
+6. replaceWith(...nodes): ie 不支持
 
 #### 1.3.7 节点选择 HTMLCollection
 
@@ -257,6 +258,14 @@ element.getClientRects(): 类似 getBoundingClientRect() ，但是当元素节�
 
 1. element.requestFullscreen()
 2. element.exitFullscreen()
+
+#### 1.3.9 元素节点滚动 api
+
+scrollIntoView()
+
+基础支持：参数为 boolean：true -> 元素的顶端和其所在滚动区的可视区域的顶端对齐(github)， false -> 同 true 相反，底端对齐
+
+高级支持：scrollIntoViewOptions，一个 object ，可以设置滚动的流畅度，`高版本 chrome 支持`
 
 ### 1.4 常用 dom api 对比
 
