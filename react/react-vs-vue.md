@@ -7,7 +7,7 @@
  */
 ```
 
-## 概要
+# 概要
 
 1. 数据流
 2. 组件
@@ -160,3 +160,5 @@ export default {
 2. 2者都是将注意力集中在核心库，将其他功能如路由和状态管理交给相关库
 3. vue 上手快，react 学习成本高(jsx, es6)
 4. 
+
+参考文章: [前端之巅](https://mp.weixin.qq.com/s/KCZsBmQiCdLF2HJ5N4Pbyw)

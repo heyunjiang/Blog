@@ -29,8 +29,8 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 
 1. ✔ w3school dom： element, document, attribute, event
 2. ✔ mdn 补漏
-3. 回顾所有dom api
-4. 完善 1.4 常用 dom api 对比
+3. ✔ 回顾所有dom api
+4. ✔ 完善 1.4 常用 dom api 对比
 5. dom 4 学习总结
 
 目录
@@ -73,7 +73,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 
 1. appendChild() removeChild() replaceChild() insertBefore() *没有 insertAfter()*
 2. innerHTML
-3. style, className, id, lang, title: 长点常用属性快捷访问或设置方式
+3. style, className, id, lang, title: 节点常用属性 property 快捷访问或设置方式
 4. `attributes`: 节点属性集合，伪数组， `NamedNodeMap`
 5. childNodes, `hasChildNodes`: 节点的后代节点集合， NodeList
 6. clientHeight, clientWidth: 元素可见高度、宽度
@@ -192,10 +192,11 @@ event 方法
 3. metaKey: 事件触发时，`meta`是否被按下
 4. shiftKey: 事件触发时，`SHIFT`是否被按下
 5. button: 哪个鼠标按钮被点击
-6. clientX: 鼠标水平坐标
-7. clientY: 鼠标垂直坐标
-8. screenX: 鼠标水平坐标
-9. screenY: 鼠标垂直坐标
+6. clientX，clientY: 鼠标相对于浏览器视口的距离
+7. screenX，screenY: 鼠标相对于显示器视口的距离
+8. offsetX, offsetY: 鼠标相对于当前 target 节点左上角的便宜位置
+9. pageX, pageY: 鼠标相对于文档html的距离
+10. x, y: 是 clientX, clientY 的别名
 
 #### 1.3.1 compareDocumentPosition 值说明
 
@@ -295,7 +296,7 @@ scrollIntoView()
 
 ### 1.4 常用 dom api 对比
 
-一 clientHeight vs offsetHeight vs scrollHeight
+#### 一 clientHeight vs offsetHeight vs scrollHeight
 
 答：clientHeight: 只读属性，表示 css `height` + `padding`，不包括 border，margin，水平滚动条高度，通常用于展示区域内容占用了多少空间。
 
@@ -303,11 +304,46 @@ offsetHeight: 只读属性，表示 `height` + `padding` + `border` + `margin` +
 
 scrollHeight: 只读属性，表示元素内容区域的实际大小，会返回可滚动内容的所有height + padding
 
-二 attribute vs property
+#### 二 attribute vs property
 
-三 event.clientX vs event.screenX
+attribute 是定义在 dom element 上的属性，属性集合叫做 `Element.attributes`，他是一个 `NamedNodeMap` 对象，不是数组，它原型提供了 getNamedItem, removeNamedItem 等方法，实现了 iterator 接口，可以使用 for of 遍历；
 
-四 Node.textContent vs Node.innerText vs innerHTML
+property 通常见到的是在 js object 对象上的，比如： defineProperty(), defineProperties(), getOwnPropertyDescriptor(), getOwnPropertyDescriptors(), hasOwnProperty()。但是 dom 节点的 property 是什么呢？与 attribute 有什么联系呢？
+
+答：dom tree，由 dom 节点构成，每个节点的表示方式为 object 对应的 key -> value 形式，如文章开头的格式，这里的 `property` 就是对应的节点 dom object 的属性，访问方式为 `element.className` ，与 attribute 的区别是， `attribute` 是当前元素节点内部的一个属性节点，所有属性节点集合叫 `attributes`，访问方式与 property 的区别是：
+
+```javascript
+<a href="https://heyunjiang.github.io" id="testId" class="hello world">heyunjiang</a>
+
+const ele = document.getElementById('testId');
+
+// property
+ele.className; // "hello world"
+ele.classList; // ["hello", "world"]
+ele.href; // "https://heyunjiang.github.io"
+
+// attribute 通过 节点属性 attributes
+const attributes = ele.attributes;
+attributes.getNamedItem('id'); // 返回节点对象 id="testId"
+// attribute 通过 节点方法
+ele.getAttribute('id'); // "testId"
+ele.getAttributeNode('id'); // 返回节点对象 id="testId"
+```
+
+**综上所述**：attribute 是最本质的东西，作为元素节点的属性节点，而 property 只是作为对 attribute 的一个引用，方便我们快速获取节点的 attribute 。区别以下几点
+
+1. 访问方式：通过 property 快速访问 attribute 值的方式有的有区别，有的不能直接使用属性节点的名称，比如 ele.className, ele.maxLength等，有的名称相同，比如 ele.id, ele.name
+2. 非标准属性(自定义属性)：不能通过 property 访问，只能通过 attribute 节点或 element 方法访问
+
+#### 三 event.clientX vs event.screenX vs event.offsetX
+
+clientX: 相对于浏览器定位
+
+screenX：相对于显示器定位
+
+offsetX：相对于 target 定位
+
+#### 四 Node.textContent vs Node.innerText vs innerHTML
 
 Node.textContent: 返回自身及后代所有元素的文本值，会获取 script 、 style 元素的内容， 会获取隐藏元素的文本，不会触发重绘，不会将文本解析为 html
 
@@ -317,11 +353,25 @@ Node.innerHTML: 返回或插入 html 文本，会自动将文本解析为html
 
 > 第四点总结：如果只是设置节点的文本属性，直接使用 `textContent`，性能更好、更安全，因为省去了解析为html这一步；获取当前浏览器渲染的文本内容使用 `innerText` ；获取 dom tree 的所有文本内容使用 `textContent` ；插入或设置 html string 使用 `innerHTML`
 
-五 isEqualNode vs isSameNode
+#### 五 isEqualNode vs isSameNode
 
 isEqualNode: 判断2个节点是否特征相等，包括属性节点相同、内容相同、子节点相同，可以用去节点相同去重
 
 isSameNode： 判断2个节点是否是同一个节点
+
+#### 六 NodeList vs HTMLCollection
+
+NodeList 接口提供了 forEach、entries、keys、values 方法，比如 querySelectorAll 实现的就是 NodeList 接口；
+
+而 HTMLCollection 没有实现 forEach 等方法，比如 getElementsByTagName 实现的就是 HTMLCollection 接口
+
+共同点：都提供了iterator接口，可以使用 for of 遍历
+
+#### 七 closest() vs querySelector()
+
+通常 querySelector() 系列，都是根据当前节点向下查找节点；
+
+closest()是根据当前节点，向上查找节点，是最近的、满足选择条件的节点。
 
 ## 2 不常见 dom 操作api
 
@@ -397,7 +447,7 @@ chrome: `alt` + `accessKey`
 
 兼容： ie10+
 
-> 伪数组：DOMTokenList, HTMLCollection, NamedNodeMap
+> 伪数组：DOMTokenList, HTMLCollection, NamedNodeMap, NodeList
 
 ## 参考文章
 
