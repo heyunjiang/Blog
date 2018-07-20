@@ -10,7 +10,8 @@ provider和connect
 
 ### 1. <Provider store>
 
-props: 
+props:
+
 1. store(redux store): 应用的store(每个应用保持单一store原则)
 2. children：应用root组件
 
@@ -49,6 +50,5 @@ ReactDOM.render(
 
 `mapDispatchToProps`: 获取redux中的dispatch方法，如果不设置此参数，默认在组件中插入 `dispatch` 方法
 
-
-> 3. connectAdvanced: connect基于此方法构建而来
-> 4. createProvider： 构建一个新的provider
+> connectAdvanced: connect基于此方法构建而来
+> createProvider： 构建一个新的provider

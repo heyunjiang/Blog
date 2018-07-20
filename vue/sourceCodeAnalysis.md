@@ -1,6 +1,6 @@
-## vue 源码解读
+# vue 源码解读
 
-### 待求解的问题
+## 待求解的问题
 
 1. 双向绑定实现原理([响应式原理](./vue响应式原理.md))
 2. virtual dom vs react (需要对react的virtual dom也熟悉，2者做对比)
