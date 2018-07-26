@@ -60,7 +60,7 @@ heyunjiang
 2. 兄弟：共同父亲
 3. Context：全局数据，redux就是基于此实现，主要用于解决跨多个父亲节点传递props问题
 
-> React.Fragment，语法糖 `<></>` ，用以解决 return 方法中保证只有一个根节点问题
+> React.Fragment，语法糖 `<></>` ，用以解决 return 方法中保证只有一个根节点问题, 16版本以上提供
 
 ### 5 提供了哪些开放接口，用于和 router、flux 等第三方对接？
 
@@ -310,11 +310,16 @@ construct: function(initialProps, children) {
 
 ****
 
+关键点
+
+最重要4个函数： `ReactMount.renderComponent` 、 `ReactComponent.mountComponentIntoNode` 、 `ReactComponent._mountComponentIntoNode` 、 `ReactCompositeComponent.mountComponent`
+
+最重要3个文件：ReactComponent.js、ReactCompositeComponent.js、ReactNativeComponent.js ，它们都有 `mountComponent` ，分别作用是 绑定ref、解析复合组件、生成真实dom组件
+
 5.3.1 组件渲染的入口函数： ReactMount.renderComponent()
 
 > 在 4.1 渲染过程 简要总结过渲染要经过哪些步骤，判断组件是否已经渲染，并把虚拟 dom -> 真实 dom ，所有虚拟 dom 维护在 `instanceByReactRootID` 对象中
 
-最重要4个函数： `ReactMount.renderComponent` 、 `ReactComponent.mountComponentIntoNode` 、 `ReactComponent._mountComponentIntoNode` 、 `ReactCompositeComponent.mountComponent`
 
 在 ReactMount.renderComponent 中，是通过 mountComponentIntoNode 将虚拟 dom 渲染到真实 dom 的；开启一个事务，保证渲染阶段不会有什么事件触发，并阻断 componentDidMount 事件，待执行后执行
 
@@ -378,9 +383,9 @@ _mountComponentIntoNode: function(rootID, container, transaction) {
 
 5.3.4 ReactCompositeComponent.mountComponent()
 
-最复杂的一个函数，实现的功能有：绑定 ref 、设置组件生命周期、调用配置的组件生命周期函数、
+最复杂的一个函数，实现以下9个功能有
 
-> _lifeCycleState：组件生命周期，用于校验 react 组件在在执行函数时状态值是否正确，2个可枚举值： `MOUNTED` 、 `UNMOUNTED`
+> _lifeCycleState：组件生命周期，用于校验 react 组件在在执行函数时状态值是否正确，只是用于给出报错提示；2个可枚举值： `MOUNTED` 、 `UNMOUNTED`
 > _compositeLifeCycleState: 复合组件生命周期，用于保证 setState 流程不受其它行为影响
 
 ```javascript
@@ -388,24 +393,27 @@ _mountComponentIntoNode: function(rootID, container, transaction) {
 // in /src/core/ReactCompositeComponent.js
 
 mountComponent: function(rootID, transaction) {
-    // 挂载组件 ref 属性到 this.refs 上，如果组件设置了 ref 属性才会有效
+    // 1 挂载组件 ref 属性到 this.refs 上，如果组件设置了 ref 属性才会有效
     ReactComponent.Mixin.mountComponent.call(this, rootID, transaction);
 
-    // Unset `this._lifeCycleState` until after this method is finished.
+    // 2 设置组件生命周期状态值
     this._lifeCycleState = ReactComponent.LifeCycle.UNMOUNTED;
     this._compositeLifeCycleState = CompositeLifeCycle.MOUNTING;
 
+    // 3 如果组件设置了 props ，则进行校验
     if (this.constructor.propDeclarations) {
       this._assertValidProps(this.props);
     }
-
+    // 4 绑定this 这是在es6出现前的 之后呢？
     if (this.__reactAutoBindMap) {
       this._bindAutoBindMethods();
     }
 
+    // 5 初始化 state
     this.state = this.getInitialState ? this.getInitialState() : null;
     this._pendingState = null;
 
+    // 6 如果设置了 componentWillMount 生命周期函数，则执行，该函数中设置 setState 不会触发 re-render
     if (this.componentWillMount) {
       this.componentWillMount();
       // When mounting, calls to `setState` by `componentWillMount` will set
@@ -416,16 +424,70 @@ mountComponent: function(rootID, transaction) {
       }
     }
 
+    // 7 如果设置了 componentDidMount 生命周期函数，则将其加入到 ReactOnDOMReady 队列中
     if (this.componentDidMount) {
       transaction.getReactOnDOMReady().enqueue(this, this.componentDidMount);
     }
 
+    // 8 调用组件声明的 render 函数，并返回 ReactComponent render 之后的抽象实例(ReactComponsiteComponent或ReactNativeComponent)
     this._renderedComponent = this._renderValidatedComponent();
 
     // Done with mounting, `setState` will now trigger UI changes.
     this._compositeLifeCycleState = null;
     this._lifeCycleState = ReactComponent.LifeCycle.MOUNTED;
 
+    // 9 _renderedComponent 是由 render 之后生成的组件实例；如果 _renderedComponent 是 ReactComponsiteComponent，那么它会重复 mountComponent 的这个过程；如果 _renderedComponent 是 ReactNativeComponent，那么它会调用 ReactNativeComponent 的 mountComponent 方法
     return this._renderedComponent.mountComponent(rootID, transaction);
 }
 ```
+
+```javascript
+// 组件创建 源码 _assertValidProps
+// in /src/core/ReactCompositeComponent.js
+
+_assertValidProps: function(props) {
+    var propDeclarations = this.constructor.propDeclarations;
+    var componentName = this.constructor.displayName;
+    for (var propName in propDeclarations) {
+      var checkProp = propDeclarations[propName];
+      if (checkProp) {
+        checkProp(props, propName, componentName);
+      }
+    }
+}
+```
+
+```javascript
+// 组件创建 源码 _renderValidatedComponent
+// in /src/core/ReactCompositeComponent.js
+
+_renderValidatedComponent: function() {
+    // 问：这里的 ReactCurrentOwner.current 有什么用？
+    ReactCurrentOwner.current = this;
+    var renderedComponent = this.render();
+    ReactCurrentOwner.current = null;
+    invariant(
+      ReactComponent.isValidComponent(renderedComponent),
+      '%s.render(): A valid ReactComponent must be returned.',
+      this.constructor.displayName || 'ReactCompositeComponent'
+    );
+    return renderedComponent;
+}
+```
+
+```javascript
+// 组件创建 源码 mountComponent
+// in /src/core/ReactNativeComponent.js
+
+mountComponent: function(rootID, transaction) {
+    ReactComponent.Mixin.mountComponent.call(this, rootID, transaction);
+    assertValidProps(this.props);
+    return (
+      this._createOpenTagMarkup() +
+      this._createContentMarkup(transaction) +
+      this._tagClose
+    );
+}
+```
+
+****
