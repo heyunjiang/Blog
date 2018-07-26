@@ -140,4 +140,292 @@ http-server: [http-server](https://github.com/indexzero/http-server)
 
 > 广度优先法与调用栈调试法最大区别：前者是先统一根据注释及方法名总结所有函数模块，再精读实现原理；后者是顺着入口文件调用函数这条线，依次深入各个函数
 
-### 4
+### 4 针对问题3 jsx 如何编译？ 组件渲染与 jsx 编译
+
+jsx 构造一个组件，将这个组件由 `React.renderComponent` 渲染到对应的真实dom节点上。
+
+```javascript
+// 例1 ： 组件渲染与 jsx 编译
+var ExampleApplication = React.createClass({
+    render: function() {
+        var elapsed = Math.round(this.props.elapsed / 100);
+        var seconds = elapsed / 10 + (elapsed % 10 ? '' : '.0' );
+        var message =
+        'React has been successfully running for ' + seconds + ' seconds.';
+        return <div>{message}</div>;
+    }
+});
+
+React.renderComponent(
+    <ExampleApplication elapsed={new Date().getTime() - start} />,
+    document.getElementById('container')
+);
+```
+
+> 15.0.0 之后的版本是 ReactDom.render
+
+4.1 渲染过程：
+
+1. 查找：查找挂载目标上是否已经存在一个与之对应、已经渲染过的 `component`
+2. 如果没有找到：将该 `component` 与这个挂载目标关联信息保存下来，方便后续查询；调用 `mountComponentIntoNode`，将 `component` 挂载到挂载目标上 (虚拟 dom -> 真实 dom)
+3. 如果找到：执行更新
+
+```javascript
+// 渲染过程，源码 renderComponent
+// in /src/core/ReactMount.js
+
+var instanceByReactRootID = {};
+
+function getReactRootID(container) {
+  // && 表达式，前者真才执行后一个，否则 undefined
+  return container.firstChild && container.firstChild.id;
+}
+
+// 返回更新或挂载后的 component
+renderComponent: function(nextComponent, container) {
+    // 获得历史缓存的renderComponent记录
+    var prevComponent = instanceByReactRootID[getReactRootID(container)];
+    if (prevComponent) {
+        // 问：constructor 是一个对象，能这么比较吗？答：能，必须2个指向的是同一个对象
+        if (prevComponent.constructor === nextComponent.constructor) {
+            var nextProps = nextComponent.props;
+            // 保持滚动条不变
+            ReactMount.scrollMonitor(container, function() {
+                // 更新属性
+                prevComponent.replaceProps(nextProps);
+            });
+            return prevComponent;
+        } else {
+            // 卸载之前的组件
+            ReactMount.unmountAndReleaseReactRootNode(container);
+        }
+    }
+    // 挂载事件
+    ReactMount.prepareTopLevelEvents(ReactEventTopLevelCallback);
+    // 注册，获取id
+    var reactRootID = ReactMount.registerContainer(container);
+    // 把历史id记录在 instanceByReactRootID 对象变量中
+    instanceByReactRootID[reactRootID] = nextComponent;
+    // 调用ReactComponent的createClass的返回结果，虚拟 dom -> 真实 dom
+    nextComponent.mountComponentIntoNode(reactRootID, container);
+
+    // 问题：为什么要先 ReactMount.registerContainer 获取 id，而不是直接 nextComponent.mountComponentIntoNode 执行挂载并返回id呢？
+
+    return nextComponent;
+}
+```
+
+4.2 jsx 编译过程
+
+1. `return <div>{message}</div>` 会被编译成 `React.DOM.div(null, message)`，这是原生组件 `ReactNativeComponen`，原型是 `ReactNativeComponen`；这也解决了问题3中 jsx 特性，其对于 html 标签的处理，react 会将写在 jsx 中的标签转换成其自身的标签对象
+2. `<ExampleApplication elapsed={new Date().getTime() - start} />` 会被编译成 `ExampleApplication( {elapsed:new Date().getTime() - start}, null )`，这是复合组件 `ReactCompositeComponent`，原型是 `ReactCompositeComponentBase`
+
+这是 react 0.3 编译的结果，那么在 react 15 种编译的结果是否一样？
+
+答： react 0.3 使用 `JSXTransformer.js` 编译jsx，调用 `React.createClass` 生成虚拟组件？；react 15 使用 `babel-preset-react` 来编译jsx，该 preset 包含4个插件，其中一个 `transform-react-jsx` 负责编译 jsx，调用 `React.createElement` 生成虚拟组件
+
+> 总结：说明在 jsx 编译过程中，会将这2种类型的组件编译成 react 能识别的方法，也就是 js 引擎能识别的 js，这个过程叫做 jsx `预编译`
+> 这里只是说了 jsx 会最终被编译成什么，复合组件会被编译成什么，但是没有说具体的编译过程
+
+### 5 针对问题4 组件构建方式？组件创建、初始化及渲染
+
+从例子1可以看到，创建组件是通过 `React.createClass` 方法，需要传入的是配置，包含初始化、属性、状态、生命周期钩子、渲染render、自定义函数等。(这也说明了框架是传入配置，我们通常所做的组件化编程，其实就是在写创建组件的配置)
+
+> 说明：配置中的 `render` 不能为空，因为 react 组件需要根据 render 的返回值来渲染最终的页面元素，其他都可以为空
+
+**5.1 组件创建**流程
+
+1. 填写配置：通过 `React.createClass` 填写组件配置
+2. 组件编译：预编译 jsx
+3. 组件创建: 通过执行 `React.createClass` 创建组件
+
+```javascript
+// 组件创建 源码 createClass
+// in /src/core/ReactCompositeComponent.js
+
+//spec 就是填写的一系列配置
+createClass: function(spec) {
+    var Constructor = function(initialProps, children) {
+      this.construct(initialProps, children);
+    };
+    // 1. 让 Constructor 继承 ReactCompositeComponentBase，所以通过 createClass 生成的组件都是复合组件
+    // 2. 这2步是典型的继承
+    // 3. react 做 dom-diff，是通过 Constructor 来判断组件相同，渲染判断更新也是通过 Constructor
+    Constructor.prototype = new ReactCompositeComponentBase();
+    Constructor.prototype.constructor = Constructor;
+
+    mixSpecIntoComponent(Constructor, spec);
+    invariant(
+      Constructor.prototype.render,
+      'createClass(...): Class specification must implement a `render` method.'
+    );
+
+    // 为什么要多包装一层呢？答：为了保证每个生成得组件都是独立的，不被开发者修改到 Constructor 这个原型，因为这里被封装了一层 ConvenienceConstructor ，开发者也只能接触到它，接触不到 Constructor，这是对组件本身的一个保护
+    var ConvenienceConstructor = function(props, children) {
+      return new Constructor(props, children);
+    };
+    ConvenienceConstructor.componentConstructor = Constructor;
+    ConvenienceConstructor.originalSpec = spec;
+    return ConvenienceConstructor;
+}
+```
+
+**5.2 组件实例化**过程
+
+上面说到了 `createClass` 是如何创建组件，那么如何实例化这个创建好的组件呢？
+
+通过 createClass 创建好组件，是作为 `renderComponent` 的第一个参数，用以渲染。
+
+> 在 createClass 创建好的组件，实例化的第一步，就是会执行 Constructor 的 construct 函数， `this.construct(initialProps, children)` ， construct 是继承自 ReactCompositeComponentBase，而 ReactCompositeComponentBase 实现的又是 `ReactComponent.Mixin.construct`
+
+组件实例化的过程：执行 construct 函数，为组件绑定 `props` 和 `children` ，绑定 `父组件指向` ，设置 `生命周期状态`
+
+```javascript
+// 组件创建 源码 construct
+// in /src/core/ReactComponent.js
+
+construct: function(initialProps, children) {
+    this.props = initialProps || {};
+    if (typeof children !== 'undefined') {
+    this.props.children = children;
+    }
+    // 绑定父组件指向
+    this.props[OWNER] = ReactCurrentOwner.current;
+    // 设置生命周期为 UNMOUNTED
+    this._lifeCycleState = ComponentLifeCycle.UNMOUNTED;
+}
+```
+
+**5.3 组件渲染**过程
+
+****
+
+在填写 `createClass` 配置之后，预编译 `jsx` ，然后执行 `createClass` 创建组件；
+
+> 为什么预编译在创建组件之前？因为 js引擎 不能识别 jsx ，需要先编译
+
+创建好的组件在使用时进行实例化 `construct` ，然后就进入渲染阶段了。
+
+整个流程： 填写配置 -> 预编译 jsx -> 创建组件 -> 组件实例化 -> 组件渲染
+
+****
+
+5.3.1 组件渲染的入口函数： ReactMount.renderComponent()
+
+> 在 4.1 渲染过程 简要总结过渲染要经过哪些步骤，判断组件是否已经渲染，并把虚拟 dom -> 真实 dom ，所有虚拟 dom 维护在 `instanceByReactRootID` 对象中
+
+最重要4个函数： `ReactMount.renderComponent` 、 `ReactComponent.mountComponentIntoNode` 、 `ReactComponent._mountComponentIntoNode` 、 `ReactCompositeComponent.mountComponent`
+
+在 ReactMount.renderComponent 中，是通过 mountComponentIntoNode 将虚拟 dom 渲染到真实 dom 的；开启一个事务，保证渲染阶段不会有什么事件触发，并阻断 componentDidMount 事件，待执行后执行
+
+5.3.2 ReactComponent.mountComponentIntoNode()
+
+> 问：事务是如何实现的呢？
+
+```javascript
+// 组件创建 源码 mountComponentIntoNode
+// in /src/core/ReactComponent.js
+
+mountComponentIntoNode: function(rootID, container) {
+    var transaction = ReactComponent.ReactReconcileTransaction.getPooled();
+    transaction.perform(
+        this._mountComponentIntoNode,
+        this,
+        rootID,
+        container,
+        transaction
+    );
+    ReactComponent.ReactReconcileTransaction.release(transaction);
+}
+```
+
+****
+
+5.3.3 ReactComponent._mountComponentIntoNode
+
+_mountComponentIntoNode 通过 ReactCompositeComponent.mountComponent() 获取待渲染组件的 innerHTML，然后将其渲染到 `container` 节点内部
+
+```javascript
+// 组件创建 源码 _mountComponentIntoNode
+// in /src/core/ReactComponent.js
+
+_mountComponentIntoNode: function(rootID, container, transaction) {
+    var renderStart = Date.now();
+    var markup = this.mountComponent(rootID, transaction);
+    ReactMount.totalInstantiationTime += (Date.now() - renderStart);
+
+    var injectionStart = Date.now();
+      // Asynchronously inject markup by ensuring that the container is not in
+      // the document when settings its `innerHTML`.
+    var parent = container.parentNode;
+    if (parent) {
+        var next = container.nextSibling;
+        parent.removeChild(container);
+        container.innerHTML = markup;
+        if (next) {
+          parent.insertBefore(container, next);
+        } else {
+          parent.appendChild(container);
+        }
+    } else {
+        container.innerHTML = markup;
+    }
+    ReactMount.totalInjectionTime += (Date.now() - injectionStart);
+}
+```
+
+****
+
+5.3.4 ReactCompositeComponent.mountComponent()
+
+最复杂的一个函数，实现的功能有：绑定 ref 、设置组件生命周期、调用配置的组件生命周期函数、
+
+> _lifeCycleState：组件生命周期，用于校验 react 组件在在执行函数时状态值是否正确，2个可枚举值： `MOUNTED` 、 `UNMOUNTED`
+> _compositeLifeCycleState: 复合组件生命周期，用于保证 setState 流程不受其它行为影响
+
+```javascript
+// 组件创建 源码 mountComponent
+// in /src/core/ReactCompositeComponent.js
+
+mountComponent: function(rootID, transaction) {
+    // 挂载组件 ref 属性到 this.refs 上，如果组件设置了 ref 属性才会有效
+    ReactComponent.Mixin.mountComponent.call(this, rootID, transaction);
+
+    // Unset `this._lifeCycleState` until after this method is finished.
+    this._lifeCycleState = ReactComponent.LifeCycle.UNMOUNTED;
+    this._compositeLifeCycleState = CompositeLifeCycle.MOUNTING;
+
+    if (this.constructor.propDeclarations) {
+      this._assertValidProps(this.props);
+    }
+
+    if (this.__reactAutoBindMap) {
+      this._bindAutoBindMethods();
+    }
+
+    this.state = this.getInitialState ? this.getInitialState() : null;
+    this._pendingState = null;
+
+    if (this.componentWillMount) {
+      this.componentWillMount();
+      // When mounting, calls to `setState` by `componentWillMount` will set
+      // `this._pendingState` without triggering a re-render.
+      if (this._pendingState) {
+        this.state = this._pendingState;
+        this._pendingState = null;
+      }
+    }
+
+    if (this.componentDidMount) {
+      transaction.getReactOnDOMReady().enqueue(this, this.componentDidMount);
+    }
+
+    this._renderedComponent = this._renderValidatedComponent();
+
+    // Done with mounting, `setState` will now trigger UI changes.
+    this._compositeLifeCycleState = null;
+    this._lifeCycleState = ReactComponent.LifeCycle.MOUNTED;
+
+    return this._renderedComponent.mountComponent(rootID, transaction);
+}
+```
