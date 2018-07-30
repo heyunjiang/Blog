@@ -94,7 +94,13 @@ http-server: [http-server](https://github.com/indexzero/http-server)
 
 **3类组件**：ReactTextComponent(文字组件)、ReactNativeComponent(原生组件)、ReactCompositeComponent(复合组件，也就是自己命名的组件)
 
-**3个层次**： 展示层(用户声明、创建虚拟组件，渲染虚拟组件，和真实dom打交道)、virtual 组件层、基础功能(所有公共代码，提供底层功能)
+**3个层次**：
+
+1. 展示层: 用户配置声明 ReactCompositeComponent.createClass, 渲染虚拟组件 ReactMount.renderComponent, 构造 jsx html ReactDom
+2. virtual 组件层: 创建虚拟组件 `ReactCompositeComponent.createClass` , 复合组件的实例化第一步初始化组件 `ReactComponent.construct` , 渲染组件 `ReactComponent.mountComponentIntoNode` 及 `ReactComponent._mountComponentIntoNode` , 渲染组件-复合组件 `ReactCompositeComponent.mountComponent` , 渲染组件-原生组件 `ReactNativeComponent.mountComponent`
+3. 基础功能: 所有公共代码，提供底层功能
+
+以虚拟组件层为核心，展示层和基础功能层围绕
 
 > 在阅读源码的时候，牢记react的这3个层次，看看目前看得源码属于哪个层次，实现了什么功能
 
