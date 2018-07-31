@@ -1,4 +1,4 @@
-## 说明
+# 说明
 
 这里记录了web开发时，在ios(iphone)环境下的开发技巧总结
 
@@ -19,5 +19,3 @@
 `<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />`
 
 在ios10以前可以，现在不行了
-
-## 
