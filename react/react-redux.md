@@ -4,18 +4,18 @@
 
 react-redux 是 `redux` 的 `react` 版本实现
 
-## api 
+## api
 
 provider和connect
 
-### 1. <Provider store>
+### 1 Provider
 
-props:
+Provider.props:
 
 1. store(redux store): 应用的store(每个应用保持单一store原则)
 2. children：应用root组件
 
-```js
+```jsx
 ReactDOM.render(
   <Provider store={store}>
     <MyRootComponent />
