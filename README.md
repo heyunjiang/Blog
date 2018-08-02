@@ -19,7 +19,8 @@
   - ✔ [es2015-解构赋值](es/es6-解构赋值.md)
   - ✔ [es2015-decorator](es/es6-decorator.md)
   - ✔ [es2015-模板字符串](es/es6-模板字符串.md)
-  - [es2015-Symbol](es/es6-Symbol.md)
+  - ✔ [es2015-Symbol](es/es6-Symbol.md)
+  - [es2015-generator、promise、async](es/es6-异步.md)
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
   - ✔ [深入js-基本类型](es/深入js-基本类型.md) 包含了数值、函数、对象的关键点总结

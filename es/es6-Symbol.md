@@ -9,7 +9,7 @@
 
 ## 1 关键点
 
-1. 第7种类型
+1 第7种类型
 
 ```javascript
 let s = Symbol();
@@ -18,7 +18,7 @@ typeof s
 // "symbol"
 ```
 
-2. 唯一
+2 唯一
 
 ```javascript
 // 没有参数的情况
@@ -34,7 +34,7 @@ let s2 = Symbol('foo');
 s1 === s2 // false
 ```
 
-3. 不能与其他类型进行运算
+3 不能与其他类型进行运算
 
 ```javascript
 let sym = Symbol('My symbol');
@@ -54,11 +54,15 @@ String(sym) // 'Symbol(My symbol)'
 Boolean(sym) // true
 ```
 
-4. 作为属性读取
+4 作为属性读取
 
 不能使用 `.` 读取，因为对象通过 . 读取，后面是只能是字符串，对于变量，只能是 `obj[mySymbol]` 方式
 
 > 魔术字符串：在代码中多次出现，作为一个具体的值(string | number)，应该尽量消除魔术字符串，改由清晰的变量代替
+
+5 Symbol.iterator
+
+任意实现了该接口的数据结构，都可以遍历，例如使用 for of
 
 ## 2 作为属性名的遍历
 
