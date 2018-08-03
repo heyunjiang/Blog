@@ -62,7 +62,13 @@ Boolean(sym) // true
 
 5 Symbol.iterator
 
-任意实现了该接口的数据结构，都可以遍历，例如使用 for of
+任意实现了该接口的数据结构，都可以遍历，例如使用 `for of` ， `...`
+
+已知实现该接口的有：array, generator, Set, Map
+
+未实现该接口的有：object, 普通函数
+
+> 基础类型就不用说了，比如 boolean, string, number, undefined, null
 
 ## 2 作为属性名的遍历
 
