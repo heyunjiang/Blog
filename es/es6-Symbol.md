@@ -129,7 +129,7 @@ Symbol.keyFor(s2) // undefined
 
 ## 4 内置的Symbol值
 
-1. `Symbol.hasInstance`: 作为构造器的属性，当它的实例调用 `instanceof` 时，其实调用的是对象的这个方法
+1 `Symbol.hasInstance`: 作为构造器的属性，当它的实例调用 `instanceof` 时，其实调用的是对象的这个方法
 
 ```javascript
 class MyClass {
@@ -143,7 +143,7 @@ class MyClass {
 // 其实调用的就是 MyClass[Symbol.hasInstance]([1, 2, 3])
 ```
 
-2. `Symbol.isConcatSpreadable`:用以决定数组使用 `concat` 方法是，是否展开
+2 `Symbol.isConcatSpreadable`:用以决定数组使用 `concat` 方法是，是否展开
 
 ```javascript
 let arr1 = ['c', 'd'];
