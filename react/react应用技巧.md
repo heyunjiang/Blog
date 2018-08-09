@@ -43,4 +43,4 @@ return (
 
 ![fragmentWrong](../images/fragmentWrong.png)
 
-答：目前的 babel-preset-react 还没有来得及支持该语法糖
+答：目前的 babel-preset-react 还没有来得及支持该语法糖，在 @babel/preset-react 中支持

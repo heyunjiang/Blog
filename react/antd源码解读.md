@@ -17,6 +17,8 @@ time: 2018.8.06
 
 想要深入了解这个产品，因为它在我日常项目中用到非常多，github 上已经超过 3w star，深入学习了解它对我个人的帮助是很大的
 
+源码中有些接口是没有对外暴露的，这样学习可以寻找到一些隐藏的接口信息
+
 ## 2 要解决些什么问题？
 
 1. antd 是如何设计的？它的设计价值观、设计原则及设计模式是怎样的？
@@ -99,5 +101,25 @@ export default Button;
 const rxTwoCNChar = /^[\u4e00-\u9fa5]{2}$/;
 const isTwoCNChar = rxTwoCNChar.test.bind(rxTwoCNChar);
 ```
+
+### 4.3.2 获取当前 component 实例的真实 dom 节点
+
+```javascript
+import { findDOMNode } from 'react-dom';
+
+// Fix for HOC usage like <FormatMessage />
+const node = (findDOMNode(this) as HTMLElement);
+const buttonText = node.textContent || node.innerText;
+```
+
+`findDOMNode` ：使用 ReactDOM 提供的这个方法
+
+`node.textContent || node.innerText` ：使用 textContent ，会返回当前节点及其所有子节点的文本内容，包含 script 内部
+
+> 为什么不用 innerText ?答：因为访问这个属性虽然不会获取到 script 内容，但是它会强制浏览器触发重绘
+
+### 4.4 隐藏接口
+
+1. Button 组件 `prefixCls` prop: 最好不改，默认 ant-btn ；改了可以自定义样式
 
 ## 5 开源项目
