@@ -72,7 +72,10 @@ clone ant-design ，npm install, npm start，运行的效果跟官网的一样�
 antd源码阅读注意事项
 
 1. 网页是由 `md` 文件构建
-2. 组件是用 `ts` 构建
+2. 组件是用 `ts` + `less` 构建
+3. 使用 `tsx`: typescript 的 jsx
+4. `@types/react`: `npm install -S react @types/react` ，这里是额外获取的 react 的声明文件
+5. 使用 `tsconfig.json` 配置文件，可以使用 `awesome-typescript-loader` 配合 webpack 使用
 
 入口：button 组件作为入口
 
@@ -91,7 +94,18 @@ export default Button;
 
 同时支持 export 及 export default
 
-#### 4.2.2
+#### 4.2.2 typescript 配置
+
+在看到 tsx 的时候，有的东西看不懂，然后就去学习 ts 。antd 内部 ts 配置是在 `const getWebpackConfig = require('antd-tools/lib/getWebpackConfig');` antd-tools 这个 npm 包里面的配置
+
+#### 4.2.3 组件样式设置
+
+1. `components/style/themes/default.less` 全局默认配置样式，这里面分模块端定义样式变量，包括 colors, font, padding, border, icon, link, animation, outline, disableStates, shadow, buttons, checkbox, radio, radioButtons, mediaQueries, grid, layout, zIndex, form, input, toolTip, popover, modal, progress, menu, darkTheme, spin, table, tag, timePicker, carousel, badge, rate, card, tabs, backtop, avatar, switch, pagination, breadcrumb, slider, tree, collapse, message
+2. `components/style/mixins/index.less` 里面都是 less 函数式(混合)的写法，包括 size, square, reset, motion, iconfont, clearfix, placeholder
+3. `./mixin.less` 全是为 button 定制的 mixin
+4. `./index.less` button 主要样式
+
+> 我这里不学习它的颜色计算面的知识，具体在 components/style/color/colorPalette.less 中，里面有使用 less function 等
 
 ### 4.3 技巧总结
 
