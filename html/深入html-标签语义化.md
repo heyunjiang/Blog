@@ -47,7 +47,7 @@ div, p, h1, ul, ol, li, dl, dt, dd
 
 nav, header, footer, article, address, aside
 
-**行内元素**：默认 `display` 属性为 `inline-block`
+**行内元素**：默认 `display` 属性为 `inline`
 
 span, b, a, img, input, select, em, strong...
 

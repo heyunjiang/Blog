@@ -11,7 +11,7 @@
   - ✔ [深入html-标签语义化](html/深入html-标签语义化.md)
 - css
   - ✔ [cssModule](css/cssModule.md)
-  - ✔ [flex布局](css/flex.md)
+  - ✔ [深入css-flex布局](css/深入css-flex.md)
   - [cssReset](css/cssReset.md)
   - [w3c标准](css/w3c标准.md)
   - [深入css-常见知识归纳](css/深入css-常见知识归纳.md)

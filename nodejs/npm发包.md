@@ -52,6 +52,18 @@ Logged in as heyunjiang on https://registry.npmjs.org/.
 
 使用 `npm publish` 命令，然后前往npm，查看你所属下的包
 
-### 5 更新
+### 5 更新远程库
 
 每当项目修改，需要更新包的时候，先使用 `npm version 1.0.1` 更新版本，然后再次执行 `npm publish` 即完成更新
+
+## 常见 npm 问题
+
+### 1 如何更新本地库
+
+比如我之前 install hyj-func 的版本为 1.6.0 ，如何将其更新到最新版本呢？
+
+我尝试的命令 `npm update hyj-func -S` ，它只能将库更新到最新，不能将 `package.json` 中的字段更新，我该怎么做呢？
+
+解决办法1： `npm uninstall` + `npm install`
+
+解决办法2： npm-check-updates 工具，还未尝试

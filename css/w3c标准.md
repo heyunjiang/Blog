@@ -2,4 +2,8 @@
 
 ## float
 
-## inline-block
+## block inline inline-block
+
+## flex
+
+## BFC

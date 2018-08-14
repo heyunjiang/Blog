@@ -16,7 +16,7 @@ heyunjiang
 
 目前我已经深入学习了 html, js, dom (肯定需要补充学习)，接下来就是 react + nodejs 了。首先选择 react ，作为基本的前端能力(吃饭工具)。
 
-之前有做过 react 的项目，但是都是停留在表面的基础应用，甚至是用的别人的集成框架，自己写的纯 react 项目写的不多，对 react 的应用主要体现在 `ReactDom.render` , `jsx` , `生命周期` , `extends React.Component`，`虚拟 dom` 。
+之前有做过 react 的项目，但是都是停留在表面的基础应用，甚至是用的别人的集成框架，自己写的纯 react 项目写的不多，对 react 的应用主要体现在 `ReactDom.render` , `jsx` , `生命周期` , `extends React.Component`，`虚拟 dom`
 
 现在需要对 react 深入学习，知晓它的内部实现原理，组织架构方式，方便以后 `bug 定位` 、 `项目扩展` 、 `项目组织架构优化` 、 `第三方工具搭配使用` ，甚至是自己写一套前端框架。
 
