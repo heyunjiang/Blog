@@ -29,3 +29,9 @@ block 元素，也就是所说的块级元素，通常有 div, header, nav, foot
 ## 3 inline-block
 
 通常将一个行内元素设置为 inline-block 元素，是因为 inline-block 可以设置 width, height, margin, padding，但是又不占一行；即它拥有了块级元素及行内元素的一些特点
+
+另外，设置成 inline-block，该元素就构成了一个bfc
+
+## 参考文章
+
+1. [深入css-fixed、absolute、float](css/深入css-fixed、absolute、float.md)

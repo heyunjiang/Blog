@@ -12,6 +12,8 @@
 - css
   - ✔ [cssModule](css/cssModule.md)
   - ✔ [深入css-flex布局](css/深入css-flex.md)
+  - ✔ [深入css-fixed、absolute、float](css/深入css-fixed、absolute、float.md)
+  - ✔ [深入css-block、inline、inline-block](css/深入css-block、inline、inline-block.md)
   - [cssReset](css/cssReset.md)
   - [w3c标准](css/w3c标准.md)
   - [深入css-常见知识归纳](css/深入css-常见知识归纳.md)
