@@ -12,6 +12,7 @@
 - css
   - ✔ [cssModule](css/cssModule.md)
   - ✔ [深入css-flex布局](css/深入css-flex.md)
+  - [深入css-grid布局](css/深入css-grid.md)
   - ✔ [深入css-fixed、absolute、float](css/深入css-fixed、absolute、float.md)
   - ✔ [深入css-block、inline、inline-block](css/深入css-block、inline、inline-block.md)
   - [cssReset](css/cssReset.md)
@@ -65,7 +66,6 @@
   - ✔ [常见问题及答案](git/常见问题及答案.md)
 - 项目经验
   - [日常感悟](software/项目开发的日常感悟.md)
-  - [开发调试](software/开发调试.md)-从console.log到打断点
 - 设计模式、技巧
   - [高阶组件](designModal/HOC.md)
   - [Observer模式](designModal/从vue响应式数据看观察者模式.md)

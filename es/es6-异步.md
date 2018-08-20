@@ -2,7 +2,7 @@
 
 time: 2018.8.02
 
-update: 2018.8.03
+update: 2018.8.20
 
 目录
 
@@ -12,7 +12,23 @@ update: 2018.8.03
 
 ## 1 promise
 
-promise 作为异步编程的一种解决方案
+promise 作为异步编程的一种解决方案，但是浏览器原生支持 `Promise` 对象
+
+创建 promise 中的代码会立即执行，resolve 即 .then 中的回掉函数会加入 microtask 中，待调用栈中的所有任务执行完毕，会立马执行 microtask 中的任务
+
+```javascript
+let promise = new Promise(function(resolve, reject) {
+  console.log('Promise');
+  resolve();
+});
+promise.then(function() {
+  console.log('resolved.');
+});
+console.log('Hi!');
+// Promise
+// Hi!
+// resolved
+```
 
 ## 2 generator
 
@@ -23,10 +39,15 @@ promise 作为异步编程的一种解决方案
 3. Generator.prototype.next() 方法参数
 4. Generator.prototype.throw()
 5. Generator.prototype.return()
+6. yield* 表达式
+7. 遍历 generator 遍历器
+8. 深入 generator 实例
 
 > generator 是 es6 提供的一种异步变成的解决方案
 
 generator是一个状态机，内部保存的是多个状态
+
+关键词： `generator 遍历器`
 
 ****
 
@@ -118,6 +139,117 @@ try {
 
 上面谈到的都是 yield 表达式，比如 `let hello = yield 'hello'` ， yield* 是什么呢？
 
+问：如果在 generator 函数中调用普通函数，普通函数会执行，但是如果调用的是 generator 函数呢，会什么后果？
 
+答：此时 generator 函数不会执行，只是获取到了 generator 的遍历器，得到的遍历器可以通过 next、for of 等实现遍历
+
+`yield*` : 只能在 generator 函数中使用，用于遍历 generator 遍历器，等同于把 generator 拆分成多个 yield 表达式。
+
+```javascript
+function* concat(iter1, iter2) {
+  yield* iter1;
+  yield* iter2;
+}
+
+// 等同于
+
+function* concat(iter1, iter2) {
+  for (var value of iter1) {
+    yield value;
+  }
+  for (var value of iter2) {
+    yield value;
+  }
+}
+```
+
+### 2.7 遍历 generator 遍历器
+
+目前能遍历 generator 遍历器的方法有4种：next, for of, yield*, ... 运算符
+
+1. `next`：返回一个对象，拥有 value 和 done 属性
+2. `for of`：直接获取遍历器的 value
+3. `...`: 直接获取遍历器的 value
+4. `yield* 表达式`：返回 yield 表达式
+
+### 2.8 深入 generator 与普通函数的关系
+
+generator 形式上是一个普通函数，但是它却只是一个异步解决方案，浏览器并没有原生支持它，也就是说它不是函数的实例，它也不像 Promise 对象那样，由浏览器直接原生提供。它提供的语法只是方便开发者调用它，用以解决异步问题，实现的是一个状态机。
+
+```javascript
+function* generatorTest () {
+  yield 'hello';
+  yield 'world';
+}
+```
+
+#### 2.8.1 看看 babel 将其编译成什么样子
+
+```javascript
+function generatorTest() {
+  return _regenerator2.default.wrap(function generatorTest$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          _context.next = 2;
+          return 'hello';
+
+        case 2:
+          _context.next = 4;
+          return 'world';
+
+        case 4:
+        case 'end':
+          return _context.stop();
+      }
+    }
+  }, _marked, this);
+}
+```
+
+可以看出
+
+1. generator 函数的执行，不会返回立即预定义的值，而是返回的一个包装器对象
+2. 返回的包装器对象需要遍历，才能返回预定义的值
+3. generator不被浏览器原生支持，也不是一个对象，它只是实现的一种机制
+
+#### 2.8.2 prototype 属性
+
+普通构造函数的 prototype 属性指向原型对象，那么 generator 函数的 prototype 属性呢？
+
+```javascript
+function* g() {}
+
+g.prototype.hello = function () {
+  return 'hi!';
+};
+
+let obj = g();
+
+obj instanceof g // true
+obj.hello() // 'hi!'
+```
+
+问：执行 g 函数返回 generator 遍历器，为什么该遍历器能够访问定义在 generator 函数prototype属性上的值呢？
+
+答：返回的遍历器对象，之所以能够访问到定义在 generator 函数 prototype属性上的方法，因为 **ES6 规定** 这个遍历器对象是 generator 函数的实例，并且继承 generator 函数的 prototype 属性。所以，上面的 obj 就继承了 g 的 prototype 属性。
+
+问：obj 作为实例，是不是可以认为 generator 可以用作构造器函数呢？
+
+答：不行，构造函数实例化是通过 new 关键字实例的，这里的 obj 实例是通过执行 generator 函数生成的，不是通过 new 关键字生成的，而且 **ES6 规定** 也不能通过 new 关键字实例化 generator 函数，因为它不能用作构造函数。
+
+#### 2.8.3 generator 中的 this 关键字
+
+因为不能用作构造函数，那么 generator 函数中的 this 代表什么呢？
+
+```javascript
+function* generatorTest () {
+  console.log(this)
+}
+const test = generatorTest()
+test.next() // undefined
+```
+
+直接输出 `undefined` ，它不是指向 window、global 等对象
 
 ## async
