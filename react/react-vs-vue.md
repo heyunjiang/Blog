@@ -1,3 +1,5 @@
+# 概要
+
 ```javascript
 /*
  * 归纳 react 和 vue的异同点
@@ -6,8 +8,6 @@
  * update: 2018.4.24
  */
 ```
-
-# 概要
 
 1. 数据流
 2. 组件
@@ -32,9 +32,7 @@
 如果采用状态管理，比如react-redux，vue-vuex，那么它们的数据状态更新都只能通过`reducer`或`mutations`来更新数据，都属于单向数据了
 
 > 注意: 在2者封装组件时，因为传递的props都是只读的，不允许直接修改，但是react可以直接在 `jsx` 中使用 pops，但是vue在使用的时候要注意，不能将 props 通过 `v-modal` 方式绑定到组件上，因为这样会直接修改 props， 从而系统报错
-
 > vue双向数据绑定原理：响应式数据，通过为根属性添加getter/setter，达到数据watcher，实现组件细粒度更新
-
 > 源码阅读问题：vue和react是怎样进行virtual dom更新，react重新渲染整个子树的流程是怎么样的，vue是怎么追踪到每一个组件的；vm是怎么映射到真实dom的
 
 

@@ -77,7 +77,7 @@ antd源码阅读注意事项
 4. `@types/react`: `npm install -S react @types/react` ，这里是额外获取的 react 的声明文件
 5. 使用 `tsconfig.json` 配置文件，可以使用 `awesome-typescript-loader` 配合 webpack 使用
 
-入口：button 组件作为入口
+入口：`Button 组件` 作为入口
 
 #### 4.2.1 组件导出
 
@@ -107,6 +107,56 @@ export default Button;
 
 > 我这里不学习它的颜色计算面的知识，具体在 components/style/color/colorPalette.less 中，里面有使用 less function 等
 
+#### 4.2.4 Button 组件
+
+4.2.4.1 Button className
+
+```javascript
+    // 变量作为 key，使用 [string]: value
+    // 模板字符串，使用 `${}`
+    const classes = classNames(prefixCls, className, {
+      [`${prefixCls}-${type}`]: type,
+      [`${prefixCls}-${shape}`]: shape,
+      [`${prefixCls}-${sizeCls}`]: sizeCls,
+      [`${prefixCls}-icon-only`]: !children && icon,
+      [`${prefixCls}-loading`]: loading,
+      [`${prefixCls}-clicked`]: clicked,
+      [`${prefixCls}-background-ghost`]: ghost,
+      [`${prefixCls}-two-chinese-chars`]: hasTwoCNChar,
+    });
+```
+
+4.2.4.2 Button jsx
+
+根据是否传入 `href` 属性，判断是否是超链接还是按钮
+
+```jsx
+    if ('href' in rest) {
+      return (
+        <a
+          {...rest}
+          className={classes}
+          onClick={this.handleClick}
+        >
+          {iconNode}{kids}
+        </a>
+      );
+    } else {
+      const { htmlType, ...otherProps } = rest;
+
+      return (
+        <button
+          {...otherProps}
+          type={htmlType || 'button'}
+          className={classes}
+          onClick={this.handleClick}
+        >
+          {iconNode}{kids}
+        </button>
+      );
+    }
+```
+
 ### 4.3 技巧总结
 
 #### 4.3.1 判断是否是2中文汉字
@@ -135,5 +185,10 @@ const buttonText = node.textContent || node.innerText;
 ### 4.4 隐藏接口
 
 1. Button 组件 `prefixCls` prop: 最好不改，默认 ant-btn ；改了可以自定义样式
+
+### 4.5 阅读 Button 组件源码总结
+
+1. 组件设计模式：原来这些庞大的开源项目开发的组件，也跟我自己做项目设计的组件一样的：通过 props 控制组件、预定义 less 变量、有状态与无状态组件、默认 props 与 默认 state
+2. 自己需要解决的问题：px em 异同；letter-spacing word-spacing；防抖与节流
 
 ## 5 开源项目
