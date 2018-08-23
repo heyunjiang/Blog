@@ -8,7 +8,7 @@ time: 2018.8.23
  &nbsp; &nbsp; [1.3 常用Loader](#13-常用Loader)  
  &nbsp; &nbsp; [1.4 常用plugins](#14-常用plugins)  
  &nbsp; &nbsp; [1.5 监听、编译代码](#15-监听、编译代码)  
- &nbsp; &nbsp; [1.6 模块热替换--HMR](#16-模块热替换--HMR)  
+ &nbsp; &nbsp; [1.6 模块热替换--HMR](#16-模块热替换--hmr)  
  &nbsp; &nbsp; [1.7 生产环境构建](#17-生产环境构建)  
  &nbsp; &nbsp; [1.8 代码分离及懒加载](#18-代码分离及懒加载)  
  &nbsp; &nbsp; [1.9 客户端缓存](#19-客户端缓存)  
