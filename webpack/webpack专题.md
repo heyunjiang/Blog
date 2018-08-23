@@ -1,52 +1,75 @@
-## 要点
+# webpack
+
+time: 2018.8.23
+
+[1.webpack 基础](#1-webpack-基础)  
+ &nbsp; &nbsp; [1.1 webpack 简介](#11-webpack-简介)  
+ &nbsp; &nbsp; [1.2 webpack 常用概念介绍](#12-webpack-常用概念介绍)  
+ &nbsp; &nbsp; [1.3 常用Loader](#13-常用Loader)  
+ &nbsp; &nbsp; [1.4 常用plugins](#14-常用plugins)  
+ &nbsp; &nbsp; [1.5 监听、编译代码](#15-监听、编译代码)  
+ &nbsp; &nbsp; [1.6 模块热替换--HMR](#16-模块热替换--HMR)  
+ &nbsp; &nbsp; [1.7 生产环境构建](#17-生产环境构建)  
+ &nbsp; &nbsp; [1.8 代码分离及懒加载](#18-代码分离及懒加载)  
+ &nbsp; &nbsp; [1.9 客户端缓存](#19-客户端缓存)  
+ &nbsp; &nbsp; [1.10 设置mode](#110-设置mode)  
+[2.webpack 深入](#2-webpack-深入)  
+[3.常见问题](#3-常见问题)
+
+## 1 webpack 基础
+
+### 1.1 webpack 简介
+
+一句话：webpack就是一个打包器，将写的模块、组件打包成一个或多个文件。
+
+文件打包：最终引入浏览器的是 html, css, js 文件，跟传统的一样，只是webpack打包生成的文件经过了压缩、混淆处理，根据 input 打包成不同的文件。平时写的时候，都是一个一个的组件写法，但是最终都会被打包成一个或多个文件。
+
+文件处理：我们写的大多不是浏览器能直接识别的代码，而是要经过一系列预处理的，比如 es6, amd, cmd, less, sass 等，webpack 提供文件处理接口，我们可以加载 loader ，通过 loader 对不同文件类型进行处理，处理成浏览器能识别的代码，当然，这里处理的结果也是 `模块 -> 模块` ，处理之后再用 webpack 打包。这也是 webpack 经常要搭配 `babel` 处理 `es6` ，要搭配 `less-loader` 处理 `.less` 文件了。
+
+特点：采用异步 I/O ，多层次缓存文件，构建与编译速度极快
+
+### 1.2 webpack 常用概念介绍
 
 1. npx： nodejs 8.2 之后版本支持 `npx` 命令，用于调用webpack的二进制文件
-2. 转译(编译): webpack自身只支持 `import` 和 `export` 的转译，如果要支持其他语法，比如es6/7/8/9的，需要使用 `bable` 或 `buble` 的loader
-3. script命令：使用npx与npm不同，npx只是一种cli命令，功能相对于npm来说弱很多
-4. 配置文件加载：webpack默认加载 `webpack.config.js` ，可以通过 `--config` 在 `webpack` 命令中指定要加载的配置文件
-5. 静态资源管理：通过loader可以处理一系列的静态资源，包括css、图片、字体、xml、svg等
+2. 文件转译(编译): webpack自身只支持 `import` 和 `export` 的转译，如果要支持其他语法，比如es6/7/8/9的，需要使用 `bable` 或 `buble` 的loader
+3. package.json script命令：npm 命令；使用npx与npm不同，npx只是一种cli命令，功能相对于npm来说弱很多
+4. webpack 配置文件加载：webpack默认加载 `webpack.config.js` ，可以通过 `--config` 在 `webpack` 命令中指定要加载的配置文件
+5. 静态资源管理：通过 `file-loader` 等可以处理一系列的静态资源，包括css、图片、字体、xml、svg等
 6. 输出bundle：可以通过设置多个入口文件控制输出多个bundle，以达到分离chunk目的
 7. 开发时错误定位: 使用 `source map`
 8. tree-shaking：删除代码中从来没有用到的代码。(前提：使用es6的import、export，和第三方压缩精简工具，比如uglifyjs)
-9. chunk: 由多个模块组合成一个chunk，构建出来的项目包含多个chunk
+9. chunk: 一个 chunk 就是生成一个 js 文件。由多个模块组合成一个chunk，构建出来的项目包含多个chunk，可以用于 chunk 异步加载，减少初始化时间
 
-## -4048
+### 1.3 常用Loader
 
-使用npm install 的时候失败，提示 `errno -4048`，自己的解决办法，是把生成的`package-lock.json` 给删除了，然后重新加载就可以
-
-查找资料，说的是缓存问题，虽然报错提示的是权限不足，但是很明显不是这个原因，按照指示，执行 `npm cache clean --force` 命令，依然执行失败(win32 x64)
-
-另一种操作方式：将 `C:\Users\Administrator\AppData\Roaming\npm-cache\`这个类似目录下的文件全部清除，重新install一下就可以了
-
-预估原因： 是即将要加载的包版本和cache中的版本冲突，新版本的npm对其的操作与旧版本不同
-
-> 可以尝试重复npm install命令，也有可能原因是npm不稳定
-
-## 常用Loader
+webpack 要求 loader 命名规则：`x-loader`
 
 1. `style-loader`
 2. `css-loader`
 3. `sass-loader`--windows需要安装ruby
-4. `file-loader`
+4. `less-loader`
+5. `file-loader`
+6. `url-loader`
+7. `json-loader`
+8. `babel-loader`
+9. html-loader
+10. markdown-loader
+11. mocha-loader
+12. eslint-loader
+13. `vue-loader`
 
-## 常用plugins
+### 1.4 常用plugins
 
 1. `html-webpack-plugin`--html模板
 2. `clean-webpack-plugin`--清空生成的dist文件夹
 3. `uglifyjs-webpack-plugin`--压缩并精简代码
 4. `webpack.optimize.CommonsChunkPlugin`--提取公共代码到指定文件中，用于缓存
 
-## 深入webpack--基础功能
-
-### 一 runtime
-
-### 二 manifest
-
-### 三 监听、编译代码--重新加载(live reloading)
+### 1.5 监听、编译代码
 
 下面3种方式，都是通过以 `webpack.config.js` 作为入口文件，只是实现它的本地监听服务器方式不同
 
-#### 1. webpack's Watch Mode
+#### 1.5.1 webpack's Watch Mode
 
 在 `package.json` 中增加一个script命令：
 
@@ -56,11 +79,11 @@
 
 > 缺点：浏览器中运行的效果不会自动更新，需要刷新
 
-#### 2. webpack-dev-server
+#### 1.5.2 webpack-dev-server
 
 能实现本地启动前端服务，其内置了一个简单web服务器，代码改动，自动编译并刷新浏览器
 
-在webpack.config.js中配置并启动webpack-dev-server: 
+在webpack.config.js中配置并启动webpack-dev-server:
 
 ```javascript
 devServer: {
@@ -74,22 +97,20 @@ devServer: {
 
 [webpack-dev-server配置地址](https://doc.webpack-china.org/configuration/dev-server)
 
-#### 3. webpack-dev-middleware
+#### 1.5.3 webpack-dev-middleware
 
-作为一个wrapper，它用于把webpack处理后的文件传递给一个server
+作为一个wrapper，它用于把webpack处理后的文件传递给一个server。使用它是为了自定义服务器，方便更加细节的操作
 
 > webpack-dev-server 在内部使用了它
 
-使用它是为了自定义服务器，方便更加细节的操作
-
-### 四 模块热替换--HMR
+### 1.6 模块热替换--HMR
 
 模块热替换(Hot Module Replacement 或 HMR)
 
 > 疑惑：在webpack-dev-server中增加hot:true时，更新代码，浏览器还是会刷新，增加与不增加还是一样的效果
-> 解惑：使用HMR的时候，在某些地方能实现不完全刷新更新页面，比如颜色等变化，跟dom更新的重绘与回流类似，这一点与第三点的监听、编译代码的效果有点小区别。
+> 解惑：使用HMR的时候，在某些地方能实现不完全刷新更新页面，比如颜色等变化，跟dom更新的重绘与回流类似，这一点与 1.5 的监听、编译代码的效果有点小区别。
 
-### 五 生产环境构建
+### 1.7 生产环境构建
 
 使用 `webpack-merge` 这个package，用以合并webpack的多个配置文件
 
@@ -99,7 +120,7 @@ devServer: {
 2. webpack.dev.js
 3. webpack.prod.js
 
-### 六 代码分离及懒加载
+### 1.8 代码分离及懒加载
 
 1. 多入口+ `CommonsChunkPlugin` ： 当存在多个bundle的时候，使用 `CommonsChunkPlugin` 提取公共部分
 2. 动态导入(懒加载)： `import()` 、 `require.ensure`
@@ -111,7 +132,7 @@ import(/* webpackChunkName: "print" */ './print').then(module => {
 });
 ```
 
-### 七 客户端缓存
+### 1.9 客户端缓存
 
 构建场景：确保webpack编译生成的文件能够被客户端缓存，在文件内容发生变化后，能够请求到新的文件
 
@@ -133,31 +154,29 @@ new webpack.optimize.CommonsChunkPlugin({
 
 使用 `HashedModuleIdsPlugin`，用于解决在entry中已经命名的chunk在使用 `CommonsChunkPlugin`打包后hash值变化的问题
 
-前后2次使用 `CommonsChunkPlugin` 的顺序要保证一直，因为webpack是根据解析顺序来控制hash值生成的
+前后2次使用 `CommonsChunkPlugin` 的顺序要保证一致，因为webpack是根据解析顺序来控制hash值生成的
 
-### 八 创建library
-
-### 九 设置mode
+### 1.10 设置mode
 
 从 `webpack4` 开始，webpack配置支持mode，参数为：'none | development | production'
 
 开启之后，会明显提升构建速度
 
-## 深入webpack--api
+## 2 webpack 深入
 
-### cli api
+### 2.1 cli api
 
 `webpack -h` 列出所有配置项
 
 使用这些api，可以实现统计配置、缓存设置、debug设置等辅助功能
 
-### 包含统计信息的文件
+### 2.2 包含统计信息的文件
 
 `webpack --profile --json > compilation-stats.json`
 
 这个json统计信息文件，包含了构建时间、chunks、module、错误信息等
 
-### 模块方法
+### 2.3 模块方法
 
 在平常编写模块、组件的时候，可以使用一下模块方法或属性
 
@@ -185,7 +204,7 @@ var componentA = context.resolve('componentA');
 > require.resolve获取到的模块会引入到bundle中，用于直接模块操作
 > 而require.resolveWeak不会，用于逻辑判断
 
-### 模块变量
+### 2.4 模块变量
 
 这些变量，会在webpack编译的时候，替换为真正的功能，这里作为语法糖类似的存在
 
@@ -204,7 +223,16 @@ var componentA = context.resolve('componentA');
 11. __webpack_public_path__：output.publicPath
 12. 其他webpack特有内置变量
 
-### nodejs api
+## 3 常见问题
 
-使用这些api，可以自定义构建或开发流程，所有报告和错误处理都自行实现，也就是构建 `属于自己风格的打包器` 了
+### 3.1 -4048
 
+使用npm install 的时候失败，提示 `errno -4048`，自己的解决办法，是把生成的`package-lock.json` 给删除了，然后重新加载就可以
+
+查找资料，说的是缓存问题，虽然报错提示的是权限不足，但是很明显不是这个原因，按照指示，执行 `npm cache clean --force` 命令，依然执行失败(win32 x64)
+
+另一种操作方式：将 `C:\Users\Administrator\AppData\Roaming\npm-cache\`这个类似目录下的文件全部清除，重新install一下就可以了
+
+预估原因： 是即将要加载的包版本和cache中的版本冲突，新版本的npm对其的操作与旧版本不同
+
+可以尝试重复npm install命令，也有可能原因是npm不稳定 
