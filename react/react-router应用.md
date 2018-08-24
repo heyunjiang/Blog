@@ -13,7 +13,13 @@ update: 2018.8.24
 [1 静态路由与动态路由](#1-静态路由与动态路由)  
 &nbsp;&nbsp; [1.1 静态路由](#11-静态路由)  
 &nbsp;&nbsp; [1.2 动态路由](#12-动态路由)  
-[2 动态路由操作文档](#2-动态路由操作文档)
+[2 动态路由操作文档](#2-动态路由操作文档)  
+&nbsp;&nbsp; [2.1 基础组件](#21-基础组件)  
+&nbsp;&nbsp;&nbsp;&nbsp; [2.1.1 BrowserRouter、HashRouter 路由根节点](#211-browserrouterhashrouter-路由根节点)  
+&nbsp;&nbsp;&nbsp;&nbsp; [2.1.2 Route、Switch 路由匹配](#212-routeswitch-路由匹配)  
+&nbsp;&nbsp;&nbsp;&nbsp; [2.1.3 Link、NavLink、Redirect 导航](#213-linknavlinkredirect-导航)  
+&nbsp;&nbsp; [2.2 使用 react-router 4](#22-使用-react-router-4)  
+&nbsp;&nbsp; [2.3 按需加载](#23-按需加载)  
 
 ## 1 静态路由与动态路由
 
