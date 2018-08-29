@@ -6,7 +6,7 @@ version: 4.0
 
 heyunjiang
 
-update: 2018.8.24
+update: 2018.8.28
 
 目录
 
@@ -108,11 +108,24 @@ const App = () => (
 
 router组件，每个应用只能有一个 router 组件，作为路由根节点。
 
-`BrowserRouter`：动态网站
+`BrowserRouter`：使用 html5 历史 API 记录 `Router` 使 UI 和 URL 保持同步。这个使用有个问题，在 spa 应用中，跳转到非首页时，浏览器刷新会获取不到页面，除非服务器做配置。
 
-`HashRouter`：静态网站
+`HashRouter`：使用 URL 的 hash 部分使 UI 和 URL 保持同步。
 
 这2个路由都会创建一个专门的 `history` 对象
+
+BrowserRouter、HashRouter 都是实现的 Router 底层接口，使用 Router 的情况一般是用于和 redux 定制的 history 保持同步
+
+```javascript
+import { Router } from 'react-router'
+import createBrowserHistory from 'history/createBrowserHistory'
+
+const history = createBrowserHistory()
+
+<Router history={history}>
+  <App/>
+</Router>
+```
 
 #### 2.1.2 Route、Switch 路由匹配
 
@@ -169,6 +182,14 @@ import {
 } from 'react-router-dom'
 ```
 
+问：react-router 与 react-router-dom 有什么区别？
+
+答：react-router 属于最基础的接口，实现了路由的基本功能；react-router-dom 在此基础上封装成路由组件，提供了 BrowserRouter、HashRouter 等组件，用于在浏览器运行环境。使用时，只需要引入 react-router-dom 就行
+
+问：如果我使用了 redux ，该怎么传递 history 对象呢？
+
+答：使用 `connected-react-router` 包，下面介绍 history 对象时会介绍到
+
 ### 2.3 按需加载
 
 首次加载不用加载所有的应用程序代码，可以做 code splitting ，中文名代码拆分，也叫做增量下载。
@@ -196,6 +217,39 @@ loading 参数，是指在加载过程中占位元素
 问题：如果使用 `BrowserRouter` ,非主页刷新页面提示 `Cannot GET /about`，是否需要设置 history ?采用 `HashRouter` 就没有问题
 
 回答：BrowserRouter，如果直接访问 `http://localhost:9000/about` ，服务器并不能直接返回 index.html， 这个需要服务器设置，就可以解决问题。如果服务器开发人员不配合，自己又不会改，那就换 `HashRouter` 吧。
+
+### 2.4 history
+
+history 对象，用于实现对 `session 历史` 的管理。以往内置于 react-router 中，现在单独列出，作为 react-router 4 的2大依赖之一(react + history)。
+
+目前用法
+
+```javascript
+// in router
+import { Router } from 'react-router'
+import createBrowserHistory from 'history/createBrowserHistory'
+
+const history = createBrowserHistory()
+
+<Router history={history}>
+  <App/>
+</Router>
+```
+
+```javascript
+// in redux
+subscriptions: {
+  enterDocList ({ dispatch, history }) {
+    history.listen((location) => {})
+  },
+},
+```
+
+因为使用 redux 时，要求有 history 对象传入，该怎么结合 react-router-dom 和 redux 呢？
+
+### 2.4.1 使用 connected-react-router
+
+
 
 ## 参考文档
 

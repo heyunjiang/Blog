@@ -53,6 +53,7 @@
   - [antd源码解读](react/antd源码解读.md)
   - ✔ [dva源码解读](react/dva源码解读.md)
   - [react源码解读](react/react源码解读.md)
+  - ✔ [redux源码解读](react/redux源码解读.md)
   - ✔ [react-router应用](react/react-router应用.md) ：react-router 4
   - [vue源码解读](vue/sourceCodeAnalysis.md)
   - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流

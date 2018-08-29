@@ -1,15 +1,33 @@
-# 主旨(约定)
+# redux 源码解读
+
+time: 2018.8.29
+version: 4.0
+designer: heyunjiang
+update: 2018.8.29
+
+目录
+
+[1 约定](#1-约定)  
+[2 基本概念](#2-基本概念)  
+[3 redux 详解](#3-redux-详解)
+[4 redux 特点](#4-redux-特点)
+
+## 1 约定
 
 1. 应用只有一个store，当应用变大的时候，store可以拆分
 2. 单向数据流：getStore()->dispatch(action)->reducer->store
 
 问题：redux是否适用于多页应用？
 
+答：不适用
+
 > 关键词：store、action、reducer、middleware
 
-## action
+## 2 基本概念
 
-js 对象
+### 2.1 action
+
+1个 action 是一个 js 对象
 
 ```javascript
 {
@@ -20,13 +38,9 @@ js 对象
 
 关键词：`action`、`action创建函数`、`dispatch绑定的action创建函数`
 
-## 异步action处理
+### 2.2 reducer
 
-需要封装dispatch方法，当异步操作(通常ajax)结束的时候，再更新store
-
-标准做法：使用中间件，通过redux-thunk或redux-saga实现
-
-## reducer
+唯一用于更新 state 的方式，是用创建一个新的 state 整体替换旧的 state
 
 ```javascript
 import { combineReducers } from 'redux'
@@ -59,13 +73,11 @@ return {
 }
 ```
 
-## store
+### 2.3 store
 
-### 构建store
+构建store: `createStore`，redux直接提供
 
-`createStore`，redux直接提供
-
-### 5大方法
+store 5大方法
 
 1. getState()
 2. dispatch(action)
@@ -75,19 +87,9 @@ return {
 
 > 注意: subscribe方法执行返回的结果是一个函数，这个函数是用于注销 subscribe 的
 
-## 异步数据流
+## 3 redux 详解
 
-默认情况下，通过 `createStore()` 创建的store没有使用 `middleware`，只能支持同步数据流
-
-> 为什么？难道不能自己写吗？中间件还不是封装起来的js，通过重新封装 `dispatch` 函数
-
-## middleware
-
-中间件，通过 `applyMiddleware()` 为redux应用中间件
-
-## redux methods
-
-这些方法都是顶级方法，可以通过 `import { createStore } from 'redux';` 方式直接引入
+redux 入口暴露5个方法，可以通过 `import { createStore } from 'redux';` 方式直接引入
 
 1. createStore(reducer, [initialState], enhancer)
 2. combineReducers(reducers)
@@ -99,7 +101,343 @@ return {
 > compose: 将包含的funcs从左到右依次嵌套执行 `funcs.reduce((a, b) => (...args) => a(b(...args)))`
 > createStore 的 enhancer : 高阶函数，返回增强版 createStore
 
-## 感想
+### 3.1 redux.createStore
+
+#### 3.1.1 createStore方法参数类型和enhancer解释
+
+```javascript
+/*
+ * @param {Function} reducer
+ * @param {any} [preloadedState] 初始化 state，state可以是任意类型的
+ * @param {Function} [enhancer] store 增强器，例如 middleware, time travel, persistence, etc.
+ * @returns {Store}
+ */
+export default function createStore(reducer, preloadedState, enhancer) {
+  if (typeof enhancer !== 'undefined') {
+    if (typeof enhancer !== 'function') {
+      throw new Error('Expected the enhancer to be a function.')
+    }
+    // enhancer 是一个高阶组件，所以传入的 middleware 一定是一个高阶组件，扩展 createStore 方法，然后传入 reducer, preloadedState
+    return enhancer(createStore)(reducer, preloadedState)
+  }
+  let currentReducer = reducer
+  let currentState = preloadedState // 创建的 state 是由用户初始化类型决定
+  let currentListeners = []
+  let nextListeners = currentListeners
+  let isDispatching = false
+}
+```
+
+#### 3.1.2 store 对象详解
+
+```javascript
+return {
+    dispatch,
+    subscribe,
+    getState,
+    replaceReducer,
+    [$$observable]: observable
+  }
+```
+
+看看关键的几个方法
+
+```javascript
+// dispatch
+// 1. 调用 reducer 更新 state 数据，此处是同步更新数据
+// 2. 触发绑定的事件
+function dispatch(action) {
+    // 要求 action 是纯对象
+    if (!isPlainObject(action)) {
+      throw new Error(
+        'Actions must be plain objects. ' +
+          'Use custom middleware for async actions.'
+      )
+    }
+    // 要求 action 必须要有 type
+    if (typeof action.type === 'undefined') {
+      throw new Error(
+        'Actions may not have an undefined "type" property. ' +
+          'Have you misspelled a constant?'
+      )
+    }
+    // 要求 dispatch 同时只能存在一个
+    if (isDispatching) {
+      throw new Error('Reducers may not dispatch actions.')
+    }
+    // 更新 state 数据
+    try {
+      isDispatching = true
+      currentState = currentReducer(currentState, action)
+    } finally {
+      isDispatching = false
+    }
+    // 如果有绑定监听事件，则执行事件
+    const listeners = (currentListeners = nextListeners)
+    for (let i = 0; i < listeners.length; i++) {
+      const listener = listeners[i]
+      listener()
+    }
+
+    return action
+  }
+```
+
+```javascript
+// subscribe
+// 1. 使用数组作为事件队列，分为当前执行事件队列和下个事件队列，每次新订阅的事件都加入下个事件队列，在 dispatch 更新完 store 的时候触发
+// 2. 返回取消订阅该事件的方法
+function subscribe(listener) {
+    // 要求 listener 必须是个 function
+    if (typeof listener !== 'function') {
+      throw new Error('Expected the listener to be a function.')
+    }
+
+    if (isDispatching) {
+      throw new Error(
+        'You may not call store.subscribe() while the reducer is executing. ' +
+          'If you would like to be notified after the store has been updated, subscribe from a ' +
+          'component and invoke store.getState() in the callback to access the latest state. ' +
+          'See https://redux.js.org/api-reference/store#subscribe(listener) for more details.'
+      )
+    }
+
+    let isSubscribed = true
+
+    ensureCanMutateNextListeners()
+    // 将该事件放入下个事件循环队列中，当触发 dispatch 的时候，则循环执行这个事件队列
+    nextListeners.push(listener)
+    // 返回取消订阅事件方法
+    return function unsubscribe() {
+      if (!isSubscribed) {
+        return
+      }
+
+      if (isDispatching) {
+        throw new Error(
+          'You may not unsubscribe from a store listener while the reducer is executing. ' +
+            'See https://redux.js.org/api-reference/store#subscribe(listener) for more details.'
+        )
+      }
+
+      isSubscribed = false
+
+      ensureCanMutateNextListeners()
+      const index = nextListeners.indexOf(listener)
+      nextListeners.splice(index, 1)
+    }
+  }
+```
+
+```javascript
+// observable
+// 1. 观察者模式，采用 subscribe 发布事件，下轮更新时执行事件，会通过 next 方法通知观察者
+function observable() {
+    const outerSubscribe = subscribe
+    return {
+      subscribe(observer) {
+        if (typeof observer !== 'object' || observer === null) {
+          throw new TypeError('Expected the observer to be an object.')
+        }
+
+        function observeState() {
+          if (observer.next) {
+            observer.next(getState())
+          }
+        }
+
+        observeState()
+        const unsubscribe = outerSubscribe(observeState)
+        return { unsubscribe }
+      },
+
+      [$$observable]() {
+        return this
+      }
+    }
+  }
+```
+
+`getState()` 则返回传入的 state 格式， `replaceReducer()` 用于替换reducer，不是合并，与 `combineReducers` 不同
+
+### 3.2 redux.compose
+
+根据依次传入的函数参数，返回依次调用函数参数的函数
+
+```javascript
+export default function compose(...funcs) {
+  if (funcs.length === 0) {
+    return arg => arg
+  }
+
+  if (funcs.length === 1) {
+    return funcs[0]
+  }
+
+  return funcs.reduce((a, b) => (...args) => a(b(...args)))
+}
+```
+
+### 3.3 redux.combineReducers
+
+功能：合并所有的 reducer 为一个 reducer
+
+1. 传入多个 reducer，返回一个 function，作为合并后的 reducer
+2. 每次调用的时候，都会去遍历所有的 reducer
+3. 返回 state 
+
+```javascript
+export default function combineReducers(reducers) {
+  const reducerKeys = Object.keys(reducers)
+  const finalReducers = {}
+  for (let i = 0; i < reducerKeys.length; i++) {
+    const key = reducerKeys[i]
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (typeof reducers[key] === 'undefined') {
+        warning(`No reducer provided for key "${key}"`)
+      }
+    }
+
+    if (typeof reducers[key] === 'function') {
+      finalReducers[key] = reducers[key]
+    }
+  }
+  const finalReducerKeys = Object.keys(finalReducers)
+
+  let unexpectedKeyCache
+  if (process.env.NODE_ENV !== 'production') {
+    unexpectedKeyCache = {}
+  }
+
+  let shapeAssertionError
+  try {
+    assertReducerShape(finalReducers)
+  } catch (e) {
+    shapeAssertionError = e
+  }
+
+  return function combination(state = {}, action) {
+    if (shapeAssertionError) {
+      throw shapeAssertionError
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      const warningMessage = getUnexpectedStateShapeWarningMessage(
+        state,
+        finalReducers,
+        action,
+        unexpectedKeyCache
+      )
+      if (warningMessage) {
+        warning(warningMessage)
+      }
+    }
+
+    let hasChanged = false
+    const nextState = {}
+    for (let i = 0; i < finalReducerKeys.length; i++) {
+      const key = finalReducerKeys[i]
+      const reducer = finalReducers[key]
+      const previousStateForKey = state[key]
+      const nextStateForKey = reducer(previousStateForKey, action)
+      if (typeof nextStateForKey === 'undefined') {
+        const errorMessage = getUndefinedStateErrorMessage(key, action)
+        throw new Error(errorMessage)
+      }
+      nextState[key] = nextStateForKey
+      hasChanged = hasChanged || nextStateForKey !== previousStateForKey
+    }
+    return hasChanged ? nextState : state
+  }
+}
+```
+
+### 3.4 redux.bindActionCreators
+
+功能：让每个定义好的 actionCreator ，都被 dispatch 方法调用执行
+
+注意：dispatch 方法的参数是 actionCreator 执行的结果
+
+```javascript
+function bindActionCreator(actionCreator, dispatch) {
+  return function() {
+    return dispatch(actionCreator.apply(this, arguments))
+  }
+}
+
+export default function bindActionCreators(actionCreators, dispatch) {
+  if (typeof actionCreators === 'function') {
+    return bindActionCreator(actionCreators, dispatch)
+  }
+
+  if (typeof actionCreators !== 'object' || actionCreators === null) {
+    throw new Error(
+      `bindActionCreators expected an object or a function, instead received ${
+        actionCreators === null ? 'null' : typeof actionCreators
+      }. ` +
+        `Did you write "import ActionCreators from" instead of "import * as ActionCreators from"?`
+    )
+  }
+
+  const keys = Object.keys(actionCreators)
+  const boundActionCreators = {}
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    const actionCreator = actionCreators[key]
+    if (typeof actionCreator === 'function') {
+      boundActionCreators[key] = bindActionCreator(actionCreator, dispatch)
+    }
+  }
+  return boundActionCreators
+}
+```
+
+### 3.5 redux.applyMiddleware
+
+功能：为 store 添加中间件，覆盖重写 store 的 dispatch 方法
+
+现在再回头去看看 dispath 实现了什么功能，与整个 store 的关系。
+
+1. 可以看到 store 是一个对象，createStore 采用了闭包的写法，返回的 store 的众属性，拥有能够访问内部函数变量的能力，如 currentReducer、currentListeners、nextListeners、currentState、isDispatching。
+2. applyMiddleware 中应用中间件有个先后顺序关系，最先传入的会依次调用后面的中间件，所以要求中间件要求能够调用其他中间件的能力。
+
+```javascript
+import compose from './compose'
+
+export default function applyMiddleware(...middlewares) {
+  return createStore => (...args) => {
+    const store = createStore(...args)
+    let dispatch = () => {
+      throw new Error(
+        `Dispatching while constructing your middleware is not allowed. ` +
+          `Other middleware would not be applied to this dispatch.`
+      )
+    }
+
+    const middlewareAPI = {
+      getState: store.getState,
+      dispatch: (...args) => dispatch(...args)
+    }
+    const chain = middlewares.map(middleware => middleware(middlewareAPI))
+    dispatch = compose(...chain)(store.dispatch)
+
+    return {
+      ...store,
+      dispatch
+    }
+  }
+}
+
+```
+
+## 4 redux 特点
+
+1. 数据是通过 dispatch 方法调用 reducer 更新，更新方式为整体替换
+2. 订阅事件是采用事件队列存储，在每次 dispatch 更新完数据的时候执行所有事件队列
+3. 应用的中间件就是覆盖 createStore 生成的 store 对象的 dispatch 方法
+
+## 5 感想
 
 redux的源码很短，就是提供的这几个api代码，直接可以方便阅读，更能理解它的api意思
 
