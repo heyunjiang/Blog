@@ -5,6 +5,8 @@ version: 4.0
 designer: heyunjiang
 update: 2018.8.29
 
+概览：redux 是一个状态管理库，通过 `createStore(reducers, initstate, enhancers)` 构建一个 store，抽象出数据 state，要求只能通过 reducer 纯函数来更新 state，通过 store.dispatch 来调用 reducer。可以监听每次数据更新，通过 `store.subscribe` 来添加监听事件，存入事件队列中。它的中间件通过 redux.applyMiddleware 来重写 store 的 `dispatch` 方法，重新定义从 dispatch 到调用 reducer 更新 state 这个过程
+
 目录
 
 [1 约定](#1-约定)  
@@ -401,6 +403,7 @@ export default function bindActionCreators(actionCreators, dispatch) {
 
 1. 可以看到 store 是一个对象，createStore 采用了闭包的写法，返回的 store 的众属性，拥有能够访问内部函数变量的能力，如 currentReducer、currentListeners、nextListeners、currentState、isDispatching。
 2. applyMiddleware 中应用中间件有个先后顺序关系，最先传入的会依次调用后面的中间件，所以要求中间件要求能够调用其他中间件的能力。
+3. 中间件是重写了 `dispatch` 这个方法，也就是控制了如何调用 reducer 更新 state 数据，redux默认的是同步更新 state
 
 ```javascript
 import compose from './compose'
