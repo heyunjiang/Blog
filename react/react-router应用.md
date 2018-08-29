@@ -249,7 +249,9 @@ subscriptions: {
 
 ### 2.4.1 使用 connected-react-router
 
+`import { ConnectedRouter } from 'connected-react-router'`
 
+该 `ConnectedRouter` 已经引入了 `Router` 根组件
 
 ## 参考文档
 

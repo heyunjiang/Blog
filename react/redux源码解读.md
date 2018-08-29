@@ -403,9 +403,10 @@ export default function bindActionCreators(actionCreators, dispatch) {
 
 1. 可以看到 store 是一个对象，createStore 采用了闭包的写法，返回的 store 的众属性，拥有能够访问内部函数变量的能力，如 currentReducer、currentListeners、nextListeners、currentState、isDispatching。
 2. applyMiddleware 中应用中间件有个先后顺序关系，最先传入的会依次调用后面的中间件，所以要求中间件要求能够调用其他中间件的能力。
-3. 中间件是重写了 `dispatch` 这个方法，也就是控制了如何调用 reducer 更新 state 数据，redux默认的是同步更新 state
+3. 中间件是重写了 `dispatch` 这个方法，也就是控制了如何调用 reducer 更新 state 数据，redux默认的是同步更新 state；如果中间件 dispatch 的 action.type 不等于中间件指定的 type 的话，那么 dispatch 会调用 redux 默认的 dispatch 来同步更新 state。例子见下面 routerMiddleware 应用
 
 ```javascript
+// applyMiddleware
 import compose from './compose'
 
 export default function applyMiddleware(...middlewares) {
@@ -434,11 +435,64 @@ export default function applyMiddleware(...middlewares) {
 
 ```
 
+中间件应用例子：react-router 4 的 connected-react-router 的 `routerMiddleware` 中间件
+
+如何应用
+
+```javascript
+// routerMiddleware 源码
+import { CALL_HISTORY_METHOD } from './actions'
+
+const routerMiddleware = (history) => store => next => action => {
+  if (action.type !== CALL_HISTORY_METHOD) {
+    // next 表示下一个中间件在 middleware chain 中的一环，这里体现了 redux 中间件具有调用其他中间件的能力
+    return next(action)
+  }
+
+  const { payload: { method, args } } = action
+  history[method](...args)
+}
+export default routerMiddleware
+```
+
+```javascript
+// 应用 routerMiddleware 例子
+import { createBrowserHistory } from 'history'
+import { applyMiddleware, compose, createStore } from 'redux'
+import { connectRouter, routerMiddleware } from 'connected-react-router'
+...
+const history = createBrowserHistory()
+
+const store = createStore(
+  connectRouter(history)(rootReducer), // new root reducer with router state
+  initialState,
+  compose(
+    applyMiddleware(
+      routerMiddleware(history), // for dispatching history actions
+      // ... other middlewares ...
+    ),
+  ),
+)
+```
+
+**应用解释**:
+
+1. routerMiddleware 首先会执行，返回函数 `store => next => action => {}` ，这个函数拥有访问 `history` 对象的能力
+2. 返回的函数作为 applyMiddleware 参数传入，接受 `middlewareAPI` 作为参数传入，但是它不对 store 做任何处理，返回函数 `next => action => {}`，作为 middleware chain 的一环，这个函数拥有访问 `history、middlewareAPI` 对象的能力
+3. 在 compose middleware chain 的时候，该函数会继续执行，返回函数 `action => {}` ，`next` 表示其他中间件在 middleware chain 的一环， 这个函数拥有访问 `history、middlewareAPI、next` 对象的能力
+4. routerMiddleware 真正执行功能的地方，当 dispatch 的 `action.type === 'CALL_HISTORY_METHOD'` 的时候，会执行下面代码
+
+```javascript
+const { payload: { method, args } } = action;
+history[method](...args)
+```
+
 ## 4 redux 特点
 
 1. 数据是通过 dispatch 方法调用 reducer 更新，更新方式为整体替换
 2. 订阅事件是采用事件队列存储，在每次 dispatch 更新完数据的时候执行所有事件队列
 3. 应用的中间件就是覆盖 createStore 生成的 store 对象的 dispatch 方法
+4. redux.applyMiddleware 是 redux 提供的一个典型的 createStore 方法的 enhancer
 
 ## 5 感想
 
