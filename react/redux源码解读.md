@@ -1,8 +1,8 @@
 # redux 源码解读
 
-time: 2018.8.29
-version: 4.0
-designer: heyunjiang
+time: 2018.8.29  
+version: 4.0  
+designer: heyunjiang  
 update: 2018.8.29
 
 概览：redux 是一个状态管理库，通过 `createStore(reducer, initstate, enhancer)` 构建一个 store，抽象出数据 state，要求只能通过 reducer 纯函数来更新 state，通过 store.dispatch 来调用 reducer。可以监听每次数据更新，通过 `store.subscribe` 来添加监听事件，存入事件队列中。它的中间件通过 redux.applyMiddleware 来重写 store 的 `dispatch` 方法，重新定义从 dispatch 到调用 reducer 更新 state 这个过程
