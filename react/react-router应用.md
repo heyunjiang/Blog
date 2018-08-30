@@ -20,6 +20,7 @@ update: 2018.8.28
 &nbsp;&nbsp;&nbsp;&nbsp; [2.1.3 Link、NavLink、Redirect 导航](#213-linknavlinkredirect-导航)  
 &nbsp;&nbsp; [2.2 使用 react-router 4](#22-使用-react-router-4)  
 &nbsp;&nbsp; [2.3 按需加载](#23-按需加载)  
+&nbsp;&nbsp; [2.4 history](#24-history)  
 
 ## 1 静态路由与动态路由
 
@@ -249,10 +250,82 @@ subscriptions: {
 
 ### 2.4.1 使用 connected-react-router
 
+该库主要是结合 redux 和 react-router，让操作 history 的时候，能同步更新到 state
+
 `import { ConnectedRouter } from 'connected-react-router'`
 
 该 `ConnectedRouter` 已经引入了 `Router` 根组件
 
+使用例子
+
+```javascript
+// 构建 history 对象与 store 对象
+import { createBrowserHistory } from 'history'
+import { applyMiddleware, compose, createStore } from 'redux'
+import { connectRouter, routerMiddleware } from 'connected-react-router'
+...
+const history = createBrowserHistory()
+
+const store = createStore(
+  connectRouter(history)(rootReducer), // new root reducer with router state
+  initialState,
+  compose(
+    applyMiddleware(
+      routerMiddleware(history), // for dispatching history actions
+      // ... other middlewares ...
+    ),
+  ),
+)
+```
+
+```javascript
+// 结合 react-redux 的 `Provider` 传入 store 对象，结合 `ConnectedRouter` 传入 history 对象，将 redux 、 history、react-router 结合起来了
+import { Provider } from 'react-redux'
+import { Route, Switch } from 'react-router' // react-router v4
+import { ConnectedRouter } from 'connected-react-router'
+...
+ReactDOM.render(
+  <Provider store={store}>
+    <ConnectedRouter history={history}> { /* place ConnectedRouter under Provider */ }
+      <div> { /* your usual react-router v4 routing */ }
+        <Switch>
+          <Route exact path="/" render={() => (<div>Match</div>)} />
+          <Route render={() => (<div>Miss</div>)} />
+        </Switch>
+      </div>
+    </ConnectedRouter>
+  </Provider>,
+  document.getElementById('react-root')
+)
+```
+
+更新原理: store.dispatch(push('/path/to/somewhere'))
+
+```javascript
+// connected-react-router action.js 部分源码
+const updateLocation = (method) => {
+  return (...args) => ({
+    type: CALL_HISTORY_METHOD,
+    payload: {
+      method,
+      args
+    }
+  })
+}
+
+export const push = updateLocation('push')
+export const replace = updateLocation('replace')
+export const go = updateLocation('go')
+export const goBack = updateLocation('goBack')
+export const goForward = updateLocation('goForward')
+
+export const routerActions = { push, replace, go, goBack, goForward }
+```
+
+源码解释，它触发了自己作为中间件的方法：dispatch 的 action.type = CALL_HISTORY_METHOD，这里会更新 history 的 state 数据，不会更新 redux 应用的基本数据
+
 ## 参考文档
 
 [react-router 4](https://react-router.docschina.org/)
+
+[redux源码解读](https://github.com/heyunjiang/Blog/blob/master/react/redux%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB.md)

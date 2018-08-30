@@ -5,13 +5,15 @@ version: 4.0
 designer: heyunjiang
 update: 2018.8.29
 
-概览：redux 是一个状态管理库，通过 `createStore(reducers, initstate, enhancers)` 构建一个 store，抽象出数据 state，要求只能通过 reducer 纯函数来更新 state，通过 store.dispatch 来调用 reducer。可以监听每次数据更新，通过 `store.subscribe` 来添加监听事件，存入事件队列中。它的中间件通过 redux.applyMiddleware 来重写 store 的 `dispatch` 方法，重新定义从 dispatch 到调用 reducer 更新 state 这个过程
+概览：redux 是一个状态管理库，通过 `createStore(reducer, initstate, enhancer)` 构建一个 store，抽象出数据 state，要求只能通过 reducer 纯函数来更新 state，通过 store.dispatch 来调用 reducer。可以监听每次数据更新，通过 `store.subscribe` 来添加监听事件，存入事件队列中。它的中间件通过 redux.applyMiddleware 来重写 store 的 `dispatch` 方法，重新定义从 dispatch 到调用 reducer 更新 state 这个过程
+
+![redux](../images/redux.png)
 
 目录
 
 [1 约定](#1-约定)  
 [2 基本概念](#2-基本概念)  
-[3 redux 详解](#3-redux-详解)
+[3 redux 详解](#3-redux-详解)  
 [4 redux 特点](#4-redux-特点)
 
 ## 1 约定
@@ -286,7 +288,7 @@ export default function compose(...funcs) {
 
 1. 传入多个 reducer，返回一个 function，作为合并后的 reducer
 2. 每次调用的时候，都会去遍历所有的 reducer
-3. 返回 state 
+3. 返回 state
 
 ```javascript
 export default function combineReducers(reducers) {
@@ -354,6 +356,21 @@ export default function combineReducers(reducers) {
   }
 }
 ```
+
+问题：它这里会默认遍历所以的 reducer，我通常定义的 reducer 只更新对应的 state，比如在 dva 的应用中，我通常这么调用 reducer , `yield put({ type: 'save' })`
+
+```javascript
+save (state, action) {
+  return {
+    ...state,
+    ...action.payload,
+  }
+}
+```
+
+难道我所有的 reducer 都要遍历吗？
+
+答：dva 对所有的 reducer 做了一层封装，有一个 `handleActions` 的高阶组件，当传入的 action.type 不等于 reducer 的名字的时候，就不会执行这个 reducer，当名称相等的时候，才会去执行这个 reducer.
 
 ### 3.4 redux.bindActionCreators
 
