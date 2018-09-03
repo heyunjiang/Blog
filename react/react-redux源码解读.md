@@ -3,11 +3,13 @@
 time: 2018.8.30  
 designer: heyunjiang  
 version: react-redux 5.0.7  
-update: 2018.8.30  
+update: 2018.9.03
 
 [github地址](https://github.com/reactjs/react-redux/blob/master/docs/api.md#api)
 
 react-redux 是 `redux` 的 `react` 版本实现
+
+概览：react-redux 提供2个接口，一个是 `Provider` 组件，用于创建根组件，传入 `store` 作为 props；另一个是 `connect` 方法， Provider 子孙组件通过 connect 方法可以获取到 Provider 根组件上的 store，是通过 react 提供的 `context` 对象实现的。
 
 目录
 
@@ -17,13 +19,16 @@ react-redux 是 `redux` 的 `react` 版本实现
 
 ## 1 为什么要阅读源码
 
-它的api写得太多了，源码又那么短，我读源码来得快些
-
 问：我为什么要用 react-redux 呢？
 
 答：redux 本身不是针对哪个框架实现的，它是一种通用的状态管理库。而 react-redux 是针对 react 实现的状态管理库
 
 **设计思想**: react-redux 的设计思想，要求 `容器组件和展示组件相分离` 。容器组件使用 connect 方法获取 store 上的数据，然后内部展示组件通过 props 从容器组件获取数据
+
+阅读源码前带2个问题
+
+1. react-redux 是怎么将与框架无关的 redux 与 react 连接起来的？
+2. connect 方法是怎么获取到 store 中的数据的？
 
 ## 2 api
 
@@ -162,6 +167,8 @@ export default createProvider()
 
 ### 3.2.2 connect 源码解读
 
+阅读源码之前的问题：容器组件是通过 connect 方法获取到 store 中的数据，connect 是否采用 props 方式注入容器组件的呢？
+
 ```javascript
 // react-redux connect 源码
 import connectAdvanced from '../components/connectAdvanced'
@@ -233,3 +240,38 @@ export default createConnect()
 ```
 
 初步可以看出，`connect` 需要传入的3个参数 `mapStateToProps`, `mapDispatchToProps`, `mergeProps`
+
+要求传入的 mapStateToProps、mapDispatchToProps 类型为 `function` 
+
+然后返回的高阶函数 connect ，它的目标是获取 initMapStateToProps ，这个是一个函数，执行返回的一个对象，暂时不去深入看
+
+然后这个 connect 执行返回的也是一个高阶函数 connectHOC 的执行结果，大致看看这个 connectHOC 高阶函数
+
+```javascript
+// connectAdvanced.js 部分源码
+export default function connectAdvanced() {
+  return function wrapWithConnect(WrappedComponent) {
+    class Connect extends Component {
+      constructor(props, context) {
+        super(props, context)
+
+        this.version = version
+        this.state = {}
+        this.renderCount = 0
+        this.store = props[storeKey] || context[storeKey]
+        this.propsMode = Boolean(props[storeKey])
+        this.setWrappedInstance = this.setWrappedInstance.bind(this)
+      }
+    }
+    return hoistStatics(Connect, WrappedComponent)
+  }
+}
+```
+
+hoistStatics 的目的是为了将 WrappedComponent 的一些属性复制给 Connect ，这里重点就是 context 属性对象，react 的每个组件都可以通过 context 全局对象访问 store。
+
+****
+
+回答阅读源码之前的问题：容器组件是通过 connect 方法获取到 store 中的数据，connect 是否采用 props 方式注入容器组件的呢？
+
+答：注入组件中的数据，肯定是通过 props 传入的，但是这个数据怎么来？通过 connect 方式获取的数据，是通过 react 组件能够访问的 `context` 对象来的。一般组件不直接访问 context 对象，但是 react-redux 就通过这个对象，传递数据给了我们 connect 的组件，它保证了我们不直接接触该对象，只有 react-redux 接触该对象。
