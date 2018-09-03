@@ -21,6 +21,7 @@ update: 2018.8.28
 &nbsp;&nbsp; [2.2 使用 react-router 4](#22-使用-react-router-4)  
 &nbsp;&nbsp; [2.3 按需加载](#23-按需加载)  
 &nbsp;&nbsp; [2.4 history](#24-history)  
+[3 参考文档](#3-参考文档)  
 
 ## 1 静态路由与动态路由
 
@@ -105,6 +106,8 @@ const App = () => (
 
 ### 2.1 基础组件
 
+在 react-router 4 种文档有明确说明，所有的组件都应该从 `react-router-dom` 中引入
+
 #### 2.1.1 BrowserRouter、HashRouter 路由根节点
 
 router组件，每个应用只能有一个 router 组件，作为路由根节点。
@@ -126,6 +129,19 @@ const history = createBrowserHistory()
 <Router history={history}>
   <App/>
 </Router>
+```
+
+2者区别: `BrowserRouter` 适用于现代浏览器，使用 html5 history api，能记录支持 location.key 和 location.state，而 `HashRouter` 主要用于支持传统浏览器，不能记录 location.key 或 location.state
+
+问题：我在设计云第一个版本中大量使用到了下面这种语法，我使用 HashRouter 是不是就不行呢？结合 connect-react-router 来看
+
+```javascript
+dispatch(routerRedux.push({pathname: '/docList',
+  state: {
+    filterListStatus: rest,
+    from: 'myWorkSpace'
+  },
+}));
 ```
 
 #### 2.1.2 Route、Switch 路由匹配
@@ -223,6 +239,8 @@ loading 参数，是指在加载过程中占位元素
 
 history 对象，用于实现对 `session 历史` 的管理。以往内置于 react-router 中，现在单独列出，作为 react-router 4 的2大依赖之一(react + history)。
 
+在将 redux 和 react-router 结合使用的时候，就需要 history 对象支持
+
 目前用法
 
 ```javascript
@@ -248,18 +266,14 @@ subscriptions: {
 
 因为使用 redux 时，要求有 history 对象传入，该怎么结合 react-router-dom 和 redux 呢？
 
-### 2.4.1 使用 connected-react-router
+## 2.5 使用 connected-react-router
 
 该库主要是结合 redux 和 react-router，让操作 history 的时候，能同步更新到 state
-
-`import { ConnectedRouter } from 'connected-react-router'`
-
-该 `ConnectedRouter` 已经引入了 `Router` 根组件
 
 使用例子
 
 ```javascript
-// 构建 history 对象与 store 对象
+// 结合 redux : 构建 history 对象与 store 对象
 import { createBrowserHistory } from 'history'
 import { applyMiddleware, compose, createStore } from 'redux'
 import { connectRouter, routerMiddleware } from 'connected-react-router'
@@ -324,8 +338,8 @@ export const routerActions = { push, replace, go, goBack, goForward }
 
 源码解释，它触发了自己作为中间件的方法：dispatch 的 action.type = CALL_HISTORY_METHOD，这里会更新 history 的 state 数据，不会更新 redux 应用的基本数据
 
-## 参考文档
+## 3 参考文档
 
 [react-router 4](https://react-router.docschina.org/)
 
-[redux源码解读](https://github.com/heyunjiang/Blog/blob/master/react/redux%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB.md)
+[redux源码解读](./源码解读-redux.md)

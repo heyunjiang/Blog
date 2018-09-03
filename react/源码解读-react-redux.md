@@ -275,3 +275,7 @@ hoistStatics 的目的是为了将 WrappedComponent 的一些属性复制给 Con
 回答阅读源码之前的问题：容器组件是通过 connect 方法获取到 store 中的数据，connect 是否采用 props 方式注入容器组件的呢？
 
 答：注入组件中的数据，肯定是通过 props 传入的，但是这个数据怎么来？通过 connect 方式获取的数据，是通过 react 组件能够访问的 `context` 对象来的。一般组件不直接访问 context 对象，但是 react-redux 就通过这个对象，传递数据给了我们 connect 的组件，它保证了我们不直接接触该对象，只有 react-redux 接触该对象。
+
+## 说明
+
+由于在写文章的时候，对 react 的源码解读还没有解读多少，所以对 react 的一些 api 使用不是熟悉，在 react-redux 的 connect 方法中，使用到了部分 react api ，所以对 react-redux 的源码解读不全面
