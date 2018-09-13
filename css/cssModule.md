@@ -6,7 +6,7 @@
 
 `import "./style.css"`
 
-> 说明：css-loader内置了css module，但是也可以使用 `react-css-modules` 来使用css module
+> 说明：css-loader内置了css module，但是它默认是关闭的，需要配置options打开；也可以使用 `react-css-modules` 来使用css module
 
 ## 规范要求
 
