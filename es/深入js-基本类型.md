@@ -138,10 +138,20 @@ function foo() {
 
 #### 1.2.4 双冒号运算符
 
+用于实现 es5 种的 `bind` 功能
+
 ```javascript
+// 功能1
 foo::bar;
 // 等同于
 bar.bind(foo);
+
+//---------------
+
+// 功能2
+obj::obj.func
+// 等同于
+::obj.func
 ```
 
 #### 1.2.5 函数尾调用
