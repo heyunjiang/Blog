@@ -511,7 +511,27 @@ history[method](...args)
 3. 应用的中间件就是覆盖 createStore 生成的 store 对象的 dispatch 方法
 4. redux.applyMiddleware 是 redux 提供的一个典型的 createStore 方法的 enhancer
 
-## 5 感想
+## 5 问题汇总
+
+这里记录了在使用 redux 中遇到的一系列问题
+
+### 5.1 redux 要求的 reducer key 为什么要和 state 的 key 保持一致呢？为什么在 dva 中，我写的就没有保持一致？
+
+保持一致：因为在 combineReducers 中，要求的就是根据 reducer 的 key 来更新对应 state 数据，是通过 key 关联的，所以 reducer key 要和对应 state 绑定起来。
+
+dva 不一致：其实 dva 对其有做一层处理。它是通过 `namespace` 作为 reducer key，然后它的 reducers 都通过 `reducers.reduce` 依次调用了；然后 dva 再 createStore 中传入的 initState 始终是空，是通过 reducer 参数 state 的默认值 `(state = initState, action)` 方式设置的。
+
+问：为什么通过这里传入的默认 initState 就能设置 state 的值呢？
+
+答：在 redux 的 `createStore` 中，在返回最终创建的 store 的时候，有一句 `dispatch({ type: ActionTypes.INIT })` ，该命令就是将 reducer 的 initial state 加入到 state tree 上面
+
+总结：不直接传入 initState ，而是通过设置 reducer state 的默认值更新 state tree 。
+
+### 5.2 reducer 和 state 对应什么关系，如何关联的？
+
+整体一个 state ，但是该 state 的 key 和 reducer 的 key 名称要对应起来，在 `combineReducers` 中，将所有的 reducer 合并成一个，然后执行时候传入的 state 是根据 reducer 的 key 获取对应 state 的值。所以一个 reducer 只更新它对应的 state 值
+
+## 6 感想
 
 redux的源码很短，就是提供的这几个api代码，直接可以方便阅读，更能理解它的api意思
 
