@@ -41,6 +41,8 @@ update: 2018.8.29
 }
 ```
 
+在 `redux.createStore` 方法中，要求 action 必须要有一个 `type` 字段，其他字段可选
+
 关键词：`action`、`action创建函数`、`dispatch绑定的action创建函数`
 
 ### 2.2 reducer
@@ -54,7 +56,9 @@ import * as reducers from './reducers'
 const todoApp = combineReducers(reducers)
 ```
 
-reducer为纯函数，接收2个参数： `state`、`action`，这里的 `action` 就是上面的action对象，表示要修改的值
+`combineReducers` 是将传入的所有 reducer 集合在一起，返回一个函数(类似于高阶函数)，每个传入的顶层 reducer 的 function.name 将作为 state.key 存在，比如 reducers 对象有一个叫做 reducerA 的reducer(方法)，那么将会在通过 `createStore` 创建出来的 store 的 state 中创建一个 reducerA 的字段。在每次 dispatch 执行的时候，会将 state 和 action 传入由 `combineReducers` 返回的这个函数中，在其内部依次遍历所有 reducer ，并执行该 reducer ，传入该 reducer 对应的 state 和 action(如 reducerA(state['reducerA'], action))
+
+reducer为纯函数，接收2个参数： `state`、`action`，这里的 `action` 就是上面的action对象
 
 ```javascript
 function todoApp(state = initialState, action) {
@@ -531,6 +535,10 @@ dva 不一致：其实 dva 对其有做一层处理。它是通过 `namespace` �
 ### 5.2 reducer 和 state 对应什么关系，如何关联的？
 
 整体一个 state ，但是该 state 的 key 和 reducer 的 key 名称要对应起来，在 `combineReducers` 中，将所有的 reducer 合并成一个，然后执行时候传入的 state 是根据 reducer 的 key 获取对应 state 的值。所以一个 reducer 只更新它对应的 state 值
+
+### 5.3 dispatch({ type: ActionTypes.INIT }) 是怎么初始化 state 的
+
+通过调用 dispatch 方法，在 dispatch 方法中有一行 `currentState = currentReducer(currentState, action)` 关键代码，会更新当前 state ，所以此处就更新了 reducer 中默认传入的值了。
 
 ## 6 感想
 
