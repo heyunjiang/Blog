@@ -2,7 +2,7 @@
 
 这里的模拟实现，目的是在于提升对重要函数的理解
 
-## call、apply
+## 1 call、apply
 
 call: 在调用的时候，修改调用对象的this指向，可以附带多个参数，可以有返回值
 
@@ -49,7 +49,7 @@ Function.prototype.apply = Function.prototype.apply || function (context, arr) {
 }
 ```
 
-## bind
+## 2 bind
 
 需要解决的几个问题：
 
@@ -79,4 +79,43 @@ Function.prototype.bind2 = Function.prototype.bind2 || function (context) {
     fBound.prototype = new fNOP(); // 继承 fNOP
     return fBound;
 }
+```
+
+## 3 reduce
+
+基本应用
+
+```javascript
+//Array.prototype.reduce
+var numbers = [65, 44, 12, 4];
+function getSum(total, num) {
+    return total + num;
+}
+console.log(numbers.reduce(getSum)) // 65 + 44 + 12 + 4 = 125
+```
+
+可以看出 reduce 是将数组中的每个元素依次在其传入的函数中执行，执行结果作为下一次执行的第一个参数。
+
+模拟实现
+
+```javascript
+// 第一版 reduce 模拟
+function myReduce(func, initData) {
+    let result = this[0], start = 1;
+    if(typeof initData !== 'undefined') {
+        result = initData;
+        start = 0;
+    }
+    for(let i = start;i<this.length;i++) {
+        result = func(result, this[i])
+    }
+    return result;
+}
+
+// test
+var numbers = [65, 44, 12, 4];
+function getSum(total, num) {
+    return total + num;
+}
+console.log(myReduce.call(numbers, getSum)) // 125
 ```

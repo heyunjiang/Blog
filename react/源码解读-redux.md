@@ -454,7 +454,6 @@ export default function applyMiddleware(...middlewares) {
     }
   }
 }
-
 ```
 
 中间件应用例子：react-router 4 的 connected-react-router 的 `routerMiddleware` 中间件

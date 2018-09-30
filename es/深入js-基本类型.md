@@ -505,6 +505,8 @@ const obj = {
 
 问：为什么写法二就不行呢？
 
+答：因为 js 引擎只能识别简写方式的对象方法，属性方式则不行
+
 #### 1.4.9 Object.keys Object.values Object.entries
 
 都属于对象的遍历，但是都只是遍历对象自身的属性，不包含原型、 `enumerable` 为 `false`、`Symbol` 的属性。
