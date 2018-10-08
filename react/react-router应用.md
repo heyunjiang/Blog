@@ -166,6 +166,13 @@ Switch组件，用于将 Route 组件分组
 
 Switch 会遍历其所有的 Route 元素，仅渲染与当前地址匹配的第一个元素，可以指定一个 404 组件，用于无匹配展示
 
+Route 组件参数：
+
+1. exact: 完全匹配，路径完全一致才行，比如不能有空格
+2. strict: 严格匹配，主要针对尾斜杠
+3. path: 匹配时的 url
+4. sensitive: path是否区分大小写
+
 #### 2.1.3 Link、NavLink、Redirect 导航
 
 location 跳转，都是根据 `to` 属性跳转

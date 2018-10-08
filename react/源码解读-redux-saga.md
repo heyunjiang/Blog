@@ -88,7 +88,7 @@ middleware 特点
 
 1. 触发dispatch顺序：以 middlewares 传入的倒序。applyMiddleware 传入为正序，构建 dispatch 时调用为middleware 为反序，触发 dispatch 时为正序
 2. middleware 要求具有能够调用传给他的另一个 middleware 的执行结果
-3. 传入 dispatch ，传出新的 dispatch ，相当于对真实的 dispatch 做了一层拦截
+3. **传入 dispatch ，返回新的 dispatch** ，相当于对真实的 dispatch 做了一层拦截
 4. middleware 只管 state 、dispatch ，不会去管 reducer 是什么
 5. middleware 生命周期： createMiddleware() -> getState() -> proxyDispatch()
 

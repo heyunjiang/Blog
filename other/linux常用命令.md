@@ -1,3 +1,5 @@
+# linux 常用命令
+
 1. `mkdir` 创建目录
 2. `mkdir -p` /dir/dir/ 创建多级目录
 3. `touch node.js` 创建空文件

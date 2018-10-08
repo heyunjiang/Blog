@@ -421,11 +421,7 @@ export default function bindActionCreators(actionCreators, dispatch) {
 
 功能：为 store 添加中间件，覆盖重写 store 的 dispatch 方法
 
-现在再回头去看看 dispath 实现了什么功能，与整个 store 的关系。
-
-1. 可以看到 store 是一个对象，createStore 采用了闭包的写法，返回的 store 的众属性，拥有能够访问内部函数变量的能力，如 currentReducer、currentListeners、nextListeners、currentState、isDispatching。
-2. applyMiddleware 中应用中间件有个先后顺序关系，最先传入的会依次调用后面的中间件，所以要求中间件要求能够调用其他中间件的能力。
-3. 中间件是重写了 `dispatch` 这个方法，也就是控制了如何调用 reducer 更新 state 数据，redux默认的是同步更新 state；如果中间件 dispatch 的 action.type 不等于中间件指定的 type 的话，那么 dispatch 会调用 redux 默认的 dispatch 来同步更新 state。例子见下面 routerMiddleware 应用
+中间件：拦截 dispatch ，传入 dispatch ，传出新的 dispatch
 
 ```javascript
 // applyMiddleware
