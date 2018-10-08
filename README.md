@@ -55,6 +55,7 @@
   - ✔ [源码解读-redux](react/源码解读-redux.md)
   - ✔ [源码解读-react-redux](react/源码解读-react-redux.md)
   - ✔ [源码解读-react-router](react/源码解读-react-router.md)
+  - ✔ [源码解读-history](react/源码解读-history.md)
   - [源码解读-connected-react-router](react/源码解读-connected-react-router.md)
   - [源码解读-redux-saga](react/源码解读-redux-saga.md)
   - [源码解读-react](react/源码解读-react.md)
