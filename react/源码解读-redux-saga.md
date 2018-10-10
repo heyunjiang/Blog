@@ -2,6 +2,8 @@
 
 time: 2018.9.30
 
+update: 2018.10.10
+
 heyunjiang
 
 目录
@@ -10,7 +12,9 @@ heyunjiang
 [2 源码分析之前](#2-源码分析之前)  
 &nbsp;&nbsp;[2.1 redux.applyMiddleware 入口分析](#2.1-redux.applyMiddleware-入口分析)  
 &nbsp;&nbsp;[2.2 回顾我项目中应用到的 redux-saga 特点](#2.2-回顾我项目中应用到的-redux-saga-特点)  
-[3 源码分析](#3-源码分析)
+[3 源码分析](#3-源码分析)  
+&nbsp;&nbsp;[3.1 阅读前的问题](#3.1-阅读前的问题)  
+&nbsp;&nbsp;[3.2 基本 api 熟悉](#3.2-基本-api-熟悉)  
 
 ## 1 为什么要阅读 saga 源码
 
@@ -19,6 +23,8 @@ heyunjiang
 3. 补充 es6 generator 实践能力
 
 ## 2 源码分析之前
+
+该节先了解一下 redux 的 middleware 原理
 
 ### 2.1 redux.applyMiddleware 入口分析
 
@@ -107,6 +113,71 @@ redux-saga 更新 state: `dispatch({ type: 'initDataFromState', payload: locatio
 ### 3.1 阅读前的问题
 
 1. 是不是强制使用 generator ，能用 asynv/await 吗？
-2. effect 的参数顺序及名称如何定义的？
+2. effect 的参数顺序及名称如何定义的，分别有什么作用？
+3. 我定义好的 generator 是如何被 saga 互相调用的？
+4. dva为什么要选用 saga， saga 有什么好处？
+5. yield 语句后面为什么要一个纯对象？
+6. fork 后台执行原理是什么？
 
-### 3.2 saga 架构
+> 结合 dva，看看它内部是如何结合 saga 的
+
+### 3.2 基本 api 熟悉
+
+time: 2018.10.10
+
+在阅读源码之前，必须要先会用 redux-saga ，然后带着使用的问题去阅读源码，所以目前是不会去看过多的源码，只是去熟悉使用 saga
+
+```javascript
+// sagas 样例
+import createSagaMiddleware from 'redux-saga'
+import { call, put, takeEvery } from 'redux-saga/effects'
+
+function* hello() {
+  yield call(query)
+  yield put({type: 'world'})
+}
+
+export default function* all() {
+  yield takeEvery('FETCH_USERS', hello)
+}
+```
+
+redux-saga **功能概括**
+
+1. createSagaMiddleware()：创建 sagaMiddleware
+2. sagaMiddleware.run(): 运行 sagas
+3. sagaEffects: put, call, apply, select, cps, takeEvery, takeLatest, take, fork, cancel
+
+****
+
+特点
+
+1. sagas 为 generator 函数
+2. yield 后面为纯对象，称为 effect，该对象用于给 middleware 解释执行
+
+****
+
+> 解决问题1：是不是强制使用 generator ，能用 asynv/await 吗？  
+> 答：只能使用 generator ，sagaMiddleware 只能识别 generator ，然后解释执行内部状态语句  
+
+****
+
+> 解决问题2：effect 的参数顺序及名称如何定义的，分别有什么作用？  
+> 答：是在 dva 的 `getWatcher` 方法中，通过 `yield effect(...args.concat(createEffects(model)));` 方式，为每个我在 model 中创建的 effect 传入参数，第一个参数就为 args ，第二个参数为 sagaEffects。sagaEffects 的作用，就是将传入的函数封装成一个 `纯对象`，交由 middleware 执行。  
+> `call/apply`：调用异步执行函数。类似于 Funtion.prototype.call，Funtion.prototype.apply  
+> `put`: 用于创建 dispatch 调用的纯对象，调用另一个 effect  
+> `select`: 获取 state  
+> `cps`: 调用异步执行函数。同 call/apply 区别是，它适用于 node 风格函数处理  
+> `takeEvery/takeLatest`: 监听 action，只要触发则执行，不能停止  
+> `take`: 监听 action,只触发执行一次，然后停止  
+> `fork`: fork 一个任务，任务在后台启动，不阻塞任务执行。与 call/apply 不同，call 会阻塞下一步执行，知道异步调用执行完毕，然后才能执行下一步  
+> `cancel`: 取消由 fork 生成的任务
+
+****
+
+> 解决问题5：yield 语句后面为什么要一个纯对象？  
+> 答：直接 yield 语句后面写 `yield query;` ，middleware 在调用 generator 时，执行到该 yield 语句，query 会立即执行；如果写成 `yield call(query)`，生成的纯对象，query 只会被生成描述语句，不会被立即执行，而是通过 middleware 解析这个纯对象进行执行。  
+> 问：middleware 解析这个纯对象执行相比于直接执行有什么好处？  
+> 答：方便测试；可以更好的控制 promise 执行状态变化时恢复 generator 执行。
+
+****

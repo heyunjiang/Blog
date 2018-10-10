@@ -2,6 +2,11 @@
 
 这里的模拟实现，目的是在于提升对重要函数的理解
 
+[1 call、apply](#1-call、apply)  
+[2 bind](#2-bind)  
+[3 reduce](#3-reduce)  
+[4 promise](#4-promise)  
+
 ## 1 call、apply
 
 call: 在调用的时候，修改调用对象的this指向，可以附带多个参数，可以有返回值
@@ -96,6 +101,8 @@ console.log(numbers.reduce(getSum)) // 65 + 44 + 12 + 4 = 125
 
 可以看出 reduce 是将数组中的每个元素依次在其传入的函数中执行，执行结果作为下一次执行的第一个参数。
 
+****
+
 模拟实现
 
 ```javascript
@@ -119,3 +126,41 @@ function getSum(total, num) {
 }
 console.log(myReduce.call(numbers, getSum)) // 125
 ```
+
+## 4 promise
+
+time：2018.10.09
+
+项目中很多地方用到 promise 的地方，比如按需加载 import 返回的是 promise，请求数据 fetch、axios 返回的也是 promise，还有 generator, async 与 promise 的结合使用等
+
+先看看基本使用情况
+
+```javascript
+// promise 使用
+let promise = new Promise(function(resolve, reject) {
+  console.log('Promise');
+  resolve();
+});
+promise.then(function() {
+  console.log('resolved.');
+});
+console.log('Hi!');
+// Promise
+// Hi!
+// resolved
+```
+
+特点：
+
+1. 构造函数内部内容会立即执行
+2. 3种状态：pending, fulfilled, rejected
+3. promise 函数执行返回新的 promise
+4. promise 函数参数：resolve, reject。都是函数，链式调用参数传递通过 `resolve(params)` 传递
+5. 原型方法有：then, catch, finally
+6. 构造函数方法有：all, race, resolve, reject
+
+****
+
+模拟实现
+
+暂时不做

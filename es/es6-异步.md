@@ -30,6 +30,51 @@ console.log('Hi!');
 // resolved
 ```
 
+****
+
+`Promise.all([])`
+
+1. 接受参数为数组，数组每个元素为一个 promise 实例
+2. 返回一个 promise
+3. 数组所有 promise 状态变成 fulfilled 之后，返回的 promise 状态才会 fulfilled
+
+****
+
+`Promise.race([])`
+
+返回一个 promise, 参数同 Promise.all , 不同的是只要数组中某一个 promise 的状态变成 fulfilled 或 rejected ，那么返回的那个 promise 状态就随之改变
+
+****
+
+`Promise.resolve()`
+
+返回一个 promise ，传入参数有4种情况
+
+1. 参数为 promise ：直接返回这个 promise
+2. 参数为含 then 方法的对象：立即执行 then 方法，返回新的 promise
+3. 参数为其他不为空的值：直接 resolve(param) ，返回新的 promise
+4. 参数为空：直接 resolve ，返回新的 promise
+
+****
+
+`Promise.reject()`
+
+返回一个 promise, 传入的参数直接作为 catch 的参数函数的参数
+
+```javascript
+const thenable = {
+  then(resolve, reject) {
+    reject('出错了');
+  }
+};
+
+Promise.reject(thenable)
+.catch(e => {
+  console.log(e === thenable)
+})
+// true
+```
+
 ## 2 generator
 
 目录

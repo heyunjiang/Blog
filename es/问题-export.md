@@ -58,3 +58,7 @@ console.log(test, test1)
 **猜想-原因2**: 本来就该是这样子，之前能成功是 `roadhog` 对 require 进行了扩展或重写
 
 time: 2018.6.4
+
+答： es6 与 commonjs 最好不要混合使用
+
+update: 2018.10.08
