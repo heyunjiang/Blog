@@ -2,7 +2,7 @@
 
 time: 2018.9.30
 
-update: 2018.10.10
+update: 2018.10.11
 
 heyunjiang
 
@@ -12,9 +12,10 @@ heyunjiang
 [2 源码分析之前](#2-源码分析之前)  
 &nbsp;&nbsp;[2.1 redux.applyMiddleware 入口分析](#2.1-redux.applyMiddleware-入口分析)  
 &nbsp;&nbsp;[2.2 回顾我项目中应用到的 redux-saga 特点](#2.2-回顾我项目中应用到的-redux-saga-特点)  
-[3 源码分析](#3-源码分析)  
+[3 熟悉redux-saga](#3-熟悉redux-saga)  
 &nbsp;&nbsp;[3.1 阅读前的问题](#3.1-阅读前的问题)  
 &nbsp;&nbsp;[3.2 基本 api 熟悉](#3.2-基本-api-熟悉)  
+[4 源码分析](#4-源码分析)
 
 ## 1 为什么要阅读 saga 源码
 
@@ -108,7 +109,7 @@ redux-saga 更新 state: `dispatch({ type: 'initDataFromState', payload: locatio
 
 所以在 saga 修改了 dispatch ，让我们不能直接操作 reducer ，而是通过操作 effects ，在 effects 内部操作 reducer 更新 state。所以 saga 定义了 effects 的一系列写法规则，我要学习的也就是 effects 的规则
 
-## 3 源码分析
+## 3 熟悉redux-saga
 
 ### 3.1 阅读前的问题
 
@@ -118,6 +119,7 @@ redux-saga 更新 state: `dispatch({ type: 'initDataFromState', payload: locatio
 4. dva为什么要选用 saga， saga 有什么好处？
 5. yield 语句后面为什么要一个纯对象？
 6. fork 后台执行原理是什么？
+7. 如何同时执行多个任务？
 
 > 结合 dva，看看它内部是如何结合 saga 的
 
@@ -146,7 +148,8 @@ redux-saga **功能概括**
 
 1. createSagaMiddleware()：创建 sagaMiddleware
 2. sagaMiddleware.run(): 运行 sagas
-3. sagaEffects: put, call, apply, select, cps, takeEvery, takeLatest, take, fork, cancel
+3. sagaEffects: put, call, apply, select, cps, take, cancel, fork, spawn, race, all
+4. sagaEffectsHelper: takeEvery, takeLatest, throttle
 
 ****
 
@@ -169,9 +172,23 @@ redux-saga **功能概括**
 > `select`: 获取 state  
 > `cps`: 调用异步执行函数。同 call/apply 区别是，它适用于 node 风格函数处理  
 > `takeEvery/takeLatest`: 监听 action，只要触发则执行，不能停止  
+> `throttle`: 监听 action，只要触发则执行，节流，必须在多少 ms 之后才能继续监听  
 > `take`: 监听 action,只触发执行一次，然后停止  
-> `fork`: fork 一个任务，任务在后台启动，不阻塞任务执行。与 call/apply 不同，call 会阻塞下一步执行，知道异步调用执行完毕，然后才能执行下一步  
-> `cancel`: 取消由 fork 生成的任务
+> `cancel`: 取消由 fork 生成的任务  
+> `fork`: fork 一个任务，任务在后台启动，不阻塞任务执行。与 call/apply 不同，call 会阻塞下一步执行，知道异步调用执行完毕，然后才能执行下一步。会阻塞父级 generator 的完成  
+> `spawn`: 同 fork 一样，启动一个任务后台启动执行，不阻塞任务执行。但是它不会影响父级 generator 任务的完成  
+> `race/all`: 类似于 promise 的 race/all
+
+****
+
+> 解决问题3：我定义好的 generator 是如何被 saga 互相调用的？  
+> 答：定义好的 generator ，也就是 saga 函数，会被 dva/core 生成一个 watcher/worker 。当触发 action 的时候，saga 会被 middleware 解析执行。解析过程看源码解析
+
+****
+
+> 解决问题4：dva为什么要选用 saga， saga 有什么好处？  
+> 答：redux-saga 作为 redux 的中间件，用于重写 dispatch ，所以在直接更新 state 之前，可以进行一系列的同步、异步操作。saga 的最终目的是修改 state ，所以将其从应用程序逻辑中抽离出来，将异步获取数据、操作浏览器缓存等工作独立出来，减小组件体积，让组件更纯净。  
+dva 选择 redux-saga，它只是将 redux、react、react-redux、redux-saga、react-router、connect-react-router 封装起来了，让应用的开发更简单，维护更简单。
 
 ****
 
@@ -181,3 +198,127 @@ redux-saga **功能概括**
 > 答：方便测试；可以更好的控制 promise 执行状态变化时恢复 generator 执行。
 
 ****
+
+> 解决问题7：如何同时执行多个任务？  
+> 答：`dispatch 与 put 的执行`：前面做 dva 开发的时候，对于某一个操作，需要同时操作多个 effect 的时候，都是连续写2个 dispatch，心里一直有个疑问，第一个会不会阻塞第二个的调用。在组件里面 dispatch 调用 effect 时，effect 会通过 saga.fork 在后台执行，不阻塞下一个 dispatch 的触发。put 的本质还是触发的 dispatch。  
+`call 的执行`：call 跟 put 不同，不是操作 dispatch ，它是让 middleware 执行 后面的异步操作， call 的返回值是后面异步操作的结果，后面还要处理返回值，所以 call 需要的是同步操作。如果需要同时处理多个 call 请求，可以通过 `const [fetchs, gets] = yield [call(fetch), call(get)]` 方式实现
+
+****
+
+### 3.3 takeEvery, takeLatest 源码
+
+takeEvery, takeLatest 是通过 take 实现的
+
+```javascript
+// takeEvery 源码
+const takeEvery = (pattern, saga, ...args) => fork(function*() {
+  while (true) {
+    const action = yield take(pattern)
+    yield fork(saga, ...args.concat(action))
+  }
+})
+```
+
+```javascript
+// takeLatest 源码
+const takeLatest = (pattern, saga, ...args) => fork(function*() {
+  let lastTask
+  while (true) {
+    const action = yield take(pattern)
+    if (lastTask) {
+      yield cancel(lastTask) // 如果任务已经结束，则 cancel 为空操作
+    }
+    lastTask = yield fork(saga, ...args.concat(action))
+  }
+})
+```
+
+### 3.4 watcher/worker 思想
+
+takeEvery & fork
+
+每一个 effect 都采用 takeEvery 创建一个 watcher ，然后采用 fork 来后台执行这个任务，不阻塞其他任务
+
+```javascript
+// watcher
+function* getWatcher(comman, effect) {
+  return function* () {
+    yield takeEvery(comman, effect)
+  }
+}
+//worker
+function* worker() {
+  const watcher = yield getWatcher('comman', effect)
+  const worker = yield fork(watcher)
+  yield fork(function* (){
+    yield take('cancelcomman')
+    yield cancel(worker)
+  })
+}
+```
+
+## 4 源码分析
+
+### 4.1 fork 的实现原理是什么？
+
+time: 2018.10.11
+
+fork 能够让 effect 在后台执行，不阻塞其他 effect 的执行。effect 内部通常是做异步操作，获取数据，更新 state 数据。
+
+```javascript
+//src/internal/io.js fork 源码
+
+import * as effectTypes from './effectTypes'
+import { IO, SELF_CANCELLATION } from '@redux-saga/symbols'
+
+const makeEffect = (type, payload) => ({ [IO]: true, type, payload })
+
+export function fork(fnDescriptor, ...args) {
+  // effectTypes.FORK === 'FORK'
+  return makeEffect(effectTypes.FORK, getFnCallDescriptor(fnDescriptor, args))
+}
+
+// fnDescriptor 为封装好的 watcher 函数， watcher 包含了待监听的命令和待执行的 effect generator 函数
+function getFnCallDescriptor(fnDescriptor, args) {
+  return { null, fnDescriptor, args }
+}
+```
+
+第一步：fork 执行返回的是一个对象 `{ [IO]: true, type, payload }` ，payload里面包含了 watcher 函数
+
+接下来需要看看 middleware 是如何解析这种命令了
+
+### 4.2 middleware 是如何解析 saga effect 执行的？
+
+现在的任务很简单，就是解释这个过程
+
+```javascript
+import createSagaMiddleware from 'redux-saga'
+import { takeEvery, put, fork, call } from 'redux-saga/effects'
+
+const sagaMiddleware = createSagaMiddleware()
+const store = createStore(reducers, {}, applyMiddleware(sagaMiddleware))
+
+sagaMiddleware.run(function* (){
+  yield fork(function* () {
+    yield takeEvery('show', effect)
+  })
+})
+
+function* effect() {
+  yield put({type: 'reducerA'})
+}
+```
+
+在使用过程中，有2个疑问，
+
+1. middleware 是如何解析执行 generator 函数的？
+2. 它通过 put, call, fork 生成的纯对象是如何被解析执行的？
+
+带着这2个疑问，看看源码
+
+> 同时学习一下 generator 的解析执行过程
+
+#### 4.2.1 createSagaMiddleware 功能解析
+
+
