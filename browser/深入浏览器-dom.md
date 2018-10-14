@@ -306,11 +306,9 @@ scrollHeight: 只读属性，表示元素内容区域的实际大小，会返回
 
 #### 二 attribute vs property
 
-attribute 是定义在 dom element 上的属性，属性集合叫做 `Element.attributes`，他是一个 `NamedNodeMap` 对象，不是数组，它原型提供了 getNamedItem, removeNamedItem 等方法，实现了 iterator 接口，可以使用 for of 遍历；
+property：为 dom 节点的 `属性` ，包括 attributes, className, scrollTop 等
 
-property 通常见到的是在 js object 对象上的，比如： defineProperty(), defineProperties(), getOwnPropertyDescriptor(), getOwnPropertyDescriptors(), hasOwnProperty()。但是 dom 节点的 property 是什么呢？与 attribute 有什么联系呢？
-
-答：dom tree，由 dom 节点构成，每个节点的表示方式为 object 对应的 key -> value 形式，如文章开头的格式，这里的 `property` 就是对应的节点 dom object 的属性，访问方式为 `element.className` ，与 attribute 的区别是， `attribute` 是当前元素节点内部的一个属性节点，所有属性节点集合叫 `attributes`，访问方式与 property 的区别是：
+attribute：为 dom 节点下面的 `属性节点` ，dom 属性 attributes 返回的就是该 dom 节点下所有属性节点的集合
 
 ```javascript
 <a href="https://heyunjiang.github.io" id="testId" class="hello world">heyunjiang</a>
@@ -329,11 +327,6 @@ attributes.getNamedItem('id'); // 返回节点对象 id="testId"
 ele.getAttribute('id'); // "testId"
 ele.getAttributeNode('id'); // 返回节点对象 id="testId"
 ```
-
-**综上所述**：attribute 是最本质的东西，作为元素节点的属性节点，而 property 只是作为对 attribute 的一个引用，方便我们快速获取节点的 attribute 。区别以下几点
-
-1. 访问方式：通过 property 快速访问 attribute 值的方式有的有区别，有的不能直接使用属性节点的名称，比如 ele.className, ele.maxLength等，有的名称相同，比如 ele.id, ele.name
-2. 非标准属性(自定义属性)：不能通过 property 访问，只能通过 attribute 节点或 element 方法访问
 
 #### 三 event.clientX vs event.screenX vs event.offsetX
 
