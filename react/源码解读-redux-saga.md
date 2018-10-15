@@ -321,4 +321,265 @@ function* effect() {
 
 #### 4.2.1 createSagaMiddleware 功能解析
 
+time: 2018.10.15
 
+首先从使用上来看，它创建了一个 middleware ，用于 redux.applyMiddleware ，redux.applyMiddleware 要求的格式是要求能够接受 middlewareAPI (getState, dispatch 2个方法)，传入的 middleware 还要能够执行，并能够 compose 链式调用，即能够返回 dispatch
+
+```javascript
+// createSagaMiddleware 源码 - 精简版
+import { noop, is, check, uid as nextSagaId, wrapSagaDispatch, isDev, log, object, createSetContextWarning } from './utils'
+import proc from './proc'
+import { emitter } from './channel'
+import { ident } from './utils'
+
+export default function sagaMiddlewareFactory({ context = {}, ...options } = {}) {
+  let runSagaDynamically
+
+  function sagaMiddleware({getState, dispatch}) {
+    runSagaDynamically = runSaga
+    const sagaEmitter = emitter()
+    sagaEmitter.emit = (options.emitter || ident)(sagaEmitter.emit)
+    const sagaDispatch = wrapSagaDispatch(dispatch)
+
+    function runSaga(saga, args, sagaId) {
+      return proc(
+        saga(...args),
+        sagaEmitter.subscribe,
+        sagaDispatch,
+        getState,
+        context,
+        options,
+        sagaId,
+        saga.name
+      )
+    }
+
+    return next => action => {
+      const result = next(action) // hit reducers
+      sagaEmitter.emit(action)
+      return result
+    }
+  }
+
+  sagaMiddleware.run = (saga, ...args) => {
+    const effectId = nextSagaId()
+    const task = runSagaDynamically(saga, args, effectId)
+    return task
+  }
+
+  sagaMiddleware.setContext = (props) => {
+    check(props, is.object, createSetContextWarning('sagaMiddleware', props))
+    object.assign(context, props)
+  }
+
+  return sagaMiddleware
+}
+```
+
+从源码可以看出，通过 `sagaMiddlewareFactory` 工厂函数返回的 sagaMiddleware 是一个对象，挂载了 run 与 setContext 方法，这个中间件对象执行接收 getState 和 dispatch 2个方法。然后它执行返回的是一个高阶函数，这个高阶函数作为 redux.applyMiddleware 中 compose 的参数值，要求能够与其他 middleware 实现链式调用，所以这个高阶函数执行的返回结果作为下一个中间件的参数，也就是构建好的 dispatch
+
+```javascript
+// sagaMiddleware 执行结果 - 高阶函数
+// 1. next 表示上一个中间件产生的 dispatch ，然后它自己返回的 dispatch 就是该高阶函数返回的函数
+return next => action => {
+  const result = next(action) // 执行上一个中间件的 dispatch
+  sagaEmitter.emit(action)
+  return result
+}
+```
+
+生成的 sagaMiddleware ，满足了 redux 的 middleware 的要求。当调用 dispatch 执行 action 时，会触发 `sagaEmitter.emit(action)` ，主动触发 sagaEmitter 。来看看 sagaEmitter 干了啥。
+
+```javascript
+// emitter 生成 sagaEmitter
+export function emitter() {
+  const subscribers = []
+
+  function subscribe(sub) {
+    subscribers.push(sub)
+    return () => remove(subscribers, sub)
+  }
+
+  function emit(item) {
+    const arr = subscribers.slice()
+    for (var i = 0, len =  arr.length; i < len; i++) {
+      arr[i](item)
+    }
+  }
+
+  return {
+    subscribe,
+    emit
+  }
+}
+
+// ident 包装 sagaEmitter.emit，使用时为了让代码更健全，配合 options.emitter 一起使用
+export const ident = v => v
+```
+
+sagaEmitter.emit 触发的是 sagaEmitter.subscribe 订阅的内容，这个与 redux 中 subscribe 一样。
+
+sagaEmitter.emit 作为后期使用时的入口函数，从这里切入可以看到 generator 是如何被解析执行的
+
+#### 4.2.2 sagaMiddleware.run 功能解析
+
+time: 2018.10.15
+
+前面看到了 sagaEmitter.emit 触发任务执行，这里的目的是看任务是如何通过 `sagaEmitter.subscribe` 订阅的
+
+```javascript
+// sagaMiddleware.run 源码
+import proc from './proc'
+function runSaga(saga, args, sagaId) {
+      return proc(
+        saga(...args),
+        sagaEmitter.subscribe,
+        sagaDispatch,
+        getState,
+        context,
+        options,
+        sagaId,
+        saga.name
+      )
+}
+```
+
+runSaga 执行返回 proc 的执行结果，这里会执行 `saga(...args)` ，这个也就是 generator 返回的状态机，实现了 iterator 接口
+
+#### 4.2.3 遍历 generator
+
+time: 2018.10.15
+
+这里是遍历 generator 执行返回的状态对象，该对象实现了 iterator 接口
+
+暂不总结，以后有需要做 generator 解析执行再来看
+
+#### 4.2.4 fork 后台执行原理
+
+其他任务的执行，直接就调用 put 方法执行了
+
+```javascript
+// src/internal/proc.js
+function runPutEffect({channel, action, resolve}, cb) {
+    asap(() => {
+      let result
+      try {
+        result = (channel ? channel.put : dispatch)(action)
+      } catch(error) {
+        if (channel || resolve) return cb(error, true)
+        log('error', `uncaught at ${name}`, error.stack || error.message || error)
+      }
+
+      if(resolve && is.promise(result)) {
+        resolvePromise(result, cb)
+      } else {
+        return cb(result)
+      }
+    })
+  }
+```
+
+fork 任务的执行, `yield fork(function* () { yield takeEvery('show', effect) })`
+
+```javascript
+// src/internal/io.js
+function getFnCallDesc(meth, fn, args) {
+  let context = null
+  if(is.array(fn)) {
+    [context, fn] = fn
+  } else if(fn.fn) {
+    ({context, fn} = fn)
+  }
+
+  return {context, fn, args}
+}
+export function fork(fn, ...args) {
+  return effect(FORK, getFnCallDesc('fork', fn, args))
+}
+```
+
+```javascript
+// src/internal/proc.js
+// 这里的 fn 就是一个 generator
+function runForkEffect({context, fn, args, detached}, effectId, cb) {
+    const taskIterator = createTaskIterator({context, fn, args})
+
+    try {
+      suspend()
+      const task = proc(
+        taskIterator,
+        subscribe,
+        dispatch,
+        getState,
+        taskContext,
+        options,
+        effectId,
+        fn.name,
+        (detached ? null : noop)
+      )
+
+      if(detached) {
+        cb(task)
+      } else {
+        if(taskIterator._isRunning) {
+          taskQueue.addTask(task)
+          cb(task)
+        } else if(taskIterator._error) {
+          taskQueue.abort(taskIterator._error)
+        } else {
+          cb(task)
+        }
+      }
+    } finally {
+      flush()
+    }
+    // Fork effects are non cancellables
+  }
+```
+
+可以看出， fork 会再次通过 proc 生成一个任务，而不是同其他 put, call 那样直接执行
+
+来看看 proc 生成任务，通过它生成的任务为什么不会影响后续代码的执行
+
+> put 都是异步执行，只是 call 会同步，等待异步请求结束之后再来继续执行
+
+2018.10.15 分析至此
+
+```javascript
+const task = newTask(parentEffectId, name, iterator, cont)
+
+return task
+
+function newTask(id, name, iterator, cont) {
+    iterator._deferredEnd = null
+    return {
+      [TASK]: true,
+      id,
+      name,
+      get done() {
+        if(iterator._deferredEnd) {
+          return iterator._deferredEnd.promise
+        } else {
+          const def = deferred()
+          iterator._deferredEnd = def
+          if(!iterator._isRunning) {
+            iterator._error ? def.reject(iterator._error) : def.resolve(iterator._result)
+          }
+          return def.promise
+        }
+      },
+      cont,
+      joiners: [],
+      cancel,
+      isRunning: () => iterator._isRunning,
+      isCancelled: () => iterator._isCancelled,
+      isAborted: () => iterator._isAborted,
+      result: () => iterator._result,
+      error: () => iterator._error,
+      setContext(props) {
+        check(props, is.object, createSetContextWarning('task', props))
+        object.assign(taskContext, props)
+      }
+    }
+}
+```
