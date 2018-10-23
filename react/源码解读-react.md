@@ -56,15 +56,105 @@ update: 2018.10.19
 18. context：用于多个层级的多个组件之间需要使用相同数据的场景。`const {Provider, Consumer} = React.createContext(defaultValue);` ，使用 Consumer 订阅 Provider 的值。使用 `context` ，其更新方式不受 shouldComponentUpdate() 生命周期方法影响，只要 Provider 值变，其下面的 Consumer 就会更新。
 19. React.Fragment：简写 `<></>`
 20. Portals: ReactDOM.createPortal(child, container)，将子节点渲染到父组件以外的 DOM 节点下
-21. Error Boundaries：
-22. web 组件：
-23. hoc：高阶组件，一个没有副作用的纯函数
-
-学到 react 官方文档 `Error Boundaries` 章节
+21. Error Boundaries：子组件异常捕获，防止应用崩溃，见 2.2 错误边界
+22. web 组件：单独学，与 react 不冲突，可以互相套用
+23. hoc：高阶组件，一个没有副作用的纯函数，见 2.3 高阶组件
+24. render props: 一种设计技术，prop 值为一个函数，动态渲染技术，例子见2.4.3
+25. react 严格模式：React.StrictMode，识别具有不安全生命周期的组件，旧 ref 警告，检查意外的副作用。用于多人开发前端时，组件的规范化问题
 
 ****
 
-### 2.2 示例代码
+### 2.2 错误边界 (Error Boundaries)
+
+time: 2018.10.23
+
+update: 2018.10.23
+
+设计目标：保护整个应用，捕获部分 UI 异常  
+功能描述：用于捕获其子组件树 javascript 异常，记录错误并展示一个回退的 UI
+
+错误捕获位置：
+
+1. 子组件内
+2. 渲染期间，非运行期间
+3. 生命周期方法、构造函数内，非render方法
+
+无法捕获的错误：
+
+1. 事件处理器内部的错误：它不是在渲染期间内触发的，而是在运行期间
+2. 异步代码：setTimeout、requestAnimationFrame
+3. 服务端渲染
+4. 组件自身，非子组件
+
+实现方式：`componentDidCatch(error, info)`
+
+使用目的：解决因部分组件问题，而造成整个应用 dom 树卸载，应用出现白屏问题。使用错误边界，可以保证整个项目正常运行
+
+错误组件定位：`babel-plugin-transform-react-jsx-source`
+
+### 2.3 高阶组件
+
+> 高阶组件可以返回有状态组件与无状态组件
+
+这里列出高阶组件应遵守的一些约定
+
+1. 约定：不改变原始组件的原型属性，而是使用组合技术，为目标组件创建一个容器组件。如果多个高阶组件使用，修改原始组件的原型属性会出现覆盖问题
+2. 约定：不修改原始组件的 props
+3. 约定：高阶组件名字有意义，并且能够通过 `WrappedComponent.displayName || WrappedComponent.name` 访问到
+
+注意事项
+
+1. 不要在 render 函数中使用 hoc ：因为 react 每次更新 render 执行时，如果存在高阶组件，则会再次创建一个高阶组件的实例，保留之前创建的实例，占用内存
+2. 静态方法拷贝：原组件的静态方法不能通过高阶组件访问到，需要做静态方法拷贝，`hoist-non-react-statics`
+3. 高阶组件不能传递 `ref` 属性：ref 属性不想其他 props 一样可以通过传递进原组件，ref 不是一个 prop；react 对 ref 属性有一层处理，会创建使用 ref 属性所在组件的一个 dom 指向。解决方案：使用 `React.forwardRef()` API
+
+```javascript
+// hoc使用错误示例
+function logProps(InputComponent) {
+  InputComponent.prototype.componentWillReceiveProps(nextProps) {
+    console.log(this.props, nextProps);
+  }
+  return InputComponent;
+}
+const EnhancedComponent = logProps(InputComponent);
+
+// hoc使用正确示例
+function logProps(WrappedComponent) {
+  return class extends React.Component {
+    componentWillReceiveProps(nextProps) {
+      console.log(this.props, nextProps);
+    }
+    render() {
+      return <WrappedComponent {...this.props} />;
+    }
+  }
+}
+
+//hoc使用传递 ref 解决方案
+function logProps(Component) {
+  class LogProps extends React.Component {
+    componentDidUpdate(prevProps) {
+      console.log('old props:', prevProps);
+      console.log('new props:', this.props);
+    }
+    render() {
+      const {forwardedRef, ...rest} = this.props;
+      return <Component ref={forwardedRef} {...rest} />;
+    }
+  }
+  function forwardRef(props, ref) {
+    return <LogProps {...props} forwardedRef={ref} />;
+  }
+  const name = Component.displayName || Component.name;
+  forwardRef.displayName = `logProps(${name})`;
+
+  return React.forwardRef(forwardRef);
+}
+```
+
+### 2.4 示例代码
+
+#### 2.4.1 jsx 编译
 
 ```javascript
 // 代码1 jsx 编译
@@ -87,6 +177,59 @@ const element = {
     children: 'Hello, world'
   }
 };
+```
+
+#### 2.4.2 错误边界
+
+```javascript
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  componentDidCatch(error, info) {
+    this.setState({ hasError: true });
+    logErrorToMyService(error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
+// 用法
+<ErrorBoundary>
+  <MyWidget />
+</ErrorBoundary>
+```
+
+#### 2.4.3 render prop
+
+```javascript
+// render prop 技术
+class Child extends React.Component {
+  render() {
+    return <components value={this.props.value} />
+  }
+}
+class Parent extends React.Component {
+  render() {
+    return <div>{this.props.render(this.state)}</div>
+  }
+}
+function withParent (Component) {
+  class withParentComponent extends React.Component {
+    render() {
+      return <Parent render={(value)=><Child value={value} />} />
+    }
+  }
+  withParentComponent.displayName = 'withParentComponent';
+  return withParentComponent;
+}
+
 ```
 
 ## 3 问题归纳
