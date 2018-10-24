@@ -32,9 +32,11 @@ react: v16.5.2
 
 time: 2018.10.18
 
-update: 2018.10.19
+update: 2018.10.24
 
 ****
+
+基本知识
 
 1. 3层架构：用户使用层、虚拟 dom 层、真实 dom 层
 2. 数据驱动：数据驱动界面变化，单向数据流
@@ -59,10 +61,35 @@ update: 2018.10.19
 21. Error Boundaries：子组件异常捕获，防止应用崩溃，见 2.2 错误边界
 22. web 组件：单独学，与 react 不冲突，可以互相套用
 23. hoc：高阶组件，一个没有副作用的纯函数，见 2.3 高阶组件
-24. render props: 一种设计技术，prop 值为一个函数，动态渲染技术，例子见2.4.3
+24. render props: 一种设计技术，prop 值为一个函数，动态渲染技术，例子见2.5.3
 25. react 严格模式：React.StrictMode，识别具有不安全生命周期的组件，旧 ref 警告，检查意外的副作用。用于多人开发前端时，组件的规范化问题
 
 ****
+
+react api
+
+1. React.Component
+2. React.PureComponent：与 Component 的却别是更新判断 props 的深度差别
+3. React.createElement()：创建 react 元素，3个参数：type, props, children，语法糖是 jsx
+4. React.cloneElement(element, [props], [...children])：克隆元素，并且增加 props ，替换 children
+5. React.isValidElement(element)：判断是否是 react 元素
+6. React.Children.FUNCTION: 用于处理 this.props.children ，方法有 map, forEach, count, only, toArray
+7. React.Fragment：语法糖 `<></>`
+8. React.forwardRef: ref 传递
+9. render()：返回 react 元素、字符串、数字、Portals、null、boolean。需要保持其纯净，和浏览器交互应该放到其他生命周期方法中。如果 `shouldComponentUpdate()` 返回 false ，render 方法不会被调用。在组件存活期间只会被调用 **多次**
+10. constructor()：组件的构造函数，可选，用于初始化状态或绑定方法，`super(props)` 在构造函数中写其他表达式之前需要先被调用。在组件存活期间只会被调用 **1次**
+11. `static getDerivedStateFromProps()`：组件静态方法，当组件初始化时和接受新 props 时会被调用，返回 state 用以更新组件 state 值。使用地方，之前有需要根据props来确定 state ，然后 state 又会改变，以前变相的解决方式是在 state 中保存一个临时 prop 值，然后再前后比较 prop 是否改变来更新 state ，现在可以调用 `getDerivedStateFromProps()` 来实现上述功能。在组件存活期间只会被调用 **多次**
+12. UNSAFE_componentWillMount()：在 componentWillMount 和 render 之间的一个生命周期函数，唯一在服务端渲染调用的声明周期钩子函数。在组件存活期间只会被调用 **1次**
+13. shouldComponentUpdate()：返回 false ，可以组织 render() 被调用。但是如果组件采用 forceUpdate() 会强制 render() 被调用。在组件存活期间只会被调用 **多次**
+14. `getSnapshotBeforeUpdate()`：在更新前拦截旧数据，它的返回值作为 componentDidUpdate() 的参数传入。在组件存活期间只会被调用 **多次**
+15. `setState(updater, [callback])`：见2.4 setState
+16. `component.forceUpdate()`
+
+****
+
+tips
+
+1. jsx 注释写法： {/* 注释 */}
 
 ### 2.2 错误边界 (Error Boundaries)
 
@@ -108,6 +135,106 @@ update: 2018.10.23
 2. 静态方法拷贝：原组件的静态方法不能通过高阶组件访问到，需要做静态方法拷贝，`hoist-non-react-statics`
 3. 高阶组件不能传递 `ref` 属性：ref 属性不想其他 props 一样可以通过传递进原组件，ref 不是一个 prop；react 对 ref 属性有一层处理，会创建使用 ref 属性所在组件的一个 dom 指向。解决方案：使用 `React.forwardRef()` API
 
+### 2.4 setState
+
+标准写法：
+
+```javascript
+setState((prevState, props) => stateChange, [callback])
+
+// 或者
+
+setState(stateChange, [callback])
+```
+
+1. 更新数据方式：setState 将要变化的数据 state 更新队列，并非立即更新 state 对象。react 会推迟更新 state ，会在合适的时候，一次性地更新组件的 state。
+2. 更新结束：callback 或者 componentDidUpdate()
+3. setState 返回的更新数据，会被 react 用于和原有 state 作一个浅合并(Object.assign)，类似于 PureComponent 的浅比较
+
+> 问：componentWillUpdate() 在什么时机触发呢？  
+> 猜想：在调用 setState 触发或 props 变化的时候。
+
+### 2.5 示例代码
+
+#### 2.5.1 jsx 编译
+
+```javascript
+// 代码1 jsx 编译
+// jsx
+const element = <h1>Hello, world!</h1>;
+const ele = (<div>xixi<element /></div>);
+const ele1 = (<div>haha<element /><ele /></div>);
+ReactDOM.render(ele, document.getElementById('root'));
+
+// 编译后的 jsx
+const element = React.createElement('h1', null, 'Hello, world!');
+const ele = React.createElement('div', null, 'xixi', React.createElement('element', null));
+const ele1 = React.createElement('div', null, 'haha', React.createElement('element', null), React.createElement('ele', null));
+ReactDOM.render(ele, document.getElementById('root'));
+
+// React.createElement('h1', null, 'Hello, world!') 返回结果
+const element = {
+  type: 'h1',
+  props: {
+    children: 'Hello, world'
+  }
+};
+```
+
+#### 2.5.2 错误边界
+
+```javascript
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  componentDidCatch(error, info) {
+    this.setState({ hasError: true });
+    logErrorToMyService(error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
+// 用法
+<ErrorBoundary>
+  <MyWidget />
+</ErrorBoundary>
+```
+
+#### 2.5.3 render prop
+
+```javascript
+// render prop 技术
+class Child extends React.Component {
+  render() {
+    return <components value={this.props.value} />
+  }
+}
+class Parent extends React.Component {
+  render() {
+    return <div>{this.props.render(this.state)}</div>
+  }
+}
+function withParent (Component) {
+  class withParentComponent extends React.Component {
+    render() {
+      return <Parent render={(value)=><Child value={value} />} />
+    }
+  }
+  withParentComponent.displayName = 'withParentComponent';
+  return withParentComponent;
+}
+```
+
+#### 2.5.4 高阶组件 及 ref 传递
+
 ```javascript
 // hoc使用错误示例
 function logProps(InputComponent) {
@@ -150,86 +277,6 @@ function logProps(Component) {
 
   return React.forwardRef(forwardRef);
 }
-```
-
-### 2.4 示例代码
-
-#### 2.4.1 jsx 编译
-
-```javascript
-// 代码1 jsx 编译
-// jsx
-const element = <h1>Hello, world!</h1>;
-const ele = (<div>xixi<element /></div>);
-const ele1 = (<div>haha<element /><ele /></div>);
-ReactDOM.render(ele, document.getElementById('root'));
-
-// 编译后的 jsx
-const element = React.createElement('h1', null, 'Hello, world!');
-const ele = React.createElement('div', null, 'xixi', React.createElement('element', null));
-const ele1 = React.createElement('div', null, 'haha', React.createElement('element', null), React.createElement('ele', null));
-ReactDOM.render(ele, document.getElementById('root'));
-
-// React.createElement('h1', null, 'Hello, world!') 返回结果
-const element = {
-  type: 'h1',
-  props: {
-    children: 'Hello, world'
-  }
-};
-```
-
-#### 2.4.2 错误边界
-
-```javascript
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  componentDidCatch(error, info) {
-    this.setState({ hasError: true });
-    logErrorToMyService(error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
-    }
-    return this.props.children;
-  }
-}
-// 用法
-<ErrorBoundary>
-  <MyWidget />
-</ErrorBoundary>
-```
-
-#### 2.4.3 render prop
-
-```javascript
-// render prop 技术
-class Child extends React.Component {
-  render() {
-    return <components value={this.props.value} />
-  }
-}
-class Parent extends React.Component {
-  render() {
-    return <div>{this.props.render(this.state)}</div>
-  }
-}
-function withParent (Component) {
-  class withParentComponent extends React.Component {
-    render() {
-      return <Parent render={(value)=><Child value={value} />} />
-    }
-  }
-  withParentComponent.displayName = 'withParentComponent';
-  return withParentComponent;
-}
-
 ```
 
 ## 3 问题归纳
@@ -305,6 +352,16 @@ time: 2018.10.18
 isFinish: `true`
 
 加个小括号，是解决 `分号自动插入` 的 bug
+
+### 4.4 setState() 属于异步更新，它更新的时机是什么？为什么要这么做？
+
+time: 2018.10.24
+
+isFinish: `false`
+
+为什么要这么做：在将要更新的 state 数据放入队列中，react 不会立即更新 state ，为了保证组件性能，react 会挑选合适的时候更新 state 。
+
+更新时机：
 
 ### 4.5 为什么要在列表生成中加入 key ？
 
