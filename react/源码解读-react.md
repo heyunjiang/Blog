@@ -32,11 +32,13 @@ react: v16.5.2
 
 time: 2018.10.18
 
-update: 2018.10.24
+update: 2018.10.25
 
 ****
 
-基本知识
+#### 2.1.1 基本知识
+
+> 包含 react 思想、设计理念、运行原理、格式要求
 
 1. 3层架构：用户使用层、虚拟 dom 层、真实 dom 层
 2. 数据驱动：数据驱动界面变化，单向数据流
@@ -66,7 +68,9 @@ update: 2018.10.24
 
 ****
 
-react api
+#### 2.1.2 react api
+
+> 包含 react 静态方法、组件生命周期方法、组件类型及属性
 
 1. React.Component
 2. React.PureComponent：与 Component 的却别是更新判断 props 的深度差别
@@ -83,7 +87,24 @@ react api
 13. shouldComponentUpdate()：返回 false ，可以组织 render() 被调用。但是如果组件采用 forceUpdate() 会强制 render() 被调用。在组件存活期间只会被调用 **多次**
 14. `getSnapshotBeforeUpdate()`：在更新前拦截旧数据，它的返回值作为 componentDidUpdate() 的参数传入。在组件存活期间只会被调用 **多次**
 15. `setState(updater, [callback])`：见2.4 setState
-16. `component.forceUpdate()`
+16. `component.forceUpdate()`：强制调用 render() ，并忽略 shouldComponentUpdate()
+17. Component.defaultProps：设置组件的默认 props 值
+18. Component.displayName：组件属性名，用在调试信息中
+
+****
+
+#### 2.1.3 ReactDOM api
+
+ReactDOM 实现了操作真实 dom 接口，兼容主流浏览器及 ie9+
+
+1. ReactDOM.render(element, container, callback)
+2. ReactDOM.unmountComponentAtNode(container)：从目标元素中移除已挂载的 React 组件，清楚他的事件处理器和 state 数据。
+3. ReactDOM.findDOMNode(component)：适用于有状态组件，不适用于无状态组件，获取对应组件所在的真实dom。推荐使用 ref 属性实现。
+4. ReactDOMServer.renderToString(element)：服务端渲染使用。将组件渲染为原始的 HTML 字符串。
+
+****
+
+#### 2.1.4 React Element
 
 ****
 
