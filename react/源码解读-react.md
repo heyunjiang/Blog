@@ -8,6 +8,11 @@ heyunjiang
 
 [1 为什么阅读源码](#1-为什么阅读源码)  
 [2 熟练使用 react](#2-熟练使用-react)  
+&nbsp;&nbsp;[2.1 基本功能](#2.1-基本功能)  
+&nbsp;&nbsp;[2.2 错误边界](#2.2-错误边界)  
+&nbsp;&nbsp;[2.3 高阶组件](#2.3-高阶组件)  
+&nbsp;&nbsp;[2.4 setState](#2.4-setState)  
+&nbsp;&nbsp;[2.5 示例代码](#2.5-示例代码)  
 [3 问题归纳](#3-问题归纳)  
 [4 问题解答](#4-问题解答)  
 &nbsp;&nbsp;[4.1 为什么使用 react ?它与 vue 相比较的优劣势是什么？](#4.1-为什么使用-react-?它与-vue-相比较的优劣势是什么？)  
@@ -32,7 +37,7 @@ react: v16.5.2
 
 time: 2018.10.18
 
-update: 2018.10.25
+update: 2018.10.29
 
 ****
 
@@ -45,10 +50,10 @@ update: 2018.10.25
 3. 组件化：由多个组件构建成一个界面
 4. jsx 编译: jsx 也是表达式，语法糖，在编译过后，jsx 会被转化成普通的 jsx 对象，由 `React.createElement()` 包装起来，如 `代码1`
 5. jsx 安全：在编译之后，所有 jsx 中的值都被转换成了字符串，有效解决了 `xss` 攻击
-6. 元素：React 基本单元，对象，存在于 `虚拟 dom 层` 中
+6. 元素：React 基本单元，对象，存在于 `虚拟 dom 层` 中。区别于浏览器 dom 元素，这里的元素是 react 实现的一套 dom 系统，属性也是参考浏览器实现，有许多差别
 7. 渲染：`真实 dom 层` 操作，采用 ReactDOM.render(element, document.getElementById('root')) 方法渲染
 8. 组件：分为有状态组件和无状态组件。组件编译后的最终形态是一个 funciton。react 在识别 jsx 时，识别到组件时，会自动组装对应组件返回的 jsx ，要求组件名称必须大写开头，用于和 react 普通元素做区别
-9. 事件：名称为小驼峰写法，传入函数(非字符串);属于合成事件，实现了浏览器兼容；
+9. 事件：名称为小驼峰写法，传入函数(非字符串);属于合成事件，实现了浏览器兼容；每个事件对象(syntheticEvent)都有这些属性：bubbles, cancelable, currentTarget, target, defaultPrevented, eventPhase, nativeEvent, type；事件对象是属于共享的，回调事件结束之后，该对象会被重用，属性值置空。
 10. html 标签：react 模拟了一层浏览器 html 标签，编译过后就成了 react 元素，要求必须小写开头
 11. jsx 内容：会移除空行和开始与结尾处的空格，标签邻近的新行也会被移除，字符串常量内部的换行会被压缩成一个空格
 12. PropTypes：只适用于开发环境
@@ -106,13 +111,27 @@ ReactDOM 实现了操作真实 dom 接口，兼容主流浏览器及 ie9+
 
 #### 2.1.4 React Element
 
+这里归纳一下 react 实现的 dom 元素与浏览器自带的 dom 元素的差别
+
+1. checked：react 中属于受控属性，`defaultChecked` 是非受控属性，设置元素初次加载时的状态
+2. 类名：react 中为 className，浏览器中为 class
+3. innerHTML：react 提供 `dangerouslySetInnerHTML` 属性接口，值必须为一个函数，函数返回包含 `__html` 属性的对象，浏览器为 dom 对象设置 property `innerHTML`
+4. for：react 使用 `htmlfor` 替代浏览器节点上的 for 属性
+5. onChange：事件处理，react 的 onChange 就是浏览器的 onInput
+6. style: react 支持对象，浏览器节点为字符串
+7. value: react 中 value 为受控属性，defaultValue 为非受控属性
+
+#### 2.1.5 测试
+
+使用 `react-dom/test-utils` 搭配 `Jest` 一起做 react 组件测试
+
 ****
 
 tips
 
 1. jsx 注释写法： {/* 注释 */}
 
-### 2.2 错误边界 (Error Boundaries)
+### 2.2 错误边界
 
 time: 2018.10.23
 
@@ -303,13 +322,13 @@ function logProps(Component) {
 ## 3 问题归纳
 
 1. 为什么使用 react ?它与 vue 相比较的优劣势是什么？
-2. 状态变化时，组件与其子组件如何变化，反应到浏览器更新时如何更新的？
-3. 为什么要在 jsx 外层包一个小括号，直接返回 jsx 不行吗？
+2. 状态变化时，组件与其子组件如何变化，反应到浏览器更新时如何更新的？ finished
+3. 为什么要在 jsx 外层包一个小括号，直接返回 jsx 不行吗？ finished
 4. setState() 属于异步更新，它更新的时机是什么？为什么要这么做？
-5. 为什么要在列表生成中加入 key ？
-6. 我使用 jsx ，为什么要引入 react 呢？
+5. 为什么要在列表生成中加入 key ？ finished
+6. 我使用 jsx ，为什么要引入 react 呢？ finished
 7. jsx 标签名为什么不能为一个表达式，必须要是一个变量或 react 元素？
-8. extend React.Component 与 React.PureComponent 有什么区别？
+8. extend React.Component 与 React.PureComponent 有什么区别？ finished
 
 ## 4 问题解答
 
@@ -317,15 +336,21 @@ function logProps(Component) {
 
 time: 2018.10.16
 
+update: 2018.10.29
+
 isFinish: `false`
 
 本科毕业设计做的项目用的是 react ，对 react 相对更熟悉，react 生态圈也更好，各种模块很完善。
 
 现在使用了一段时间 react ,使用的技术栈为： `webpack4 + react 16 + redux + react-router4 + redux-saga` ，除了 webpack4、 react 源码外，redux + router 系列的源码也都看过了，知道了技术栈中各个模块在系统构建过程中充当什么角色，承担了什么责任。
 
-> 先熟悉一下 react 实现的基本功能，也就是 [第二点](#2-熟练使用-react) 再来看这个问题
+> 先熟悉一下 react 实现的基本功能，也就是 [第二点](#2-熟练使用-react) 再来看这个问题  
+> dom 操作是页面性能的瓶颈
 
-react 作为视图层的一个框架，基于 `数据驱动` 外接 redux、redux-saga 做 `状态管理` ，内部连接浏览器原生 dom 操作，封装了一个虚拟 dom 层。
+1. 加快开发速度
+2. 实现合理兼容：syntheticEvent，antd
+3. 利用庞大社区，使用已有轮子：redux, react-router 等
+4. 项目合理优化：使用 webpack 优化，dom 操作优化
 
 ### 4.2 状态变化时，组件与其子组件如何变化，反应到浏览器更新时如何更新的？
 
