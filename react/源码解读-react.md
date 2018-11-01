@@ -322,13 +322,13 @@ function logProps(Component) {
 ## 3 问题归纳
 
 1. 为什么使用 react ?它与 vue 相比较的优劣势是什么？
-2. 状态变化时，组件与其子组件如何变化，反应到浏览器更新时如何更新的？ finished
-3. 为什么要在 jsx 外层包一个小括号，直接返回 jsx 不行吗？ finished
+2. 状态变化时，组件与其子组件如何变化，反应到浏览器更新时如何更新的？ `finished`
+3. 为什么要在 jsx 外层包一个小括号，直接返回 jsx 不行吗？ `finished`
 4. setState() 属于异步更新，它更新的时机是什么？为什么要这么做？
-5. 为什么要在列表生成中加入 key ？ finished
-6. 我使用 jsx ，为什么要引入 react 呢？ finished
+5. 为什么要在列表生成中加入 key ？ `finished`
+6. 我使用 jsx ，为什么要引入 react 呢？ `finished`
 7. jsx 标签名为什么不能为一个表达式，必须要是一个变量或 react 元素？
-8. extend React.Component 与 React.PureComponent 有什么区别？ finished
+8. extend React.Component 与 React.PureComponent 有什么区别？ `finished`
 
 ## 4 问题解答
 

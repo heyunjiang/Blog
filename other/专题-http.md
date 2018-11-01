@@ -2,6 +2,18 @@
 
 ![架构图](./http2.jpg)
 
+目录
+
+[1 基础知识](#1-基础知识)  
+[2 http 基本优化要点](#2-http-基本优化要点)  
+[3 http1.1相较与http1.0的优点](#3-http1.1相较与http1.0的优点)  
+[4 https相较与http1.1的区别](#4-https相较与http1.1的区别)  
+[5 将网站改造成https](#5-将网站改造成https)  
+[6 SPDY](#6-SPDY)  
+[7 http2相较与SPDY的区别](#7-http2相较与SPDY的区别)  
+[8 有了http2，不用再做哪些优化](#8-有了http2，不用再做哪些优化)  
+[9 ssl 握手](#9-ssl-握手)
+
 ## 1 基础知识
 
 1. http协议简历在tcp协议之上，http协议的性能瓶颈及其性能优化都是针对tcp操作的
@@ -9,6 +21,36 @@
 3. https是运行在ssl/tls上的安全协议
 4. spdy基于https，支持多路复用与header压缩，提高效率，拥有https的优点
 5. http2是spdy的升级版本，支持2进制解析，拥有spdy的优点
+
+http 协议内容
+
+> 问：为什么要详细学习协议？  
+> 答：在做nodejs 服务中间层的时候，需要控制 request 及 response 对象，需要详细了解 http
+
+http 请求模型
+
+```http
+// http post 请求头
+POST /plmPortal/platForm/getPlatFormByEnterprise HTTP/1.1
+Host: plmcloud.yonyou.com
+Connection: keep-alive
+Content-Length: 82
+Accept: application/json, text/plain, */*
+Origin: http://plmcloud.yonyou.com
+User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36
+Content-Type: application/json;charset=UTF-8
+Referer: http://plmcloud.yonyou.com/plmPortal/dist/
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9
+Cookie: JSESSIONID=43B8D7A60DFE3A8BC8EA3D28D87070A;
+
+// http post 响应头
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Type: text/javascript;charset=UTF-8
+Content-Length: 91
+Date: Thu, 01 Nov 2018 10:42:09 GMT
+```
 
 ## 2 http 基本优化要点
 
@@ -80,7 +122,7 @@
 2. http2支持http、https传输，spdy强制https
 3. header压缩算法不同，http2 HPACK，SPDY DEFLATE
 
-### 8 有了http2，不用再做哪些优化
+## 8 有了http2，不用再做哪些优化
 
 1. HTTP2对数据进行二进制分帧，
 2. 在http和tls之间增加的一层分帧层，
@@ -90,7 +132,7 @@
 6. 这个唯一的tcp连接是一个双工字节流连接，服务器主动推送资源
 7. 分片之间存在优先级，解决了资源阻塞问题，
 
-## ssl 握手
+## 9 ssl 握手
 
 [ssl运行机制](http://www.ruanyifeng.com/blog/2014/02/ssl_tls.html)
 
