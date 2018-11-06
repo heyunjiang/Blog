@@ -39,7 +39,8 @@
   - 功能清单、事件队列
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
-  - ✔ [koaAPI](nodejs/koaAPI.md)
+  - [nodejs 基础](nodejs/基础知识.md)
+  - ✔ [koaAPI](nodejs/koaAPI.md)  koa 实现了 http 服务器方面功能，包括 response, request, context 3大api
 - 浏览器
   - ✔ [深入浏览器-dom](browser/深入浏览器-dom.md)
   - [深入浏览器-bom](browser/深入浏览器-bom.md)
