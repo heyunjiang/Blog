@@ -102,6 +102,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 29. `innerText`: 表示一个节点及其后代的渲染文本内容
 30. `getRootNode()`: 获取根节点，ie 不支持 (可以使用 ownerDocument 属性，都支持)
 31. `contains(el)`: 判断当前节点是否有 el 这个子节点，ie5+
+32. `addEventListener(type, listener ,{capture: Boolean, passive: Boolean, once: Boolean})`: 绑定事件， capture 表示是否在事件捕获阶段就触发； once 只触发一次，随后自动移除 listener ； passive 表示是否忽略 preventDefault 事件。
 
 > 视口：浏览器视口，就是浏览器标签栏以下的那个物理窗口
 
@@ -197,6 +198,26 @@ event 方法
 8. offsetX, offsetY: 鼠标相对于当前 target 节点左上角的便宜位置
 9. pageX, pageY: 鼠标相对于文档html的距离
 10. x, y: 是 clientX, clientY 的别名
+
+五：addEventListener 第三个参数详解
+
+{capture, passive, once}
+
+> 在旧版本的浏览器中，第三个参数为布尔值  
+> 事件触发阶段：捕获阶段、元素阶段、捕获阶段  
+
+在规范中，passive 默认为 `false` ；但是在某些浏览器的实现中，在 `touchStart` 和 `touchMove` 事件中，已经默认设置 passive 为 `true` ，所以无法调用 `e.preventDefault` 阻止浏览器主线程的滚动。  
+解决方法是，通过显示设置 passive 的值为 false 来覆盖这个行为
+
+```javascript
+var passiveIfSupported = false;
+
+try {
+  window.addEventListener("test", null, Object.defineProperty({}, "passive", { get: function() { passiveIfSupported = { passive: true }; } }));
+} catch(err) {}
+
+window.addEventListener('scroll', function(event) {}, passiveIfSupported );
+```
 
 #### 1.3.1 compareDocumentPosition 值说明
 

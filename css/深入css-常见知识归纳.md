@@ -6,6 +6,7 @@
 [2. css 选择器](#2-css-选择器)  
 [3. css 三大特性](#3-css-三大特性)  
 [4. css 字体](#4-css-字体)
+[5. pointer events](#5-pointer-events)
 
 ## 1 盒子模型
 
@@ -119,3 +120,13 @@ p {
   font-family: 'kaitiregular';
 }
 ```
+
+## 5 pointer events
+
+time: 2018.11.06
+
+最近做嵌套滚动时，出现了滚动联动问题，原因是 chrome 浏览器为 touchStart, touchMove 实现了事件默认 passive 值为 true ，可以通过设置 passive 为 false 解决这个问题，也可以通过设置 `touch-action` 属性为 `none` 实现。
+
+touch-action： 控制该元素如何响应用户操作。可选值有 auto, none, manipulation, pan-x 等，功能是可控制用户点击、缩放等操作。
+
+pointer-events： 控制元素是否成为鼠标事件的 target 。可选值有 auto, none 等
