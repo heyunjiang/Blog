@@ -4,6 +4,8 @@ time: 2018.10.16
 
 heyunjiang
 
+> 这里总结的是 react 的基本使用，包括官网所有 api 及使用技巧
+
 目录
 
 [1 为什么阅读源码](#1-为什么阅读源码)  
@@ -13,6 +15,7 @@ heyunjiang
 &nbsp;&nbsp;[2.3 高阶组件](#2.3-高阶组件)  
 &nbsp;&nbsp;[2.4 setState](#2.4-setState)  
 &nbsp;&nbsp;[2.5 示例代码](#2.5-示例代码)  
+&nbsp;&nbsp;[2.6 虚拟 dom](#2.6-虚拟-dom)  
 [3 问题归纳](#3-问题归纳)  
 [4 问题解答](#4-问题解答)  
 &nbsp;&nbsp;[4.1 为什么使用 react ?它与 vue 相比较的优劣势是什么？](#4.1-为什么使用-react-?它与-vue-相比较的优劣势是什么？)  
@@ -198,6 +201,8 @@ setState(stateChange, [callback])
 
 #### 2.5.1 jsx 编译
 
+jsx 编译结果: `createElement( tag, attrs, child1, child2, child3 );`
+
 ```javascript
 // 代码1 jsx 编译
 // jsx
@@ -319,6 +324,12 @@ function logProps(Component) {
 }
 ```
 
+### 2.6 虚拟 dom
+
+[深入理解virtualDOM](./深入理解virtualDOM.md)
+
+这一节单独拿出去总结，因为属于 react 最核心的部分，不在基础掌握范围中
+
 ## 3 问题归纳
 
 1. 为什么使用 react ?它与 vue 相比较的优劣势是什么？
@@ -407,7 +418,13 @@ isFinish: `false`
 
 为什么要这么做：在将要更新的 state 数据放入队列中，react 不会立即更新 state ，为了保证组件性能，react 会挑选合适的时候更新 state 。
 
-更新时机：
+更新时机：在每次事件循环中，只执行一次 setState
+
+```javascript
+function defer( fn ) {
+    return Promise.resolve().then( fn );
+}
+```
 
 ### 4.5 为什么要在列表生成中加入 key ？
 
