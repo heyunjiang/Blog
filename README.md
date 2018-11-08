@@ -61,6 +61,7 @@
   - ✔ [源码解读-history](react/源码解读-history.md)
   - [源码解读-connected-react-router](react/源码解读-connected-react-router.md)
   - ✔ [源码解读-redux-saga](react/源码解读-redux-saga.md)
+  - ✔ [深入理解virtualDOM](react/深入理解virtualDOM.md)
   - ✔ [基本使用-react](react/基本使用-react.md) 官网 api + 使用技巧
   - ✔ [基本使用-react-router](react/基本使用-react-router.md) ：react-router 4
   - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流
