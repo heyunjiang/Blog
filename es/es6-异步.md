@@ -30,7 +30,7 @@ console.log('Hi!');
 // resolved
 ```
 
-****
+### 1.1 Promise 对象上的方法
 
 `Promise.all([])`
 
@@ -38,13 +38,9 @@ console.log('Hi!');
 2. 返回一个 promise
 3. 数组所有 promise 状态变成 fulfilled 之后，返回的 promise 状态才会 fulfilled
 
-****
-
 `Promise.race([])`
 
 返回一个 promise, 参数同 Promise.all , 不同的是只要数组中某一个 promise 的状态变成 fulfilled 或 rejected ，那么返回的那个 promise 状态就随之改变
-
-****
 
 `Promise.resolve()`
 
@@ -54,8 +50,6 @@ console.log('Hi!');
 2. 参数为含 then 方法的对象：立即执行 then 方法，返回新的 promise
 3. 参数为其他不为空的值：直接 resolve(param) ，返回新的 promise
 4. 参数为空：直接 resolve ，返回新的 promise
-
-****
 
 `Promise.reject()`
 
@@ -74,6 +68,18 @@ Promise.reject(thenable)
 })
 // true
 ```
+
+### 1.2 promise 原型上的方法
+
+1. Promise.prototype.then
+2. Promise.prototype.catch
+3. Promise.prototype.finally
+
+### 1.3 promise 错误处理
+
+1. 在 promise 内部发生的错误，具有冒泡性质，会被最近的一个 catch 捕获到
+2. 在 resolve() 之后抛出的错误，会被忽略
+3. 在 promise 内部发生的错误，不会传递到外层代码，即不能被 try...catch 捕获到，成为一个未被捕获到的事件
 
 ## 2 generator
 

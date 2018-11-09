@@ -76,6 +76,7 @@
   - ✔ [常见问题及答案](git/常见问题及答案.md)
 - 项目经验
   - [日常感悟](software/项目开发的日常感悟.md)
+  - [项目中遇到的问题](software/项目中遇到的问题.md)
 - 设计模式、技巧
   - [高阶组件](designModal/HOC.md)
   - [Observer模式](designModal/从vue响应式数据看观察者模式.md)
@@ -91,7 +92,7 @@
   - docker基础
 - 新技术
   - webAssembly
-- [学习资源](software/资源.md)
+- [学习资源](software/资源.md) 这里记录我学习相关的资源链接
 
 ## 其他技术杂项
 
