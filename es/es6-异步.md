@@ -6,9 +6,9 @@ update: 2018.8.20
 
 目录
 
-1. promise
-2. generator
-3. async
+[1. promise](#1-promise)  
+[2. generator](#2-generator)  
+[3. async](#3-async)
 
 ## 1 promise
 
@@ -321,3 +321,27 @@ generator函数执行上下文变化过程
 > 学习 generator 可以搭配 redux-saga 学习
 
 ## 3 async
+
+### 3.1 问题
+
+1. async 函数是什么，有什么用？
+2. async 执行返回一个 promise ，需要手动 return promise 吗？
+
+### 3.2 问题解答
+
+#### 3.2.1 async 函数是什么，有什么用？
+
+async 就是 generator 函数的语法糖。与 generator 函数不同的是，async 有 4 项改进
+
+1. 内置执行器：对于异步操作的同步写法，generator必须亲自写执行过程，而 async 属于自执行，但是 async 函数不再有 generator 的保存状态功能了
+2. 更好的语义：使用 `async/awair` 代替 `*/yield`
+3. 适用性更广：yield 命令后面通常是 Thunk 函数或者 Promise 对象，但是 await 后面可以是 promise 对象和原始类型的值
+4. 返回值是 promise ：generator 初次执行的返回值是一个 iterator 对象，可以采用 ... 遍历，每次调用 next() 执行返回一个对象 `{value: 0, done: false}` ；而 async 函数执行返回的结果是一个 promise
+
+#### 3.2.2 async 执行返回一个 promise ，需要手动 return promise 吗？
+
+答：不是，要求跟在 await 后面的必须是一个 promise 或普通原始类型，如果是原始类型，则相当于直接赋值。 async 执行结果返回一个 promise ，在其内部执行 `return value` ，这里的 value 相当于 `.then(value)` 传入的参数值
+
+## 参考文章
+
+[1. 阮一峰-es6入门/async](http://es6.ruanyifeng.com/#docs/async)  

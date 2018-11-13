@@ -25,7 +25,7 @@
   - ✔ [es2015-decorator](es/es6-decorator.md)
   - ✔ [es2015-模板字符串](es/es6-模板字符串.md)
   - ✔ [es2015-Symbol](es/es6-Symbol.md)
-  - [es2015-generator、promise、async](es/es6-异步.md)
+  - [es2015-generator、promise、async](es/es6-异步.md)  包含 promise, generator, async
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
   - ✔ [深入js-基本类型](es/深入js-基本类型.md) 包含了数值、函数、对象的关键点总结
@@ -40,7 +40,8 @@
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
   - [nodejs 基础](nodejs/基础知识.md)
-  - ✔ [koaAPI](nodejs/koaAPI.md)  koa 实现了 http 服务器方面功能，包括 response, request, context 3大api
+  - ✔ [koaAPI](nodejs/koaAPI.md) koa 实现了 http 服务器方面功能，包括 response, request, context 3大api
+  - [koa 进阶](nodejs/koa进阶.md) 学习 koa 如何使用
 - 浏览器
   - ✔ [深入浏览器-dom](browser/深入浏览器-dom.md)
   - [深入浏览器-bom](browser/深入浏览器-bom.md)
