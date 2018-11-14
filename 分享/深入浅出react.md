@@ -2,17 +2,15 @@
 
 time: 2018.10.25
 
-update: 2018.11.06
+update: 2018.11.13
 
 > 公司内部分享，面向大部分不太懂前端的人员
-
-目录
 
 ## 1 分享目的
 
 听者：了解流行前端框架 react，包括其应用方式、原理、场景等
 
-自己：对阶段学习总结，加深印象
+自己：对阶段学习总结，加深印象，沟通能力提高
 
 ## 2 初探 react
 
@@ -66,8 +64,7 @@ redux + redux-saga + react-router (+ webpack + history + connect-react-router)
 
 ## 6 react 技术难点
 
-1. 组件更新原理
-2. 虚拟 dom
+虚拟 dom
 
 ## 7 对比 vue
 

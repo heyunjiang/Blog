@@ -322,10 +322,13 @@ generator函数执行上下文变化过程
 
 ## 3 async
 
+time: 2018.11.13
+
 ### 3.1 问题
 
 1. async 函数是什么，有什么用？
 2. async 执行返回一个 promise ，需要手动 return promise 吗？
+3. 如果 async 函数内部抛出错误，该怎么处理？
 
 ### 3.2 问题解答
 
@@ -341,6 +344,28 @@ async 就是 generator 函数的语法糖。与 generator 函数不同的是，a
 #### 3.2.2 async 执行返回一个 promise ，需要手动 return promise 吗？
 
 答：不是，要求跟在 await 后面的必须是一个 promise 或普通原始类型，如果是原始类型，则相当于直接赋值。 async 执行结果返回一个 promise ，在其内部执行 `return value` ，这里的 value 相当于 `.then(value)` 传入的参数值
+
+#### 3.3 如果 async 函数内部抛出错误，该怎么处理？
+
+async 函数在调用时，会立即返回一个 promise ，如果内部出现错误，可以在返回的这个 promise 上处理错误。
+
+问题：如果 await 后面的异步操作出错，该怎么监听？
+
+```javascript
+const errorThrower = () => {
+  return new Promise((resolve, reject) => {
+    throw new Error("出错出错")
+  })
+}
+
+const container = async () => {
+  ...
+  let result = await errorThrower();
+  ...
+}
+```
+
+答：如果 await 后面的异步操作出错，那么该 promise 会被 reject ，从而影响到整个 container 函数返回的 promise 都被 reject。
 
 ## 参考文章
 

@@ -98,6 +98,7 @@ update: 2018.10.29
 16. `component.forceUpdate()`：强制调用 render() ，并忽略 shouldComponentUpdate()
 17. Component.defaultProps：设置组件的默认 props 值
 18. Component.displayName：组件属性名，用在调试信息中
+19. React.createContext(): 创建一个对象，包含 Provider, Consumer 2 个组件字段
 
 ****
 
