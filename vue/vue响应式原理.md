@@ -2,7 +2,7 @@
 
 > 关键词：响应式数据、根级响应式数据及其限制、异步更新队列
 
-## shim vs polyfill
+## 1 shim vs polyfill
 
 shim: 使用浏览器的已有(旧)的api，来实现一个新的api功能
 
@@ -10,11 +10,11 @@ polyfill: 检测浏览器是否有这个api，如果没有，就加载polyfill�
 
 区别：polyfill使用的新api是标准的、公认的，而shim使用的新api不一定是标准的，可能是用于自定义的，也可能是公认的，shim包含了polyfill，polyfill是shim的部分实现
 
-## 如何追踪数据变化
+## 2 如何追踪数据变化
 
 ```javascript
 data () {
-	return object
+  return object
 }
 ```
 
@@ -24,7 +24,7 @@ data () {
 
 ![data](./data.png)
 
-## 数据监测并触发更新限制
+## 3 数据监测并触发更新限制
 
 vue 不能监测到对象属性的添加或删除，只能监测到getter/setter，这是由javascript语言特性限制的。
 
@@ -32,13 +32,13 @@ vue 不能监测到对象属性的添加或删除，只能监测到getter/setter
 
 vue不允许在已经创建的实例上动态添加新的**根级**响应式属性。但是可以使用 `Vue.set(object, key, value)` 、 `this.$set(object, key, value)` 或 `this.someObject = Object.assign({}, this.someObject, { a: 1, b: 2 })`，在非根级对象上添加新的属性及其值。
 
-**为什么要有这个限制？**
+为什么要有这个限制？
 
 1. 消除了在依赖项跟踪系统中的一类边界情况(什么边界情况???)
 2. 使得vue实例在类型检查系统的帮助下运行的更高效
 3. 增强代码的可维护性：提前声明所有响应式属性，便于理解
 
-## 异步更新队列
+## 4 异步更新队列
 
 vue是异步执行dom更新
 
@@ -61,25 +61,24 @@ Vue.component('example', {
   }
 })
 ```
+
 > nextTick: 在本次dom更新完成之后就会调用
 
-**如何理解异步更新？**
+如何理解异步更新？
 
 跟 `react` 一样，都是属于数据驱动，当 set 数据时，如果需要更新dom，他们(vue、react)都不会立即更新dom，而是会开启一个队列，缓冲同一事件循环中的所有数据改变，当所有数据改变完成，然后才把该缓冲数据推入到队列中去。也就是说，同一事件循环中，当同一个watcher被多次触发，只会被推入到队列中一次。
 
 > 好处：在缓冲时去除了重复数据产生的不必要的计算和dom重复操作，其实这个在原生js操作中，如果代码写得规范，原生的执行效率是要高于vue、react的，因为原生还少了watcher触发并通知 re-render，少了virtual dom这一层
 
-**为什么说vue属于细粒度数据相应机制，react是很粗糙吗?**
+## 5 如何更新 dom
 
-之所以说vue是细粒度，因为其对每个实例的根数据都采用响应式数据，每次`getter/setter`都是触发watcher(缓存是在watcher时缓存的)，然后通知render方法执行异步更新，每个组件都是独立的，控制更加精细。
+time: 2018.11.15
 
-再说react，react是通过`setState`更新数据，在每次`setState`时更新state，然后判断virtual dom是否需要更新，react的组件更新，都会把该组件下所有子组件全都更新，所以粒度大，相对vue更粗糙。
+以前没有总结完善，只看到了在调用 `this.hello = 'world'` 时，通知到了对应该属性的 watcher ，在 watcher 队列被执行，更新数据之后，又是如何更新 dom 的，这个问题没有得到解决？
 
-**vue 这种机制比 react 更加高效吗？**
+答：真实 dom 的更新，是在虚拟 dom 树中，调用 element.replaceChild 替换 dom ，或者设置 dom 的属性。那么watcher 是如何对应到虚拟 dom 的哪个点的呢？[答案](../react/深入理解virtualDOM.md#3.5-数据-state-和-virtual-dom-是如何关联的？)
 
-这里的高效，说的是状态更新的高效
-
-由于每次更新只需要更新对应的组件，不会更新该组件下所有子组件，所以更加高效
+> 为什么说 vue 是细粒度的，因为它的每个属性都对应了一个 watcher ，占很多内存的
 
 ## 题外
 

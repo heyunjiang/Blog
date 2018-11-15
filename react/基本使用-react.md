@@ -2,13 +2,15 @@
 
 time: 2018.10.16
 
+update: 2018.11.15
+
 heyunjiang
 
-> 这里总结的是 react 的基本使用，包括官网所有 api 及使用技巧
+> 这里总结的是 react 的基本使用，包括官网所有 api 及使用技巧。也作为以后 react 使用的参考，每当官网有更新，都会更新在这里
 
 目录
 
-[1 为什么阅读源码](#1-为什么阅读源码)  
+[1 为什么总结这篇文档](#1-为什么总结这篇文档)  
 [2 熟练使用 react](#2-熟练使用-react)  
 &nbsp;&nbsp;[2.1 基本功能](#2.1-基本功能)  
 &nbsp;&nbsp;[2.2 错误边界](#2.2-错误边界)  
@@ -20,17 +22,18 @@ heyunjiang
 [4 问题解答](#4-问题解答)  
 &nbsp;&nbsp;[4.1 为什么使用 react ?它与 vue 相比较的优劣势是什么？](#4.1-为什么使用-react-?它与-vue-相比较的优劣势是什么？)  
 
-## 1 为什么阅读源码
+## 1 为什么总结这篇文档
 
-1. 在使用 react 过程中，存在一些问题，需要读取源码才能解答这些疑惑；
+1. 系统性学习 react；
 2. 在解答这些问题的过程中，补充学习基本能力(html, css, js, dom, 浏览器等)
-3. 加强自己对 react 的熟练使用程度，学习其设计理念
 
 ## 2 熟练使用 react
 
 time: 2018.10.16
 
-背景：自己也使用过 react ，知道 react 的基本使用，没有系统学习 react 。对 redux , react-router4, redux-saga 也研究过了，知道了这3个在项目中充当什么责任，明白了它们的设计理念与实现原理。现在再对 react 做一个完整学习与回顾，看看它在视图层做了什么工作。本次学习就是对自己知识体系的一个完善，'补补牙'
+背景：自己也使用过 react ，知道 react 的基本使用，没有系统学习 react 。对 redux , react-router4, redux-saga 也研究过了，知道了这3个在项目中充当什么责任，明白了它们的设计理念与实现原理。现在再对 react 做一个完整学习与回顾，看看它在视图层做了什么工作。本次学习就是对自己知识体系的一个完善，'补补牙'。
+
+> 每当学到新知识时，要在项目中去实践，否则没有用
 
 ### 2.1 基本功能
 
@@ -40,7 +43,7 @@ react: v16.5.2
 
 time: 2018.10.18
 
-update: 2018.10.29
+update: 2018.11.15
 
 ****
 
@@ -74,31 +77,41 @@ update: 2018.10.29
 24. render props: 一种设计技术，prop 值为一个函数，动态渲染技术，例子见2.5.3
 25. react 严格模式：React.StrictMode，识别具有不安全生命周期的组件，旧 ref 警告，检查意外的副作用。用于多人开发前端时，组件的规范化问题
 
-****
-
 #### 2.1.2 react api
 
 > 包含 react 静态方法、组件生命周期方法、组件类型及属性
 
 1. React.Component
-2. React.PureComponent：与 Component 的却别是更新判断 props 的深度差别
+2. `React.PureComponent`：与 Component 的却别是更新判断 props 的深度差别。在组件更新时，执行 props 浅比较判断更新。
 3. React.createElement()：创建 react 元素，3个参数：type, props, children，语法糖是 jsx
 4. React.cloneElement(element, [props], [...children])：克隆元素，并且增加 props ，替换 children
 5. React.isValidElement(element)：判断是否是 react 元素
 6. React.Children.FUNCTION: 用于处理 this.props.children ，方法有 map, forEach, count, only, toArray
 7. React.Fragment：语法糖 `<></>`
 8. React.forwardRef: ref 传递
-9. render()：返回 react 元素、字符串、数字、Portals、null、boolean。需要保持其纯净，和浏览器交互应该放到其他生命周期方法中。如果 `shouldComponentUpdate()` 返回 false ，render 方法不会被调用。在组件存活期间只会被调用 **多次**
-10. constructor()：组件的构造函数，可选，用于初始化状态或绑定方法，`super(props)` 在构造函数中写其他表达式之前需要先被调用。在组件存活期间只会被调用 **1次**
-11. `static getDerivedStateFromProps()`：组件静态方法，当组件初始化时和接受新 props 时会被调用，返回 state 用以更新组件 state 值。使用地方，之前有需要根据props来确定 state ，然后 state 又会改变，以前变相的解决方式是在 state 中保存一个临时 prop 值，然后再前后比较 prop 是否改变来更新 state ，现在可以调用 `getDerivedStateFromProps()` 来实现上述功能。在组件存活期间只会被调用 **多次**
-12. UNSAFE_componentWillMount()：在 componentWillMount 和 render 之间的一个生命周期函数，唯一在服务端渲染调用的声明周期钩子函数。在组件存活期间只会被调用 **1次**
-13. shouldComponentUpdate()：返回 false ，可以组织 render() 被调用。但是如果组件采用 forceUpdate() 会强制 render() 被调用。在组件存活期间只会被调用 **多次**
-14. `getSnapshotBeforeUpdate()`：在更新前拦截旧数据，它的返回值作为 componentDidUpdate() 的参数传入。在组件存活期间只会被调用 **多次**
-15. `setState(updater, [callback])`：见2.4 setState
-16. `component.forceUpdate()`：强制调用 render() ，并忽略 shouldComponentUpdate()
-17. Component.defaultProps：设置组件的默认 props 值
-18. Component.displayName：组件属性名，用在调试信息中
-19. React.createContext(): 创建一个对象，包含 Provider, Consumer 2 个组件字段
+9. `setState(updater, [callback])`：见2.4 setState
+10. `component.forceUpdate()`：强制调用 render() ，并忽略 shouldComponentUpdate()
+11. Component.defaultProps：设置组件的默认 props 值
+12. Component.displayName：组件属性名，用在调试信息中
+13. React.createContext(): 创建一个对象，包含 Provider, Consumer 2 个组件字段
+
+生命周期方法：
+
+1. constructor()：组件的构造函数，可选，用于初始化状态或绑定方法，`super(props)` 在构造函数中写其他表达式之前需要先被调用。在组件存活期间只会被调用 **1次**
+2. `static getDerivedStateFromProps()`：组件静态方法，当组件实例化后和接受新 props 时会被调用，返回 state 用以更新组件 state 值。用于替换原生命周期方法 componentWillRecevePorps 。在组件存活期间只会被调用 **多次**
+3. componentDidMount(): 组件加载完毕。在组件存活期间只会被调用 **1次**
+4. render()：返回 react 元素、字符串、数字、Portals、null、boolean。需要保持其纯净，和浏览器交互应该放到其他生命周期方法中。如果 shouldComponentUpdate() 返回 false ，render 方法不会被调用。在组件存活期间只会被调用 **多次**
+5. shouldComponentUpdate()：返回 false ，可以阻止 render() 被调用。但是如果组件采用 forceUpdate() 会忽略 shouldComponentUpdate 方法，即强制 render() 被调用。在组件存活期间只会被调用 **多次**
+6. `getSnapshotBeforeUpdate()`：在更新前拦截旧数据，它的返回值作为 componentDidUpdate() 的参数传入。在组件存活期间只会被调用 **多次**
+7. componentDidUpdate()：在组件更新后立即被调用。在组件存活期间只会被调用 **多次**
+8. componentWillUnmount(): 在组件卸载之前调用。在组件存活期间只会被调用 **1次**
+9. `componentDidCatch()`: 在组价发生错误时调用。在组件存活期间只会被调用 **1次**
+
+逐渐被废弃的生命周期方法
+
+1. componentWillRecevePorps： 采用 getDerivedStateFromProps 替代
+2. componentWillMount： 暂无替代
+3. componentWillUpdate: 采用 getSnapshotBeforeUpdate 替代
 
 ****
 
@@ -341,6 +354,8 @@ function logProps(Component) {
 6. 我使用 jsx ，为什么要引入 react 呢？ `finished`
 7. jsx 标签名为什么不能为一个表达式，必须要是一个变量或 react 元素？
 8. extend React.Component 与 React.PureComponent 有什么区别？ `finished`
+9. 生命周期方法 componentWillReciveProps 和 getDerivedStateFromProps 有什么区别？
+10. 调用 setState 更新数据，react 怎么判断哪些组件需要更新？对比着 vue 一起来看
 
 ## 4 问题解答
 
@@ -363,6 +378,13 @@ isFinish: `false`
 2. 实现合理兼容：syntheticEvent，antd
 3. 利用庞大社区，使用已有轮子：redux, react-router 等
 4. 项目合理优化：使用 webpack 优化，dom 操作优化
+
+****
+
+react 相较于 vue ，其学习曲线更加陡峭，为什么要选择它呢？
+
+1. 生态更加丰富，基本所有除 react 自身的其他模块，比如 react-redux ，都是由社区维护的
+2. 后期维护更加简单
 
 ### 4.2 状态变化时，组件与其子组件如何变化，反应到浏览器更新时如何更新的？
 
@@ -468,5 +490,33 @@ isFinish: `true`
 都为 react 组件，区别就在于实现更新上，`shouldComponentUpdate` 上，做 **props 和 state 数据比较**。React.Component 会对传入的 props 和 state 做深层数据比较，判断是否更新组件，而 React.PureComponent 只会对数据做浅比较，只要数据第一层没有变化就不更新，所以它的速度会快许多。
 
 同时，在继承 React.PureComponent 的组件中，其子组件不要有复杂的数据结构
+
+### 4.9 生命周期方法 componentWillReciveProps 和 getDerivedStateFromProps 有什么区别？
+
+time: 2018.11.15
+
+isFinish: `false`
+
+这2者都会在组件更新前，接收到新 props 时触发，此时用于设置 state 来更新 state ，然后才更新组件。
+
+但是 getDerivedStateFromProps 还会在组件初始化时被调用，并且使个 static 静态方法。
+
+是不是 react 就是使用 getDerivedStateFromProps 来替代 componentWillReciveProps 呢？它出现的价值在哪里？
+
+### 10 调用 setState 更新数据，react 怎么判断哪些组件需要更新？对比着 vue 一起来看
+
+time: 2018.11.15
+
+isFinish: `false`
+
+setState 会更新组件的数据，是在对应的组件上执行的这个命令，知道更新的是这个组件的数据，知道把这个组件作为入口，执行 diff 更新算法，遍历子组件。
+
+但是，如果是 redux 做了数据管理呢？把所有的数据都拿出来了，每次 dispatch 更新数据时，不能对应到某个组件，那么它又是怎么对应到 virtual dom 的呢，它怎么知道把哪个节点作为入口呢？
+
+在 vue 中，每次 set 数据的值 `this.hello = 'world'` 时，会触发 vue 的 watch 方法，那它又是怎么对应到某个组件的呢？。
+
+问题总结：在数据更新的时候， react 和 vue 是怎么去更新 dom 的呢？
+
+[答案](./深入理解virtualDOM.md#3.5-数据-state-和-virtual-dom-是如何关联的？)
 
 ****

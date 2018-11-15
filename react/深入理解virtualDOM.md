@@ -26,6 +26,7 @@ react 采用数据驱动，当数据变化，执行更新算法，对比前后�
 2. 更新算法与 dom-diff 是什么关系？
 3. setState 为什么要实现异步更新，仅仅是效率吗？
 4. 虚拟 dom tree 如何渲染到真实 dom 上？
+5. 数据 state 和 virtual dom 是如何关联的？
 
 ## 3 解答问题
 
@@ -60,7 +61,8 @@ jsx 编译后的结果通常是 `createElement( tag, attrs, child1, child2, chil
 
 dom-diff：就是更新的时候，用于判断 virtual dom tree 前后哪些部分变了，需要更新哪些部分。dom-diff 时一个更新过程，采用的 [更新算法](./基本使用-react.md#4.2-状态变化时，组件与其子组件如何变化，反应到浏览器更新时如何更新的？)
 
-> 不同框架实现的 dom-diff 算法不同，有的是对比前后虚拟树，有的是直接比较虚拟树与真实树，react 采用更新算法是对比前后虚拟树
+> 不同框架实现的 dom-diff 算法不同，有的是对比前后虚拟树，有的是直接比较虚拟树与真实树，react 采用更新算法是对比前后虚拟树  
+> diff 过程中，diff 算法抽象独立出去，每次对同层节点做 diff 比较，然后递归遍历子节点
 
 ### 3.3 setState 为什么要实现异步更新，仅仅是效率吗？
 
@@ -98,6 +100,21 @@ export function renderComponent( component ) {
 
 }
 ```
+
+### 3.5 数据 state 和 virtual dom 是如何关联的？
+
+**前言**：react 和 vue 一样，都是数据驱动。在初始化的时候，数据格式就已经定义好，每个组件都是对应有固定的数据格式，只是在数据变化过程中，数据的值变化了而已。
+
+vue 通过双向数据绑定，在 set 数据的时候，通过 watcher 通知数据变化；react 是通过 setState 通知数据变化。如果采用状态管理，是通过 reducer 或 mutations 更新数据，通知数据变化。
+
+**问题**：数据变化了，是怎么通知 virtual dom tree 更新呢？从头比到脚吗？可能不是
+
+state 数据只是保存在内存中的数据而已，组件或者 redux、vuex 能访问到他们。关键是调用 setState 或者 reducer 更新数据的时候，发生了什么。需要看看 react-redux 源码和 setState 源码分析。
+
+发现通过 redux 获取、更新数据，其实还是会给每个 `connect()(component)` 的组件包裹一层组件，当调用 dispatch 成功更新数据之后，会在包裹的这层组件上调用 `this.setState({})` ，这个不更新任何数据，目的是调用 react 的 setState 方法，通知需要更新了，现在也是只需要看 setState 作何变化了。
+
+[源码解读-react-redux](./源码解读-react-redux.md#3.2.2-connect-源码解读)  
+[源码解读-setState](./源码解读-setState.md)
 
 ## 参考文章
 

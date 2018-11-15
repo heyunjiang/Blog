@@ -32,7 +32,7 @@ react-redux 是 `redux` 的 `react` 版本实现
 
 ## 2 api
 
-provider和connect
+provider 和 connect
 
 ### 2.1 Provider
 
@@ -76,7 +76,7 @@ ReactDOM.render(
 
 `mapDispatchToProps`: 获取redux中的dispatch方法，如果不设置此参数，默认在组件中插入 `dispatch` 方法
 
-> connectAdvanced: connect基于此方法构建而来
+> connectAdvanced: connect基于此方法构建而来  
 > createProvider： 构建一个新的provider
 
 ## 3 源码解读
@@ -138,14 +138,6 @@ export function createProvider(storeKey = 'store', subKey) {
           // 限制一个孩子
           return Children.only(this.props.children)
         }
-    }
-
-    if (process.env.NODE_ENV !== 'production') {
-      Provider.prototype.componentWillReceiveProps = function (nextProps) {
-        if (this[storeKey] !== nextProps.store) {
-          warnAboutReceivingStore()
-        }
-      }
     }
 
     Provider.propTypes = {
