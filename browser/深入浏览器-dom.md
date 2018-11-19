@@ -75,7 +75,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 2. innerHTML
 3. style, className, id, lang, title: 节点常用属性 property 快捷访问或设置方式
 4. `attributes`: 节点属性集合，伪数组， `NamedNodeMap`
-5. childNodes, `hasChildNodes`: 节点的后代节点集合， NodeList
+5. childNodes, `hasChildNodes`: 节点的后代节点集合，包含文本节点， NodeList
 6. clientHeight, clientWidth: 元素可见高度、宽度
 7. cloneNode(): 克隆节点及其后代，可选参数-boolean，true表示clone后代，false表示不clone后代，默认false
 8. `compareDocumentPosition()`: a.compareDocumentPosition(b)，比较a,b两个节点的位置关系

@@ -16,9 +16,10 @@
   - [深入css-grid布局](css/深入css-grid.md)
   - ✔ [深入css-fixed、absolute、float](css/深入css-fixed、absolute、float.md)
   - ✔ [深入css-block、inline、inline-block](css/深入css-block、inline、inline-block.md)
+  - ✔ [深入css-选择器及权重](css/深入css-选择器及权重.md)
   - [cssReset](css/cssReset.md)
   - [w3c标准](css/w3c标准.md)
-  - [深入css-常见知识归纳](css/深入css-常见知识归纳.md)
+  - [常见知识归纳](css/常见知识归纳.md)
   - [less](css/less.md)
 - es
   - ✔ [es2015-解构赋值](es/es6-解构赋值.md)
@@ -27,7 +28,7 @@
   - ✔ [es2015-Symbol](es/es6-Symbol.md)
   - [es2015-generator、promise、async](es/es6-异步.md)  包含 promise, generator, async
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
-  - ✔ [深入js-词法作用域](es/深入js-词法作用域.md)
+  - ✔ [深入js-词法作用域](es/深入js-作用域.md)
   - ✔ [深入js-基本类型](es/深入js-基本类型.md) 包含了数值、函数、对象的关键点总结
   - ✔ [深入js-原型与继承](es/深入js-原型与继承.md)
   - ✔ [深入js-执行上下文](es/深入js-执行上下文.md)

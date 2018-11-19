@@ -99,14 +99,6 @@ function readonly(target, name, descriptor){
 
 > 注：在使用 `babel-plugin-transform-decorators` 的时候，提示错误: `Leading decorators must be attached to a class declaration`，看来decorator还是只支持修饰类
 
-没有搞太懂，去查了下资料
-
-这种说法是不严谨的, 如果 `const func = @someDecorator('abc') (x, y) => { return x + y };`，这种写法，应该就可以了(但是还不如直接使用HOC了)
-
-**decorator不适用于函数的情况**
-
-> 说明：当被修饰的函数 `foo` 属于直接声明函数时，那么就不适用
-
 ```javascript
 var counter = 0;
 
@@ -118,6 +110,10 @@ var add = function () {
 function foo() {
 }
 ```
+
+解释：为什么这里就不能成功呢？因为函数 `foo` 会存在函数提升，如果这里的 foo 是 `class foo {}` 就不会存在类提升。首先会函数提升，此时add的值都还是 `undefined` 。
+
+> 问：这个解释有问题， decorator 的执行阶段是在编译阶段。
 
 想要对函数进行处理，直接使用HOC包装就可以了，例如
 
@@ -146,12 +142,12 @@ const wrapped = loggingDecorator(doSomething);
 
 ### decorator vs HOC(高阶组件)
 
-**相同点**
+相同点
 
 1. 都能作用于类
 2. 都能作用于类的属性
 
-**不同点**
+不同点
 
 1. decorator只能作用于类，不能作用于普通方法，这是由es6及 `babel-plugin-transform-decorators` 限制了的，而HOC可以作用于普通方法 
 2. 问题: decorator和HOC是否会对被修饰(组装)的方法的this指向问题，需要待尝试

@@ -54,6 +54,9 @@ createClass: function(spec) {
 }
 ```
 
+> 问题：为什么 `Constructor.prototype.constructor = Constructor;` 单独设置 constructor 属性呢？  
+> 答：在实例化后，实例.__proto__.constructor 指向的是原函数类。伪类继承，目的是完全获取父类 prototype 上的值，但是不想获取不该要的 constructor 属性。
+
 ### 2.2 直接对象继承
 
  `var children = Object.create(obj)`，这里obj为直接对象 `{}`
