@@ -69,7 +69,7 @@
   - ✔ [基本使用-react-router](react/基本使用-react-router.md) ：react-router 4
   - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流
   - ✔ [vue 双向绑定原理](vue/vue响应式原理.md)
-  - 校验：eslint
+  - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme
   - 模拟: mock
 - pwa

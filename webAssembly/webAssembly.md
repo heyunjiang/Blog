@@ -1,4 +1,6 @@
-## 功能简介
+# webAssembly
+
+## 1 功能简介
 
 浏览器支持的第二种语言
 
@@ -8,7 +10,7 @@
 
 设计目的：不是为了手写代码，而是为诸如C、C++和Rust等低级源语言提供一个高效的编译目标
 
-**适用目标**
+适用目标
 
 1. 快速、高效、可移植: 通过利用常见的硬件能力，WebAssembly代码在不同平台上能够以接近本地速度运行。
 2. 可读、可调试: WebAssembly是一门低阶语言，但是它有确实有一种人类可读的文本格式（其标准即将得到最终版本），这允许通过手工来写代码，看代码以及调试代码。
@@ -17,9 +19,9 @@
 
 > [WebAssembly也用在网络和JavaScript环境之外](http://webassembly.org/docs/non-web/)
 
-## 基础知识
+## 2 基础知识
 
-### 代码格式
+### 2.1 代码格式
 
 文件后缀: `.wasm`
 
@@ -32,11 +34,9 @@
 ```
 
 ```javascript
-var importObject = { 
-    imports: { 
-        imported_func: arg => console.log(arg) 
-    } 
+var importObject = {
+    imports: {
+        imported_func: arg => console.log(arg)
+    }
 };
 ```
-
-
