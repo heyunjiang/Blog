@@ -45,7 +45,7 @@
   - [koa 进阶](nodejs/koa进阶.md) 学习 koa 如何使用
 - 浏览器
   - ✔ [深入浏览器-dom](browser/深入浏览器-dom.md)
-  - [深入浏览器-bom](browser/深入浏览器-bom.md)
+  - ✔ [深入浏览器-bom](browser/深入浏览器-bom.md)
   - ✔ [深入浏览器-浏览器](browser/深入浏览器-浏览器.md)
   - [web 存储](PWA/web存储.md)
 - 构建工具

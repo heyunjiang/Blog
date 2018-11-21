@@ -10,11 +10,12 @@ time: 2018.11.20
 
 ## 1 bom 内容
 
-通常说的浏览器 bom 是什么呢？是浏览器对象模型，包含浏览器的一些信息，是浏览器提供的 api 供操作，主要有以下接口：window、navigator、history、indexedDB、cacheStorage、localStorage、sessionStorage
+通常说的浏览器 bom 是什么呢？是浏览器对象模型，包含浏览器的一些信息，是浏览器提供的 api 供操作，主要有以下接口：window、navigator、history、indexedDB、cacheStorage、localStorage、sessionStorage、serviceWorker
 
 ### 1.1 window
 
-众多宿主环境中，浏览器实现全局对象 window ，nodejs 实现了全局对象 global。
+众多宿主环境中，浏览器实现全局对象 window ，nodejs 实现了全局对象 global。  
+window 对象主要包含了浏览器 `几何大小`、`性能`、`移动`、`滚动`等 api
 
 属性
 
@@ -41,14 +42,55 @@ time: 2018.11.20
 1. window.getComputedStyle()：返回实时的节点的 `CSSStyleDeclaration` 对象信息，获取的是当前浏览器绘制的最终结果样式数据
 2. window.matchMedia()：js 进行媒体查询，返回布尔值
 3. window.moveTo(x, y)：将窗口移动到指定坐标位置，要求是通过 window.open 打开的窗口，并且只有一个标签页
-4. window.postMessage()：安全地实现跨源通信，同一浏览器多个窗口之间跨域通信，结合 `window.addEventListener("message", receiveMessage, false);` 使用
-5. window.requestAnimationFrame(callback)：callback 会在浏览器下次绘制时执行
-6. window.resizeBy(x, y)：调整窗口大小，要求是通过 window.open 打开的窗口，并且只有一个标签页
-7. window.resizeTo(x, y)：调整窗口大小，要求是通过 window.open 打开的窗口，并且只有一个标签页
-8. window.scrollTo()：滚动窗口到指定位置。不支持设置滚动时间
-9. window.stop()：浏览器停止加载资源，同点击浏览器的停止按钮
-10. window.atob()：解码 base-64 编码过的字符串。编码使用 window.btoa()
-11. window.getSelection()：获取用户选择的文本范围或光标的当前位置
+4. window.moveBy(x, y)：窗口移动，便宜量，要求是通过 window.open 打开的窗口，并且只有一个标签页
+5. window.postMessage()：安全地实现跨源通信，同一浏览器多个窗口之间跨域通信，结合 `window.addEventListener("message", receiveMessage, false);` 使用
+6. window.requestAnimationFrame(callback)：callback 会在浏览器下次绘制时执行
+7. window.resizeBy(x, y)：调整窗口大小，要求是通过 window.open 打开的窗口，并且只有一个标签页
+8. window.resizeTo(x, y)：调整窗口大小，要求是通过 window.open 打开的窗口，并且只有一个标签页
+9. window.scrollTo(x, y)：滚动窗口到指定位置，可以设置平滑滚动，代替 window.scroll() 。不支持设置滚动时间
+10. window.scroll(x, y)：滚动窗口到指定位置。不支持设置滚动时间
+11. window.scrollBy(x, y)：滚动窗口，偏移量，不是滚动到指定位置。不支持设置滚动时间
+12. window.stop()：浏览器停止加载资源，同点击浏览器的停止按钮
+13. window.atob()：解码 base-64 编码过的字符串。编码使用 window.btoa()
+14. window.getSelection()：获取用户选择的文本范围或光标的当前位置
+
+### 1.2 navigator
+
+navigator 属于用户代理，包含的也是 `地理位置`、`语言`、`代理信息`、`sendBeacon` 等信息
+
+属性
+
+1. navigator.geolocation：[定位](https://developer.mozilla.org/zh-CN/docs/Web/API/Geolocation/Using_geolocation)
+2. navigator.language：返回所使用浏览器的语言，`"en"、"en-US"、"fr"、"es-ES"、"zh-cn"` 等
+3. navigator.mimeTypes：返回一个可被浏览器识别的 [MimeType](https://developer.mozilla.org/zh-CN/docs/Web/API/MimeType) 列表
+4. navigator.onLine：是否联网
+5. navigator.userAgent：返回浏览器基本信息，字符串
+6. navigator.platform：返回用户浏览器所在的系统平台类型
+
+方法
+
+1. navigator.javaEnabled()：是否启用了 java
+2. navigator.sendBeacon(url, data)：向服务器发送数据，通常用于统计数据
+
+> 无感发送数据方式：设置 img 的 src 属性；使用 navigator.sendBeacon 方法
+
+### 1.3 文档生命周期事件
+
+> 总结这节是为了增强对文档生命周期触发的事件印象。
+
+浏览器物理位置信息，可以通过 window 对象获取，包括获取显示器高宽、浏览器高宽、浏览器视口高宽、滚动距离等。
+
+document 获取节点位置信息可以通过 element 获取，包括节点本身高宽、节点视口高宽、节点相对于视口的坐标位置等。
+
+那么文档从获取到加载完毕触发了哪些事件呢？对应 window.performance.timing 的哪些字段？
+
+> html5 规范规定：window.onbeforeunload 可以忽略 window.showModalDialog、window.alert、window.confirm、window.prompt 的执行
+
+主要是这6个事件：onloadstart、onload、onloadend、DOMContentLoaded、onbeforeunload、onunload
+
+执行顺序：onloadstart -> onload -> DOMContentLoaded -> onloadend -> onbeforeunload -> onunload
+
+> DOMFrameContentLoaded 只作用于 frames ，同 DOMContentLoaded
 
 ## 2 ie 专属
 
@@ -65,7 +107,6 @@ time: 2018.11.20
 ## 参考文章
 
 [mdn navigator](https://developer.mozilla.org/zh-CN/docs/Web/API/Navigator)  
-
-[mdn window](https://developer.mozilla.org/zh-CN/docs/Web/API/Window)
-
-[mdn base 64 编码解码](https://developer.mozilla.org/zh-CN/docs/Web/API/WindowBase64/Base64_encoding_and_decoding)
+[mdn window](https://developer.mozilla.org/zh-CN/docs/Web/API/Window)  
+[mdn base 64 编码解码](https://developer.mozilla.org/zh-CN/docs/Web/API/WindowBase64/Base64_encoding_and_decoding)  
+[mdn 事件类型一览表](https://developer.mozilla.org/zh-CN/docs/Web/Events)
