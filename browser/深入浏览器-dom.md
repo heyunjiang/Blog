@@ -115,6 +115,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 5. document.documentElement.isDefaultNamespace(namespace)：检查 namespace 是否是默认的命名空间
 6. document.documentElement.namespaceURI: 任意节点都可以访问
 7. `document.documentElement.contains(el)`: 判断 document 是否拥有 el 这个节点
+8. 访问 window 对象： `document.defaultView`
 
 问：为什么 html 的 `namespaceURI` 总是 `http://www.w3.org/1999/xhtml`?
 
