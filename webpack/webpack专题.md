@@ -93,7 +93,8 @@ devServer: {
   }
 ```
 
-> 注意：webpack-dev-server版本不同，对应的webpack版本也不同，安装最新的就行
+> 注意：webpack-dev-server版本不同，对应的webpack版本也不同，安装最新的就行  
+> 缺点：会整个刷新浏览器
 
 [webpack-dev-server配置地址](https://doc.webpack-china.org/configuration/dev-server)
 
@@ -107,8 +108,30 @@ devServer: {
 
 模块热替换(Hot Module Replacement 或 HMR)
 
-> 疑惑：在webpack-dev-server中增加hot:true时，更新代码，浏览器还是会刷新，增加与不增加还是一样的效果
+> 疑惑：在webpack-dev-server中增加hot:true时，更新代码，浏览器还是会刷新，增加与不增加还是一样的效果  
 > 解惑：使用HMR的时候，在某些地方能实现不完全刷新更新页面，比如颜色等变化，跟dom更新的重绘与回流类似，这一点与 1.5 的监听、编译代码的效果有点小区别。
+
+之所以修改样式不会刷新浏览器而更新界面，是因为 css-loader 实现了 css 的热更新。
+
+****
+
+修改 **react** 内容要实现不刷新浏览器，可以使用 `react-hot-loader` 模块
+
+```javascript
+import React from 'react'
+import { hot } from 'react-hot-loader'
+import styles from './index.less'
+
+const Error = () => (<div className="content-inner">
+  <div className={styles.error}>
+    <h1>建设中</h1>
+  </div>
+</div>)
+
+export default hot(module)(Error)
+```
+
+原理是什么？
 
 ### 1.7 生产环境构建
 
@@ -187,7 +210,7 @@ new webpack.optimize.CommonsChunkPlugin({
 5. 标签模块：使用 `LabeledModulesPlugin` 插件，可以实现webpack的标签式模块导入导出
 6. require.context()：指定一系列完整依赖，便于后面模块解析(优化解析)
 
-比如： 
+比如：
 
 ```javascript
 var context = require.context('components', true, /\.html$/);
