@@ -6,6 +6,8 @@ time: 2018.11.20
 
 [1 bom 内容](#1-bom-内容)  
 &nbsp;&nbsp;[1.1 window](#1.1-window)  
+&nbsp;&nbsp;[1.2 navigator](#1.2-navigator)  
+&nbsp;&nbsp;[1.3 文档生命周期事件](#1.3-文档生命周期事件)  
 [2 ie 专属](#2-ie-专属)
 
 ## 1 bom 内容
