@@ -2,6 +2,8 @@
 
 time: 2018.11.20
 
+update: 2018.11.30
+
 目录
 
 [1 bom 内容](#1-bom-内容)  
@@ -12,7 +14,7 @@ time: 2018.11.20
 
 ## 1 bom 内容
 
-通常说的浏览器 bom 是什么呢？是浏览器对象模型，包含浏览器的一些信息，是浏览器提供的 api 供操作，主要有以下接口：window、navigator、history、indexedDB、cacheStorage、localStorage、sessionStorage、serviceWorker
+通常说的浏览器 bom 是什么呢？是浏览器对象模型，包含浏览器的一些信息，是浏览器提供的 api 供操作，主要有以下接口：window、navigator、history、indexedDB、cacheStorage、localStorage、sessionStorage、serviceWorker、screen
 
 ### 1.1 window
 
@@ -25,7 +27,7 @@ window 对象主要包含了浏览器 `几何大小`、`性能`、`移动`、`�
 2. self.caches：返回与当前上下文相关的 CacheStorage 对象，多用在 service worker 存储离线资源
 3. window.crypto：用于操作 getRandomValues() ，生成安全随机数
 4. window.devicePixelRatio：返回当前物理设备与 css 像素分辨率的比值
-5. window.frames：返回当前窗口的所有直接子窗口集合，但是有如下特点：返回值同时是一个类数组和object
+5. window.frames：返回当前窗口的所有直接子窗口集合，但是有如下特点：`返回值同时是一个类数组和object`
 6. window.fullScreen：返回 boolean ，表示是否在全屏模式下
 7. window.innerHeight：返回浏览器窗口视口的高度，不包含标签栏，但是包含滚动条。同 window.innerWidth
 8. window.outerHeight：返回浏览器整个的高度。同 window.outerWidth
@@ -38,6 +40,8 @@ window 对象主要包含了浏览器 `几何大小`、`性能`、`移动`、`�
 15. window.self：返回对当前 window 对象的引用
 16. window.pageYOffset：返回浏览器滚动了多少距离。同 window.scrollY
 17. window.top：返回窗口体系中的最顶层窗口的引用
+18. window.frameElement: 返回当前 window 对象所在的元素，比如 `iframe` 或者 `embed`，如果 window 属于顶层，则返回 null
+19. window.parent: 返回当前窗口的父窗口，如果 window 属于顶层，则返回自身
 
 方法
 
@@ -45,7 +49,7 @@ window 对象主要包含了浏览器 `几何大小`、`性能`、`移动`、`�
 2. window.matchMedia()：js 进行媒体查询，返回布尔值
 3. window.moveTo(x, y)：将窗口移动到指定坐标位置，要求是通过 window.open 打开的窗口，并且只有一个标签页
 4. window.moveBy(x, y)：窗口移动，便宜量，要求是通过 window.open 打开的窗口，并且只有一个标签页
-5. window.postMessage()：安全地实现跨源通信，同一浏览器多个窗口之间跨域通信，结合 `window.addEventListener("message", receiveMessage, false);` 使用
+5. window.postMessage()：安全地实现跨源通信，同一浏览器多个窗口之间跨域通信，结合 `window.addEventListener("message", receiveMessage, false);` 使用。注意：使用 `targetWindow.postMessage()` ，向谁发送消息，则谁使用 postMessage 方法
 6. window.requestAnimationFrame(callback)：callback 会在浏览器下次绘制时执行
 7. window.resizeBy(x, y)：调整窗口大小，要求是通过 window.open 打开的窗口，并且只有一个标签页
 8. window.resizeTo(x, y)：调整窗口大小，要求是通过 window.open 打开的窗口，并且只有一个标签页
