@@ -8,7 +8,9 @@
 
 > 说明：写(复制)这些文章，目的是让自己对js基础知识掌握更全面。这里总结的是自己不是很熟或者陌生的知识点，如果说熟悉了的，平常用到的，就不总结了。  
 > 不着急总结全部知识，每个知识追求细枝末节，希望掌握全面  
-> 学习技术，要结合实际项目来学习，脱离项目的学习很快就会忘记；结合项目的学习，负责任把项目做好，技术做深入，能力自然就提升了。
+> 使用技术：学习技术，要结合实际项目来学习，脱离项目的学习很快就会忘记；结合项目的学习，负责任把项目做好，技术做深入，能力自然就提升了。  
+> 新技术：关注新技术，先总结其能做什么，再考虑能否在项目中融合使用进去  
+> 项目开发目标：首要完成项目，其次 **提升自己技术能力**
 
 - html
   - ✔ [深入html-标签语义化](html/深入html-标签语义化.md)
@@ -23,6 +25,8 @@
   - [w3c标准](css/w3c标准.md)
   - [常见知识归纳](css/常见知识归纳.md)
   - [less](css/less.md)
+  - transform 动画
+  - animate 动画
 - es
   - ✔ [es2015-解构赋值](es/es6-解构赋值.md)
   - ✔ [es2015-decorator](es/es6-decorator.md)
@@ -39,7 +43,6 @@
   - [深入js-this](es/深入js-this.md)
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
 - nodejs
-  - 功能清单、事件队列
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
   - [nodejs 基础](nodejs/基础知识.md)
@@ -72,7 +75,7 @@
   - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流
   - ✔ [vue 双向绑定原理](vue/vue响应式原理.md)
   - [校验：eslint](react/基本使用-eslint.md)
-  - 测试：mocha, karma, jest, enzyme
+  - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md)
@@ -90,14 +93,22 @@
 - 规范
   - W3C标准
   - ES规范
-- 可视化
-  - webGL
-  - canvas
-- docker
-  - docker基础
-- 新技术
-  - webAssembly
+- 计算机基础
+  - 枚举
+  - 网络
+  - 数据结构与算法
+  - 操作系统
+- 技术方向
+  - webGL: 3D
+  - canvas: 2D
+  - webRTC: 实时通信技术
+  - docker基础: 容器技术
+  - webAssembly: 提升项目运行效率，能在浏览器中跑的另一种语言
+  - typescript: 强类型语言
+  - postcss: css 预处理
 - [学习资源](software/资源.md) 这里记录我学习相关的资源链接
+
+> 注：没有链接的表示待发展、学习的技术
 
 ## 其他技术杂项
 

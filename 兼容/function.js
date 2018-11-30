@@ -18,6 +18,19 @@ function bindEvent(type, func){
 		this.attachEvent('on'+type, func);
 	}
 }
+
+/* 0.1 + 0.2 = 0.3 */
+function numberPlus(arr) {
+	if(!Array.isArray(arr)) {return arr}
+	return arr.reduce(function(pre, value) {
+		let len1 = pre.toString().split('.')[1] || '';
+		let len2 = value.toString().split('.')[1] || '';
+		let maxLen = Math.pow(10, Math.max(len1.length, len2.length))
+		return (pre*maxLen + value*maxLen)/maxLen
+	})
+}
+
+
 /*get event*/
 var e = window.event||e;
 /*get target*/

@@ -40,7 +40,7 @@ display新属性值
 1. `order`: 1 (数字越小、排列越靠前)
 2. `flex-grow`: 1 (项目放大比例，每个项目设置不同，可以设置其对应占据空间比例，0表示不放大)
 3. `flex-shrink`: 1 (项目缩小比例，每个项目设置不同，可以设置其对应占据空间比例，0表示不缩小)
-4. `flex-basis`: auto | 100px (设置项目主轴空间)
+4. `flex-basis`: auto | 100px (设置项目初始宽度)
 5. `flex`: flex-grow flex-shrink flex-basis 的合写
 6. `align-self`: auto | flex-start | flex-end | center | baseline | stretch (垂直交叉轴的时候，定义单个元素的对齐方式，默认继承父元素)
 
