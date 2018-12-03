@@ -1,6 +1,12 @@
 # 关于 export default 结合 require 适用问题
 
-常规模块导出有 `export default` 和 `module.exports`，一个是 es6 提供的，一个是 webpack 默认提供的 commonjs 语法，对应的引入有 `import` 和 `require`
+模块导出  
+es6：`export default`  
+commonjs：`module.exports`  
+
+模块引入
+es6：`import`  
+commonjs：`module.require`  
 
 ## 1. 问题描述
 

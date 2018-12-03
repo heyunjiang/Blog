@@ -27,7 +27,7 @@
   - [less](css/less.md)
   - transform 动画
   - animate 动画
-- es
+- javascript
   - ✔ [es2015-解构赋值](es/es6-解构赋值.md)
   - ✔ [es2015-decorator](es/es6-decorator.md)
   - ✔ [es2015-模板字符串](es/es6-模板字符串.md)
@@ -40,8 +40,9 @@
   - ✔ [深入js-执行上下文](es/深入js-执行上下文.md)
   - ✔ [深入js-闭包](es/深入js-闭包.md)
   - ✔ [深入js-正则表达式](es/深入js-正则表达式.md)
-  - [深入js-this](es/深入js-this.md)
+  - [深入js-this](es/深入js-this.md)  说明了 this 指向问题
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
+  - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+02 问题、退出循环等问题
 - nodejs
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
@@ -53,6 +54,7 @@
   - ✔ [深入浏览器-bom](browser/深入浏览器-bom.md)
   - ✔ [深入浏览器-浏览器](browser/深入浏览器-浏览器.md)
   - [web 存储](PWA/web存储.md)
+  - ✔ [跨域实现的几种方法](other/跨域实现的几种方法.md)
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
   - webpack 扩展、封装
@@ -61,22 +63,25 @@
   - ✔ [babel plugin](webpack/babel.md)
 - 框架
   - [源码解读-antd](react/源码解读-antd.md)
-  - ✔ [源码解读-dva](react/源码解读-dva.md)
-  - ✔ [源码解读-redux](react/源码解读-redux.md)
-  - ✔ [源码解读-react-redux](react/源码解读-react-redux.md)
-  - ✔ [源码解读-react-router](react/源码解读-react-router.md)
-  - ✔ [源码解读-history](react/源码解读-history.md)
-  - [源码解读-connected-react-router](react/源码解读-connected-react-router.md)
-  - ✔ [源码解读-redux-saga](react/源码解读-redux-saga.md)
-  - [源码解读-setState](./源码解读-setState.md)
-  - ✔ [深入理解virtualDOM](react/深入理解virtualDOM.md)
-  - ✔ [基本使用-react](react/基本使用-react.md) 官网 api + 使用技巧
-  - ✔ [基本使用-react-router](react/基本使用-react-router.md) ：react-router 4
-  - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流
-  - ✔ [vue 双向绑定原理](vue/vue响应式原理.md)
+  - react
+    - ✔ [源码解读-dva](react/源码解读-dva.md)
+    - ✔ [源码解读-redux](react/源码解读-redux.md)
+    - ✔ [源码解读-react-redux](react/源码解读-react-redux.md)
+    - ✔ [源码解读-react-router](react/源码解读-react-router.md)
+    - ✔ [源码解读-history](react/源码解读-history.md)
+    - [源码解读-connected-react-router](react/源码解读-connected-react-router.md)
+    - ✔ [源码解读-redux-saga](react/源码解读-redux-saga.md)
+    - [源码解读-setState](./源码解读-setState.md)
+    - ✔ [深入理解virtualDOM](react/深入理解virtualDOM.md)
+    - ✔ [基本使用-react](react/基本使用-react.md) 官网 api + 使用技巧
+    - ✔ [基本使用-react-router](react/基本使用-react-router.md) ：react-router 4
+    - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流
+  - vue
+    - ✔ [vue 双向绑定原理](vue/vue响应式原理.md)
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
+  - Rxjs: [中文官网](https://cn.rx.js.org/)
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md)
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
@@ -96,6 +101,9 @@
 - 计算机基础
   - 枚举
   - 网络
+    - [http 3](https://http3-explained.haxx.se/zh/)
+    - ✔ [http前世今生](other/专题-http.md)
+    - ✔ [常见 http 状态码、解释及解决方案](other/httpCode.md)
   - 数据结构与算法
   - 操作系统
 - 技术方向
@@ -109,19 +117,3 @@
 - [学习资源](software/资源.md) 这里记录我学习相关的资源链接
 
 > 注：没有链接的表示待发展、学习的技术
-
-## 其他技术杂项
-
-[http前世今生](other/专题-http.md)
-
-> 从http1.0到http2,影响到前端哪些地方
-
-[跨域实现的几种方法](other/跨域实现的几种方法.md)
-
-> 开发时跨域、上线跨域
-
-[文件下载](other/download.md)
-
-> 通用型文件下载
-
-[常见 http 状态码、解释及解决方案](other/httpCode.md)
