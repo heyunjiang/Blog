@@ -2,12 +2,12 @@
 
 目录
 
-1. 常用标签
-2. html5 种常用标签使用规范
-3. 如何理解html语义化
-4. 用标签鉴别 h5
-5. html xhtml dhtml
-6. html5 新特性
+[1. 常用标签](#1-常用标签)  
+[2. html5 种常用标签使用规范](#2-html5-种常用标签使用规范)  
+[3. 如何理解html语义化](#3-如何理解html语义化)  
+[4. 用标签鉴别 h5](#4-用标签鉴别-h5)  
+[5. html xhtml dhtml](#5-html-xhtml-dhtml)  
+[6. html5 新特性](#6-html5-新特性)
 
 ## 1 常用标签
 
@@ -129,7 +129,24 @@ th.colspan、th.rowspan
 11. `legend` 表单组件分组，分组命名，配合 fieldset 使用
 12. `textarea` 基本属性不说了，他的 `wrap` 属性，规定提交表单时，文本域如何换行 `hard | soft`
 
-> 关闭自动输入： `autocomplete = off`
+html5 input type 值， [mdn 参考文章](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input)
+
+1. color：颜色选择，弹出颜色选择框
+2. date：日期，年月日，不包含时间
+3. datetime：日期，基于 UTC 时区的日期时间输入控件 chrome 不支持
+4. datetime-local：日期，不包含时区
+5. email
+6. month：日期，输入年月
+7. number
+8. range：输入不精确值，可用属性：min, max, value, step
+9. search:：搜索，比 text 多一个删除按钮
+10. tel
+11. time：时间控件
+12. url
+13. week：星期-年控件
+
+> 关闭自动输入： `autocomplete = off`  
+> 说明：这些控件自带格式检查属性
 
 #### 1.5.1 select
 
