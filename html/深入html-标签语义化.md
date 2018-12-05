@@ -101,6 +101,20 @@ base, col, area, embed...
 30. `wbr` 单词换行，除ie外，其他浏览器都支持
 31. `time` 日期语义化标签
 
+a 标签功能
+
+样式：未访问的是蓝色，访问后的是紫色，活动是红色，且都带有下划线
+
+属性：
+
+1. download：下载，ie, edge, ios safari 12.1 不支持，其他都支持。要求：同源。文件名优先级：http Content-Disposition > download
+2. href：超链接、file:、ftp:、mailto:、tel:、#top、#。包括跳转、打开文件、打开 ftp、打开邮件、打开电话、返回顶部
+3. hreflang：指定链接文档的人类语言，无实际功能，仅提供建议
+4. ping：包含一个以空格分隔的url列表，浏览器后台发送ping的post请求，通常用于跟踪。 `<a href="javascript:;" ping="https://www.baidu.com">123456</a>`
+5. rel：该属性指定引入对象与当前对象的关系，语义化，实际没有什么用，可用值有：author、bookmark、external、help、icon、license、manifest...
+6. target：指定在何处显示链接的资源，可用值：_self、_blank、_parent、_top
+7. type：指定引入对象的 mimetype ，语义化，实际没有什么用
+
 ### 1.4 table
 
 1. `table, tr, th, td, col, colgroup` 表格专用。tbody：添加了这个标签，只有在完整加载表格之后才显示，否则加载一部分就显示一部分
@@ -190,6 +204,8 @@ link.media: 规定被链接文档将被显示在什么设备上， meida_query
 link.hreflang: 规定被链接文档中文本的语言，language_code
 
 link.sizes: 规定被链接资源的尺寸，仅当 link.rel === icon 起效
+
+link.crossorigin: 规定加载相关图片时，是否必须使用 cors 跨域
 
 #### 1.7.2 meta
 

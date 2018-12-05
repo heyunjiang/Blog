@@ -107,7 +107,7 @@
   - 数据结构与算法
   - 操作系统
 - 技术方向
-  - webGL: 3D
+  - [webGL](webGL/入门.md): 3D
   - canvas: 2D
   - webRTC: 实时通信技术
   - docker基础: 容器技术
