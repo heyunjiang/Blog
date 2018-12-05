@@ -112,8 +112,10 @@
   - webRTC: 实时通信技术
   - docker基础: 容器技术
   - webAssembly: 提升项目运行效率，能在浏览器中跑的另一种语言
+  - flutter: 移动应用开发，替代 android ios
   - typescript: 强类型语言
   - postcss: css 预处理
+  - GraphQL: vs restful
 - [学习资源](software/资源.md) 这里记录我学习相关的资源链接
 
 > 注：没有链接的表示待发展、学习的技术
