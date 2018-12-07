@@ -1,6 +1,6 @@
 # http
 
-![架构图](./http2.jpg)
+![架构图](../images/http2.jpg)
 
 目录
 
@@ -66,19 +66,22 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 
 ### 2.3 数据明文传输
 
-> 怎么解决？加密
+> 怎么解决？  
+> 加密
 
 ### 2.4 tcp3次握手
 
 每次传输数据时，都需要重新建立连接，增加了大量的延迟时间
 
-> 怎么解决？保持长链接
+> 怎么解决？  
+> 保持长链接
 
 ### 2.5 header携带的内容过大
 
 每次传输，header的内容都几乎不怎么变化，浪费空间
 
-> 怎么解决？长链接、压缩
+> 怎么解决？  
+> 长链接、压缩
 
 ### 2.6 `connection: keep-alive` 使用过多
 
@@ -121,6 +124,8 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 1. http2是spdy的升级版本
 2. http2支持http、https传输，spdy强制https
 3. header压缩算法不同，http2 HPACK，SPDY DEFLATE
+
+http2 相较于 http1 只是在 http1 的基础上扩展了一些功能，还是采用的 tcp 作为传输层的控制协议，最大特点是长连接、多路复用、header压缩
 
 ## 8 有了http2，不用再做哪些优化
 

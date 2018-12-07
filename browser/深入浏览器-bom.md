@@ -26,7 +26,7 @@ window 对象主要包含了浏览器 `几何大小`、`性能`、`移动`、`�
 1. window.applicationCache：返回应用缓存对象的引用
 2. self.caches：返回与当前上下文相关的 CacheStorage 对象，多用在 service worker 存储离线资源
 3. window.crypto：用于操作 getRandomValues() ，生成安全随机数
-4. window.devicePixelRatio：返回当前物理设备与 css 像素分辨率的比值
+4. window.devicePixelRatio：返回当前物理设备与 css 像素分辨率的比值，比如我的雷神 ips 就是 1.25
 5. window.frames：返回当前窗口的所有直接子窗口集合，但是有如下特点：`返回值同时是一个类数组和object`
 6. window.fullScreen：返回 boolean ，表示是否在全屏模式下
 7. window.innerHeight：返回浏览器窗口视口的高度，不包含标签栏，但是包含滚动条。同 window.innerWidth

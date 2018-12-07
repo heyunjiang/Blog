@@ -101,9 +101,10 @@
 - 计算机基础
   - 枚举
   - 网络
-    - [http 3](https://http3-explained.haxx.se/zh/)
-    - ✔ [http前世今生](other/专题-http.md)
-    - ✔ [常见 http 状态码、解释及解决方案](other/httpCode.md)
+    - [http 3](计算机基础/网络-http3学习.md)
+    - ✔ [http1、http2简介](计算机基础/网络-专题-http.md)
+    - ✔ [常见 http 状态码、解释及解决方案](计算机基础/网络-httpCode.md)
+    - ✔ [七层协议](计算机网络/网络-七层协议.md)
   - 数据结构与算法
   - 操作系统
 - 技术方向
@@ -117,5 +118,7 @@
   - postcss: css 预处理
   - GraphQL: vs restful
 - [学习资源](software/资源.md) 这里记录我学习相关的资源链接
+- 示例 demo
+  - 智能提示组件：在 textarea 输入时，基于 react + getBoundingClietRect + element.selectionStart 实现的智能提示
 
 > 注：没有链接的表示待发展、学习的技术
