@@ -2,6 +2,8 @@
 
 time: 2018.12.07
 
+update: 2018.12.12
+
 基于 react + getBoundingClietRect + element.selectionStart + textarea 实现的智能提示
 
 ## 1 背景
