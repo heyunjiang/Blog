@@ -87,9 +87,11 @@
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
 - git
   - ✔ [常见问题及答案](git/常见问题及答案.md)
-- 项目经验
+- 软件工程
+  - [学习资源](software/资源.md) 这里记录我学习相关的资源链接
   - [日常感悟](software/项目开发的日常感悟.md)
   - [项目中遇到的问题](software/项目中遇到的问题.md)
+  - [MBA](software/MBA.md)
 - 设计模式、技巧
   - [高阶组件](designModal/HOC.md)
   - [Observer模式](designModal/从vue响应式数据看观察者模式.md)
@@ -117,7 +119,6 @@
   - typescript: 强类型语言
   - postcss: css 预处理
   - GraphQL: vs restful
-- [学习资源](software/资源.md) 这里记录我学习相关的资源链接
 - 示例 demo
   - 智能提示组件：在 textarea 输入时，基于 react + getBoundingClietRect + element.selectionStart 实现的智能提示
 

@@ -18,7 +18,7 @@ MBA：Master of Business Administration，工商管理硕士
 
 课程类别：包含经济学、管理学
 
-课程方向：企业管理、市场营销、人力资源、财务管理、会计、企业投资等
+课程方向：金融与投资方向、创新创业方向、综合管理方向、医疗与健康方向、文化产业方向、社会公益管理方向、数据产业方向等
 
 ## 3 报考条件
 
@@ -52,6 +52,36 @@ MBA：Master of Business Administration，工商管理硕士
 
 #### 3.1.4 课程类型
 
+EMBA：executive MBA，高阶工商管理硕士，公司高层管理者，利用空闲工作时间之余修习
+
+MBA：普通管理者或大学毕业生，学习的是普通工商管理硕士课程，增进管理知识
+
+SMBA：special MBA，普通从业人员或2年以上工作经验的人，学习的是工商管理硕士课程，强化企管专业基础能力
+
+IMBA：international MBA，国际合作工商硕士，全英文授课
+
+PMBA：part time MBA，半工半读工商硕士，3-5年完成学业
+
+FMBA：financial MBA，金融管理硕士
+
+#### 3.1.5 课程项目
+
+1. 商务英语
+2. 财务会计
+3. 管理经济学
+4. 数据分析与统计决策
+5. 组织行为学
+6. 运营管理
+7. 宏观经济政策分析
+8. 营销管理
+9. 公司财务
+10. 战略管理
+11. 企业社会责任与伦理
+12. 商业模拟与领导力烦死
+13. 从历史看管理
+14. 哲学与人生
+15. 国际商务方略
+
 ## 4 问题
 
 1. 我读 MBA 的利弊有哪些？
@@ -62,4 +92,5 @@ MBA：Master of Business Administration，工商管理硕士
 
 ## 参考文章
 
-[1. 百度百科-MBA](https://baike.baidu.com/item/%E5%B7%A5%E5%95%86%E7%AE%A1%E7%90%86%E7%A1%95%E5%A3%AB/4390565?fromtitle=MBA&fromid=10420&fr=aladdin)
+[1. 百度百科-MBA](https://baike.baidu.com/item/%E5%B7%A5%E5%95%86%E7%AE%A1%E7%90%86%E7%A1%95%E5%A3%AB/4390565?fromtitle=MBA&fromid=10420&fr=aladdin)  
+[2. 北大光华MBA](http://www.gsm.pku.edu.cn/mba/kcpy/bxkc/bxhj.htm)
