@@ -35,6 +35,7 @@
   - [es2015-generator、promise、async](es/es6-异步.md)  包含 promise, generator, async
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-作用域.md)
+  - ✔ [深入js-语句与表达式](es/深入js-语句与表达式.md)
   - ✔ [深入js-基本类型](es/深入js-基本类型.md) 包含了数值、函数、对象的关键点总结
   - ✔ [深入js-原型与继承](es/深入js-原型与继承.md)
   - ✔ [深入js-执行上下文](es/深入js-执行上下文.md)
@@ -42,7 +43,7 @@
   - ✔ [深入js-正则表达式](es/深入js-正则表达式.md)
   - [深入js-this](es/深入js-this.md)  说明了 this 指向问题
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
-  - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+02 问题、退出循环等问题
+  - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+0.2 问题、退出循环等问题
 - nodejs
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
