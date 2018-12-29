@@ -15,16 +15,15 @@
 - html
   - ✔ [深入html-标签语义化](html/深入html-标签语义化.md)
 - css
-  - ✔ [cssModule](css/cssModule.md)
+  - ✔ [cssModule](css/cssModule.md)  :global、:local、composes继承
   - ✔ [深入css-flex布局](css/深入css-flex.md)
   - [深入css-grid布局](css/深入css-grid.md)
   - ✔ [深入css-fixed、absolute、float](css/深入css-fixed、absolute、float.md)
   - ✔ [深入css-block、inline、inline-block](css/深入css-block、inline、inline-block.md)
   - ✔ [深入css-选择器及权重](css/深入css-选择器及权重.md)
-  - [cssReset](css/cssReset.md)
-  - [w3c标准](css/w3c标准.md)
-  - [常见知识归纳](css/常见知识归纳.md)
-  - [less](css/less.md)
+  - [常见知识归纳](css/常见知识归纳.md) 包含了 css 一些常用知识点：盒子模型、选择器、字体使用、rem等
+  - [预处理器-less](css/预处理器-less.md)
+  - 预处理器-postcss
   - transform 动画
   - animate 动画
 - javascript
@@ -58,7 +57,9 @@
   - ✔ [跨域实现的几种方法](other/跨域实现的几种方法.md)
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
-  - webpack 扩展、封装
+  - webpack 运行原理
+  - webpack loader
+  - webpack plugin
   - rollup基础
   - fis基础
   - ✔ [babel plugin](webpack/babel.md)
@@ -120,7 +121,6 @@
   - webAssembly: 提升项目运行效率，能在浏览器中跑的另一种语言
   - flutter: 移动应用开发，替代 android ios
   - typescript: 强类型语言
-  - postcss: css 预处理
   - GraphQL: vs restful
 - 用户体验
   - [字体优化](用户体验/字体优化.md)
