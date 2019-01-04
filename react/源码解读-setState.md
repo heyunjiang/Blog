@@ -9,6 +9,12 @@ time: 2018.11.15
 1. 在 setState 将数据加入队列之后，什么时机替换真实数据呢？
 2. 组件内部 setState 更新数据之后，组件是如何更新的呢，从头开始做 diff 比较吗？
 
+setState 特点
+
+1. 不能直接使用 `this.state.hello = world` 这种方式更新 state
+2. setState 是异步的
+3. setState 会将参数 state 与原有 state 做浅合并
+
 ## 2 解决问题
 
 ### 2.1 在 setState 将数据加入队列之后，什么时机替换真实数据呢？
