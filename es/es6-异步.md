@@ -12,9 +12,7 @@ update: 2018.8.20
 
 ## 1 promise
 
-promise 作为异步编程的一种解决方案，但是浏览器原生支持 `Promise` 对象
-
-创建 promise 中的代码会立即执行，resolve 即 .then 中的回掉函数会加入 microtask 中，待调用栈中的所有任务执行完毕，会立马执行 microtask 中的任务
+创建 promise 中的代码会立即执行，then 内部任务属于 microtask 任务
 
 ```javascript
 let promise = new Promise(function(resolve, reject) {
@@ -80,6 +78,14 @@ Promise.reject(thenable)
 1. 在 promise 内部发生的错误，具有冒泡性质，会被最近的一个 catch 捕获到
 2. 在 resolve() 之后抛出的错误，会被忽略
 3. 在 promise 内部发生的错误，不会传递到外层代码，即不能被 try...catch 捕获到，成为一个未被捕获到的事件
+
+### 1.4 promise 特征
+
+了解特征，才能在实现原理上明白，为什么这么实现
+
+1. promise 状态只能由异步操作结果决定，不受其它操作影响
+2. promise 状态改变之后不能再变
+3. promise 在实例化创建的时候，会立即执行，不能被取消
 
 ## 2 generator
 
