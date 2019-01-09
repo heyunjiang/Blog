@@ -1,93 +1,6 @@
-# generator、promise、async
+# generator
 
-time: 2018.8.02
-
-update: 2018.8.20
-
-目录
-
-[1. promise](#1-promise)  
-[2. generator](#2-generator)  
-[3. async](#3-async)
-
-## 1 promise
-
-创建 promise 中的代码会立即执行，then 内部任务属于 microtask 任务
-
-```javascript
-let promise = new Promise(function(resolve, reject) {
-  console.log('Promise');
-  resolve();
-});
-promise.then(function() {
-  console.log('resolved.');
-});
-console.log('Hi!');
-// Promise
-// Hi!
-// resolved
-```
-
-### 1.1 Promise 对象上的方法
-
-`Promise.all([])`
-
-1. 接受参数为数组，数组每个元素为一个 promise 实例
-2. 返回一个 promise
-3. 数组所有 promise 状态变成 fulfilled 之后，返回的 promise 状态才会 fulfilled
-
-`Promise.race([])`
-
-返回一个 promise, 参数同 Promise.all , 不同的是只要数组中某一个 promise 的状态变成 fulfilled 或 rejected ，那么返回的那个 promise 状态就随之改变
-
-`Promise.resolve()`
-
-返回一个 promise ，传入参数有4种情况
-
-1. 参数为 promise ：直接返回这个 promise
-2. 参数为含 then 方法的对象：立即执行 then 方法，返回新的 promise
-3. 参数为其他不为空的值：直接 resolve(param) ，返回新的 promise
-4. 参数为空：直接 resolve ，返回新的 promise
-
-`Promise.reject()`
-
-返回一个 promise, 传入的参数直接作为 catch 的参数函数的参数
-
-```javascript
-const thenable = {
-  then(resolve, reject) {
-    reject('出错了');
-  }
-};
-
-Promise.reject(thenable)
-.catch(e => {
-  console.log(e === thenable)
-})
-// true
-```
-
-### 1.2 promise 原型上的方法
-
-1. Promise.prototype.then
-2. Promise.prototype.catch
-3. Promise.prototype.finally
-
-### 1.3 promise 错误处理
-
-1. 在 promise 内部发生的错误，具有冒泡性质，会被最近的一个 catch 捕获到
-2. 在 resolve() 之后抛出的错误，会被忽略
-3. 在 promise 内部发生的错误，不会传递到外层代码，即不能被 try...catch 捕获到，成为一个未被捕获到的事件
-
-### 1.4 promise 特征
-
-了解特征，才能在实现原理上明白，为什么这么实现
-
-1. promise 状态只能由异步操作结果决定，不受其它操作影响
-2. promise 状态改变之后不能再变
-3. promise 在实例化创建的时候，会立即执行，不能被取消
-
-## 2 generator
+time: 2019.01.09
 
 目录
 
@@ -107,9 +20,7 @@ generator是一个状态机，内部保存的是多个状态
 
 关键词： `generator 遍历器`
 
-****
-
-### 2.1 例子
+## 1 例子
 
 ```javascript
 function* helloWorldGenerator() {
@@ -125,16 +36,14 @@ hw.next();
 hw.return();
 ```
 
-****
-
-### 2.2 特性
+## 2 特性
 
 1. 函数名 * 开头：但是不限制写在具体位置，只要在函数名之前就行
 2. yield 表达式：函数执行暂停标志；返回 yield 后面表达式的值给函数 next 方法调用者；只能存在于generator 函数中
 3. generator 函数调用方式与普通函数一样，但是它不立即执行，返回的是一个指向内部状态的指针对象，也就是generator的遍历器对象，该对象实现了 Symbol.iterator 接口。每次获取下一个状态，需要调用这个遍历器对象的 `next` 方法，获取到的状态是一个对象，如 `{value: "hello", done: false}`
 4. 因为 generator 函数执行返回的是一个实现了 iterator 接口的对象，可以直接使用 for of , ... 遍历了。可以用作函数延迟执行
 
-### 2.3 Generator.prototype.next()
+## 3 Generator.prototype.next()
 
 2.2 特性中的第三点讲到调用 next 方法返回的是一个指针，指向一个对象，包含value和done属性。
 
@@ -158,7 +67,7 @@ function* helloWorldGenerator() {
 
 第三次执行时，返回给函数调用者的是 `world` ；如果给此次调用 next() 方法传入参数，则该参数会被赋予给上个 yield 执行的返回结果，也就是 hello 会被设置值，比如 next('hello') ，那么第三次执行返回给函数调用者的值是 `hello world`
 
-### 2.4 Generator.prototype.throw()
+## 4 Generator.prototype.throw()
 
 设计在原型上的方法，用于在实例抛出错误，在 generator 函数内部捕获错误
 
@@ -187,13 +96,13 @@ try {
 }
 ```
 
-### 2.5 Generator.prototype.return()
+## 5 Generator.prototype.return()
 
 用于终结执行当前 generator 的遍历器对象，参数表示返回值，否则返回 undefined;
 
 如果存在 try...finally ，那么如果执行 return 时，return 会在 finally 代码块执行完成之后执行
 
-### 2.6 yield* 表达式
+## 6 yield* 表达式
 
 上面谈到的都是 yield 表达式，比如 `let hello = yield 'hello'` ， yield* 是什么呢？
 
@@ -221,7 +130,7 @@ function* concat(iter1, iter2) {
 }
 ```
 
-### 2.7 遍历 generator 遍历器
+## 7 遍历 generator 遍历器
 
 目前能遍历 generator 遍历器的方法有4种：next, for of, yield*, ... 运算符
 
@@ -230,7 +139,7 @@ function* concat(iter1, iter2) {
 3. `...`: 直接获取遍历器的 value
 4. `yield* 表达式`：返回 yield 表达式
 
-### 2.8 深入 generator 与普通函数的关系
+## 8 深入 generator 与普通函数的关系
 
 generator 形式上是一个普通函数，但是它却只是一个异步解决方案，浏览器并没有原生支持它，也就是说它不是函数的实例，它也不像 Promise 对象那样，由浏览器直接原生提供。它提供的语法只是方便开发者调用它，用以解决异步问题，实现的是一个状态机。
 
@@ -241,7 +150,7 @@ function* generatorTest () {
 }
 ```
 
-#### 2.8.1 看看 babel 将其编译成什么样子
+### 8.1 看看 babel 将其编译成什么样子
 
 ```javascript
 function generatorTest() {
@@ -271,7 +180,7 @@ function generatorTest() {
 2. 返回的包装器对象需要遍历，才能返回预定义的值
 3. generator不被浏览器原生支持，也不是一个对象，它只是实现的一种机制
 
-#### 2.8.2 prototype 属性
+### 8.2 prototype 属性
 
 普通构造函数的 prototype 属性指向原型对象，那么 generator 函数的 prototype 属性呢？
 
@@ -296,7 +205,7 @@ obj.hello() // 'hi!'
 
 答：不行，构造函数实例化是通过 new 关键字实例的，这里的 obj 实例是通过执行 generator 函数生成的，不是通过 new 关键字生成的，而且 **ES6 规定** 也不能通过 new 关键字实例化 generator 函数，因为它不能用作构造函数。
 
-#### 2.8.3 generator 中的 this 关键字
+### 8.3 generator 中的 this 关键字
 
 因为不能用作构造函数，那么 generator 函数中的 this 代表什么呢？
 
@@ -310,7 +219,7 @@ test.next() // undefined
 
 直接输出 `undefined` ，它不是指向 window、global 等对象。为什么是 `undefined` 呢？
 
-### 2.9 generator 与 协程、执行上下文
+## 9 generator 与 协程、执行上下文
 
 引用来自阮一峰 ECMAScript 6 入门中关于协程的介绍
 
@@ -325,54 +234,3 @@ generator函数执行上下文变化过程
 在generator函数执行的时候，也为其创建执行上下文环境，不立即入全局执行上下文栈；当遍历 generator 遍历器的时候，将执行上下文环境对象压入全局执行上下文栈；执行时一旦遇到 `yield` 命令，则暂停执行函数，保留当前执行状态，将执行上下文环境出栈，但是不删除，此时可以做其他事情；当继续遍历的时候，又将generator执行上下文环境入栈，冻结的状态恢复。
 
 > 学习 generator 可以搭配 redux-saga 学习
-
-## 3 async
-
-time: 2018.11.13
-
-### 3.1 问题
-
-1. async 函数是什么，有什么用？
-2. async 执行返回一个 promise ，需要手动 return promise 吗？
-3. 如果 async 函数内部抛出错误，该怎么处理？
-
-### 3.2 问题解答
-
-#### 3.2.1 async 函数是什么，有什么用？
-
-async 就是 generator 函数的语法糖。与 generator 函数不同的是，async 有 4 项改进
-
-1. 内置执行器：对于异步操作的同步写法，generator必须亲自写执行过程，而 async 属于自执行，但是 async 函数不再有 generator 的保存状态功能了
-2. 更好的语义：使用 `async/awair` 代替 `*/yield`
-3. 适用性更广：yield 命令后面通常是 Thunk 函数或者 Promise 对象，但是 await 后面可以是 promise 对象和原始类型的值
-4. 返回值是 promise ：generator 初次执行的返回值是一个 iterator 对象，可以采用 ... 遍历，每次调用 next() 执行返回一个对象 `{value: 0, done: false}` ；而 async 函数执行返回的结果是一个 promise
-
-#### 3.2.2 async 执行返回一个 promise ，需要手动 return promise 吗？
-
-答：不是，要求跟在 await 后面的必须是一个 promise 或普通原始类型，如果是原始类型，则相当于直接赋值。 async 执行结果返回一个 promise ，在其内部执行 `return value` ，这里的 value 相当于 `.then(value)` 传入的参数值
-
-#### 3.3 如果 async 函数内部抛出错误，该怎么处理？
-
-async 函数在调用时，会立即返回一个 promise ，如果内部出现错误，可以在返回的这个 promise 上处理错误。
-
-问题：如果 await 后面的异步操作出错，该怎么监听？
-
-```javascript
-const errorThrower = () => {
-  return new Promise((resolve, reject) => {
-    throw new Error("出错出错")
-  })
-}
-
-const container = async () => {
-  ...
-  let result = await errorThrower();
-  ...
-}
-```
-
-答：如果 await 后面的异步操作出错，那么该 promise 会被 reject ，从而影响到整个 container 函数返回的 promise 都被 reject。
-
-## 参考文章
-
-[1. 阮一峰-es6入门/async](http://es6.ruanyifeng.com/#docs/async)  

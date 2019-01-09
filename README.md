@@ -31,7 +31,9 @@
   - ✔ [es2015-decorator](es/es6-decorator.md)
   - ✔ [es2015-模板字符串](es/es6-模板字符串.md)
   - ✔ [es2015-Symbol](es/es6-Symbol.md)
-  - [es2015-generator、promise、async](es/es6-异步.md)  包含 promise, generator, async
+  - ✔ [es2015-promise](es/es6-promise.md)
+  - ✔ [es2015-generator](es/es6-generator.md)
+  - [es2015-async](es/es6-async.md)
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-作用域.md)
   - ✔ [深入js-语句与表达式](es/深入js-语句与表达式.md)
@@ -53,6 +55,7 @@
   - ✔ [深入浏览器-dom](browser/深入浏览器-dom.md)
   - ✔ [深入浏览器-bom](browser/深入浏览器-bom.md)
   - ✔ [深入浏览器-浏览器](browser/深入浏览器-浏览器.md)
+  - ✔ [深入浏览器-事件循环](browser/深入浏览器-事件循环.md)
   - [web 存储](PWA/web存储.md)
   - ✔ [跨域实现的几种方法](other/跨域实现的几种方法.md)
 - 构建工具
