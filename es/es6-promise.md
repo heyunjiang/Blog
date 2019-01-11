@@ -10,6 +10,7 @@ time: 2019.01.09
 [4. promise 特征](#4-promise-特征)  
 [5. promise 学习中的问题](#5-promise-学习中的问题)  
 [6. promise 应用](#6-promise-应用)  
+[7. promise 模拟实现](#7-promise-模拟实现)  
 
 创建 promise 中的代码会立即执行，then 内部任务属于 microtask 任务，会在本轮事件结束之前调用
 
@@ -29,6 +30,8 @@ p2
   .then(result => console.log('123', result))
   .catch(error => console.log(error))
 // Error: fail
+
+// 解释：此刻的 then 方法，都是针对在 p1 种返回的 promise 对象了，因为是 reject，所以直接走 catch 方法。
 ```
 
 ## 1 Promise 对象上的方法
@@ -105,6 +108,8 @@ Promise.reject(thenable)
 
 ### 5.1 resolve(param) 函数参数 param 传递给 then 方法的第一个参数函数，并且 resolve 执行后将通过构造函数生成的 promise 对象的状态变成 fulfilled。如果这个 param 参数为一个 promise ，那么这个 promise 对象的状态如何变化呢？
 
+答：如果传递的是一个 promise 对象，则不构建新的 promise 对象。后面的 then 方法都是对应该传递的 promise 对象而来的。
+
 ### 5.2 promise 对象的状态是否必须从 pending 变成 fulfilled 或 rejected？
 
 答：不是，比如通过构造函数创建的 promise 对象，如果内部不调用 resolve() 方法，则该 promise 对象始终为 `pending` 状态
@@ -117,11 +122,25 @@ Promise.reject(thenable)
 
 ## 6 promise 应用
 
-在常规使用中，通常我们不会使用构造函数 `new Promise()` 方式创建 promise 对象，而是直接使用某些具体的 api 来创建 promise 对象，比如 fetch、createAudioFileAsync 等方法
+在常规使用中，通常我们不会使用构造函数 `new Promise()` 方式创建 promise 对象，而是直接使用某些具体的 api 来创建 promise 对象，比如 fetch 等方法
+
+****
+
+promise 对象的状态变化，可以在一定时间后 resolved ，也可以立即 resolved。
+
+```javascript
+// 10s 后 resolved
+const wait = time => new Promise(resolve => setTimeout(resolve, time || 10000))
+// 立即 resolved
+Promise.resolve().then()
+```
+
+## 7 promise 模拟实现
 
 ## 参考文章
 
 [阮一峰 es 入门](http://es6.ruanyifeng.com/#docs/promise)  
 [mdn promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)  
 [mdn 使用 promises](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Using_promises)  
-[mdn EventLoop](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/EventLoop)
+[mdn EventLoop](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/EventLoop)  
+[简书 Promise 详解与实现](https://www.jianshu.com/p/459a856c476f)
