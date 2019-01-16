@@ -2,6 +2,8 @@
 
 time: 2019.01.09
 
+update: 2019.01.16
+
 目录
 
 [1. Promise 对象上的方法](#1-Promise-对象上的方法)  
@@ -105,10 +107,11 @@ Promise.reject(thenable)
 1. resolve(param) 函数参数 param 传递给 then 方法的第一个参数函数，并且 resolve 执行后将通过构造函数生成的 promise 对象的状态变成 fulfilled。如果这个 param 参数为一个 promise ，那么这个 promise 对象的状态如何变化呢？
 2. promise 对象的状态是否必须从 pending 变成 fulfilled 或 rejected？
 3. then 方法返回的 promise 对象，如果不包含异步操作，它的状态如何变化，是否可以链式调用？
+4. promise 的异步任务回调为什么就能链式写法呢？
 
 ### 5.1 resolve(param) 函数参数 param 传递给 then 方法的第一个参数函数，并且 resolve 执行后将通过构造函数生成的 promise 对象的状态变成 fulfilled。如果这个 param 参数为一个 promise ，那么这个 promise 对象的状态如何变化呢？
 
-答：如果传递的是一个 promise 对象，则不构建新的 promise 对象。后面的 then 方法都是对应该传递的 promise 对象而来的。
+答：构造函数通过 resolve 方法传递参数，同 then 方法返回值。如果传递的是一个 promise 对象，resolve 方法会作一个判断，如果是 promise 对象，则后一个对象会立即调用 `promise.then(resolve, reject)`，此刻后一个对象调用前一个对象的 `resolve | reject` 方法，后一个对象状态是已经确定了的，这就让后一个 promise 对象决定了前一个 promise 对象的状态了。
 
 ### 5.2 promise 对象的状态是否必须从 pending 变成 fulfilled 或 rejected？
 
@@ -120,11 +123,13 @@ Promise.reject(thenable)
 如果包含异步操作呢？比如返回的是一个 promise ，则这个问题就同 5.1 一样了，在 then 方法中返回 promise 对象，跟在构造函数中调用 resolve(param) 方法传递 promise 一样。  
 如果不返回 promise ，则默认是 fulfilled。
 
+### 5.4 promise 的异步任务回调为什么就能链式写法呢？
+
+答：简单讲，promise 的 then 方法的参数，是我们写的回调处理函数，不是立即执行，是作为参数传递的。
+
 ## 6 promise 应用
 
 在常规使用中，通常我们不会使用构造函数 `new Promise()` 方式创建 promise 对象，而是直接使用某些具体的 api 来创建 promise 对象，比如 fetch 等方法
-
-****
 
 promise 对象的状态变化，可以在一定时间后 resolved ，也可以立即 resolved。
 
@@ -136,6 +141,78 @@ Promise.resolve().then()
 ```
 
 ## 7 promise 模拟实现
+
+```javascript
+const PENGDING = 'pending';
+const FULLFILLED = 'fullfilled';
+const REJECTED = 'rejected';
+
+// Promise 接受一个函数参数
+function myPromise(callback) {
+  let that = this
+  this.statu = PENGDING;
+  this.fullfilledCallbackArray = []; // 保存 fullfilled 任务，当异步调用 resolve 时执行
+  this.rejectedCallbackArray = []; // 保存 rejeced 任务，当异步调用 reject 时执行
+  // 执行这个函数参数
+  callback(resolve, reject)
+  function resolve(value) {
+    // 如果返回的是一个 promise 对象，那么当前对象的状态就由该返回的 promise 对象决定了，因为直接传递的就是 resolve, reject 。如果返回的 promise 对象状态为 fullfilled ，那么当前 promise 对象状态就为 fullfilled，rejected 也一样。
+    if(value instanceof myPromise) {
+      return value.then(resolve, reject)
+    }
+    // 异步执行
+    setTimeout(() => {
+      that.statu = FULLFILLED;
+      that.result = value;
+      that.fullfilledCallbackArray.forEach(item => {
+        item(value)
+      })
+    })
+  }
+  function reject(reason) {
+    setTimeout(() => {
+      that.statu = REJECTED;
+      that.reason = reason;
+      that.rejectedCallbackArray.forEach(item => {
+        item(reason)
+      })
+    })
+  }
+}
+// then 方法，返回一个新的 promise
+myPromise.prototype.then = function (fullfilledCallback, rejectedCallback) {
+  const that = this; // 原 promise 对象的 this
+  if(this.statu === FULLFILLED) {
+    return new myPromise((resolve, reject) => {
+      setTimeout(() => {
+        let value = fullfilledCallback(that.result)
+        resolve(value)
+      })
+    })
+  } else if(this.statu === REJECTED && rejectedCallback) {
+    return new myPromise((resolve, reject) => {
+      setTimeout(() => {
+        let value = rejectedCallback(that.reason)
+        reject(value)
+      })
+    })
+  } else if(this.statu === PENGDING) {
+    return new myPromise((resolve, reject) => {
+      that.fullfilledCallbackArray.push((result) => {
+        let value = fullfilledCallback(result);
+        resolve(value)
+      });
+      that.rejectedCallbackArray.push(reason => {
+        let value = rejectedCallback(reason)
+        reject(value)
+      });
+    })
+  }
+}
+myPromise.prototype.catch = function (rejectedCallback) {
+  return this.then(null, rejectedCallback)
+}
+```
 
 ## 参考文章
 
