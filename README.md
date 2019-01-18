@@ -1,6 +1,6 @@
 # Blog
 
-![abilityTree](./images/abilityTree.png)
+![abilityTree](./images/abilityTree.jpg)
 
 个人技术总结，技术发展方向
 
@@ -109,12 +109,12 @@
   - [计算机组成原理](计算机基础/结构-计算机组成原理.md)
   - ✔ [vultr 搭梯子](计算机基础/vultr搭梯子.md)  科学上网，你懂的
   - 操作系统
-  - 枚举
   - 计算机网络
     - [http 3](计算机基础/网络-http3学习.md)
     - ✔ [http1、http2简介](计算机基础/网络-专题-http.md)
     - ✔ [常见 http 状态码、解释及解决方案](计算机基础/网络-httpCode.md)
     - ✔ [七层协议](计算机网络/网络-七层协议.md)
+    - ✔ [网络抓包](计算机网络/网络-抓包.md) wireshark
   - 数据结构与算法
     - ✔ [冒泡排序](计算机网络/算法-冒泡排序最优.md)
 - 技术方向
@@ -128,7 +128,9 @@
   - GraphQL: vs restful
 - 用户体验
   - [字体优化](用户体验/字体优化.md)
+- 人工智能
+  - [人工智能入门](人工智能/人工智能入门.md)
 - 示例 demo
-  - 智能提示组件：在 textarea 输入时，基于 react + getBoundingClietRect + element.selectionStart 实现的智能提示
+  - 智能提示组件: 在 textarea 输入时，基于 react + getBoundingClietRect + element.selectionStart 实现的智能提示
 
 > 注：没有链接的表示待发展、学习的技术
