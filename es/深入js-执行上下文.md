@@ -44,7 +44,7 @@ Fn1();
 
 执行环境栈变化过程：[图片来源](http://www.cnblogs.com/fool/archive/2010/10/16/1853326.html)
 
-![ecstack](./ecstack.jpg)
+![ecstack](../images/ecstack.jpg)
 
 创建执行上下文内部的 `作用域链` 及 `变量对象VO` 可以参见 [深入js-词法作用域](./深入js-词法作用域.md)
 

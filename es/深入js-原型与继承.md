@@ -14,7 +14,7 @@
 
 由原型组成的一条链，原型为一个对象，它有 `__proto__` 属性，指向父类的 `prototype` 属性
 
-![prototype](./prototype.png)
+![prototype](../images/prototype.png)
 
 `__proto__`：该属性是任何对象都有的属性
 

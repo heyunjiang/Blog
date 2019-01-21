@@ -4,15 +4,21 @@
 
 目录
 
-1. 7大变量类型
-2. 值类型与引用类型
-3. 如何理解js中参数都是按值传递
+[1 七大变量类型](#1-7大变量类型)  
+&nbsp;&nbsp;[1.1 number](#1.1-number)  
+&nbsp;&nbsp;[1.2 函数](#1.2-函数)  
+&nbsp;&nbsp;[1.3 array](#1.3-array)  
+&nbsp;&nbsp;[1.4 object](#1.4-object)  
+[2 值类型与引用类型](#2-值类型与引用类型)  
+[3 如何理解js中参数都是按值传递](#3-如何理解js中参数都是按值传递)  
+[4 参考文章](#4-参考文章)
 
 ## 1 7大变量类型
 
 boolean, number, string, null, undefined, object, symbol
 
-Symbol 单独拿出去总结的 [es6-Symbol](./es6-Symbol.md)
+symbol：[es6-Symbol](./es6-Symbol.md)  
+string: [es2015-模板字符串](./es6-模板字符串.md)
 
 ### 1.1 number
 
@@ -51,7 +57,8 @@ Symbol 单独拿出去总结的 [es6-Symbol](./es6-Symbol.md)
 
 #### 1.1.3 number 的存储方式
 
-整数和浮点数采用同样的存储方法，都采用 IEEE 754 标准(其他大多数语言同样)，数值存储为64位双精度格式，但是在js中，数值精度最多可以达到53个二进制位(1个隐藏位与52个有效位)，超过限度的会被丢弃。
+整数和浮点数采用同样的存储方法，都采用 IEEE 754 标准(其他大多数语言同样)，数值存储为64位双精度格式，但是在js中，数值精度最多可以达到53个二进制位(1个隐藏位与52个有效位)，超过限度的会被丢弃。  
+javascript 不区分整数值和浮点数值，所有数字在 javascript 中均用 `浮点数` 值表示。
 
 #### 1.1.4 Math 扩展
 
@@ -537,3 +544,7 @@ const obj = {
 const arr = [{"hello": 'world'}, {"hello": 'world'}]
 console.log(arr === arr, arr[0] === arr[1]) //true, false
 ```
+
+## 4 参考文章
+
+[mdn javascript 教程](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)
