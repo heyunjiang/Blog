@@ -4,9 +4,9 @@
 
 目录
 
-1. 原型链
-2. 实现继承的3种方式
-3. 原型对象注意事项
+1. [原型链](#1-原型链)
+2. [实现继承的3种方式](#2-实现继承的3种方式)
+3. [原型对象注意事项](#3-原型对象注意事项)
 
 > 原型：也称为实例原型，是一个对象，构造函数的 `prototype` 属性指向的就是原型，由构造函数创建的实例有个 `__proto__` 属性，指向的也是原型
 
@@ -67,6 +67,22 @@ createClass: function(spec) {
 
 > 说明：第3种方式与前2种有很大的区别，前2种都继承了父亲的所有属性，第三种继承部分父亲属性，并且可以隐藏操作细节，不允许实例直接访问属性值，实现对父亲属性的保护，通过闭包。
 
+### 2.4 class 继承
+
+time: 2019.01.22
+
+```javascript
+class Parent {
+  constructor() {}
+}
+
+class children extends Parent {
+  constructor() {
+    super()
+  }
+}
+```
+
 ## 3 原型对象注意事项
 
 ```javascript
@@ -106,3 +122,20 @@ prototype 是只存在于构造器中，实例不具备这个属性，实例具�
 问： 构造器的 __proto__ 属性，与构造器原型对象的 __proto__ 属性什么关系？
 
 答： 并没有什么关系。构造器原型对象的 __proto__ 指向的是 Object 的原型对象。反而构造器原型对象的 constructor 的 __proto__ 属性，它就是构造器的 __proto__ 属性，即 `Hello.__proto__ = Hello.prototype.constructor.__proto__`
+
+### 3.4 获取/设置对象的原型
+
+以往访问对象原型对象，可以通过构造函数的 `prototype` 属性访问，也可以通过实例对象的 `__proto__` 属性访问
+
+es6 在全局对象 Object 上新增了2个方法：
+
+1. Object.getPrototypeOf() 获取对象的原型
+2. Object.setPrototypeOf() 设置对象的原型
+
+问题：能使用 setPrototypeOf 方法在 function 构造函数上吗？  
+答：不能。通常在 function 构造函数上使用 prototype 属性访问原型对象，在实例对象上使用 `__proto__` 属性访问构造函数的原型对象，但是也可以使用 getPrototypeOf 访问实例对象的原型对象。
+
+## 参考文章
+
+[mdn super](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/super)  
+[mdn 继承与原型](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Inheritance_and_the_prototype_chain)
