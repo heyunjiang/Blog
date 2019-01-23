@@ -42,7 +42,7 @@
   - ✔ [深入js-执行上下文](es/深入js-执行上下文.md)
   - ✔ [深入js-闭包](es/深入js-闭包.md)
   - ✔ [深入js-正则表达式](es/深入js-正则表达式.md)
-  - [深入js-内存管理与垃圾回收](es/深入js-内存管理与垃圾回收.md)
+  - ✔ [深入js-内存管理与垃圾回收](es/深入js-内存管理与垃圾回收.md)
   - [深入js-this](es/深入js-this.md)  说明了 this 指向问题
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
   - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+0.2 问题、退出循环等问题
@@ -131,6 +131,7 @@
   - [字体优化](用户体验/字体优化.md)
 - 人工智能
   - [人工智能入门](人工智能/人工智能入门.md)
+  - [python入门](人工智能/python入门.md)
 - 示例 demo
   - 智能提示组件: 在 textarea 输入时，基于 react + getBoundingClietRect + element.selectionStart 实现的智能提示
 
