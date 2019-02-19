@@ -26,6 +26,7 @@
   - 预处理器-postcss
   - transform 动画
   - animate 动画
+  - [动画-flip](css/动画-flip.md) flip技术让过渡动画更流畅
 - javascript
   - ✔ [es2015-解构赋值](es/es6-解构赋值.md)
   - ✔ [es2015-decorator](es/es6-decorator.md)
