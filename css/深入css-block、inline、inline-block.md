@@ -16,7 +16,10 @@ block 元素，也就是所说的块级元素，通常有 div, header, nav, foot
 
 除了 float 之外，还有其他例子。比如 设置父元素为 `display: flex` ，那么子元素及时是块级元素，那么它的宽度也不会充满一行，而是由其内容长度决定，它的 display 属性依旧会是 block。
 
-**总结**：1 一个块级元素宽度是否占满一行，取决于它父元素的表现，如果父元素占满一行，它才会占满一行；2 给一个占满一行的块级元素设置width，它依旧会占满一行，浏览器依旧会强制换行
+**总结**：
+
+1. 一个块级元素宽度是否占满一行，取决于它父元素的表现，如果父元素占满一行，它才会占满一行，如果父元素属于特殊布局，则 display 为 block 的子元素也不能占满一行  
+2. 给一个占满一行的块级元素设置width，它依旧会占满一行，浏览器依旧会强制换行
 
 ## 2 inline
 
@@ -31,6 +34,8 @@ block 元素，也就是所说的块级元素，通常有 div, header, nav, foot
 通常将一个行内元素设置为 inline-block 元素，是因为 inline-block 可以设置 width, height, margin, padding，但是又不占一行；即它拥有了块级元素及行内元素的一些特点
 
 另外，设置成 inline-block，该元素就构成了一个bfc
+
+默认为 inline-block 的元素：img, button, radio, checkbox, input 等
 
 ## 参考文章
 

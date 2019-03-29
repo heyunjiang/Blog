@@ -6,44 +6,7 @@ update: 2018.8.14
 
 总体来说，3者都是脱离文档流，但是3者又有不同
 
-目录
-
-1. fixed
-2. absolute
-3. float
-4. bfc
-
-案例：今天在做友空间用友plm首页的时候，将一个盒子里面的按钮组设置为
-
-```css
-.sliderBtns {
-    position: absolute;
-    border: 1px solid #a5a5a5;
-    background-color: white;
-    padding: 2px 4px;
-    width: 30vw;
-    bottom: -30px;
-    border-radius: 5px;
-    z-index: 1;
-    transition: bottom .3s ease;
-}
-```
-
-并且其父元素设置了
-
-```css
-#main-content {
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    background-color: #eaeaea;
-    padding: 0 8px;
-}
-```
-
-但是，它还是能够通过滚动页面看到它
-
-然后我将其设置为 fixed ，随便怎么滚动都不能看到了
+关键词： fixed、absolute、float、 bfc
 
 ## 1 fixed
 
