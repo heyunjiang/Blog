@@ -82,10 +82,9 @@
     - ✔ [深入理解virtualDOM](react/深入理解virtualDOM.md)
     - ✔ [基本使用-react](react/基本使用-react.md) 官网 api + 使用技巧
     - ✔ [基本使用-react-router](react/基本使用-react-router.md) ：react-router 4
-    - [vue vs react](react/react-vs-vue.md) : 虚拟dom、数据流
+    - [vue vs react](react/react-vs-vue.md) : 可以直接参考 vue 及 react 相关知识点
   - vue
     - ✔ [vue 双向绑定原理](vue/vue响应式原理.md)
-    - [基本使用-vue](vue/基本使用-vue.md) 官网 api + 使用技巧
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
