@@ -22,6 +22,18 @@ css 参考手册上提到：vertical-align 是将当前元素放置在父元素�
 
 规定：vertical-align用来指定行内元素 (inline) 或表格单元格 (table-cell) 的对齐方式
 
+表格居中或其他对齐方式，浅显易懂，这里主要是归纳一下行内元素的对齐方式
+
+实践证明，其对行内块状元素也是有效
+
+## 3 总结
+
+1. vertical-align 指的是相对于兄弟 inline 或 inline-block 的对齐方式，不是相对于父元素的对齐方式，比如 height + line-height 是让子元素相对于父元素居中对齐
+2. vertical-align 只对行内及行内块状元素起效， 不对普通块状元素起效
+3. float 会使 vertical-align 属性失效，所以该属性的使用很有限制
+
+
+
 ## 参考文章
 
 [张鑫旭-vertical-align](https://www.zhangxinxu.com/wordpress/2010/05/%E6%88%91%E5%AF%B9css-vertical-align%E7%9A%84%E4%B8%80%E4%BA%9B%E7%90%86%E8%A7%A3%E4%B8%8E%E8%AE%A4%E8%AF%86%EF%BC%88%E4%B8%80%EF%BC%89/)  

@@ -35,7 +35,7 @@ block 元素，也就是所说的块级元素，通常有 div, header, nav, foot
 
 另外，设置成 inline-block，该元素就构成了一个bfc
 
-默认为 inline-block 的元素：img, button, radio, checkbox, input 等
+默认为 inline-block 的元素：img(它的浏览器默认display属性是inline，但是它可以直接设置 width、height), button, radio, checkbox, input 等
 
 ## 参考文章
 

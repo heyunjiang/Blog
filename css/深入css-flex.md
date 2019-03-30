@@ -48,7 +48,7 @@ display新属性值
 
 如果父元素设置了 `display: flex;` ，那么它的后代是怎么表现呢？后代分块级与行内分析
 
-> 总结：如果父元素设置为 `display: flex;`， 那么它的子元素表现为 `display: block` ，并且子元素宽度由其内容宽度决定
+> 总结：如果父元素设置为 `display: flex;`， 那么它的子元素表现为 `display: block` ，并且子元素宽度由其内容宽度决定，高度如果没有自己设置，则会从祖先继承
 
 ### 4.1 块级 display: block
 
