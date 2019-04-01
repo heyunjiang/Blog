@@ -1,14 +1,17 @@
 # react vs vue
 
 > 每当自己对 vue 或 react 有疑惑的时候，则可以来这里查看相关  
-> 总结归纳方式：通读 vue 官方文档，每到一个知识点，同 react 官方文档对比来看
+> 总结归纳方式：通读 vue 官方文档，每到一个知识点，同 react 官方文档对比来看，待总结完了，再完整看 react 官方文档一编
 
 已经总结到：基础 - vue 实例，该**模板语法**了
 
 ## 1 整体对比
 
+归纳
+1. react 很轻量，vue 做了太多特性的东西了，比如指令、class多种类型绑定等
+
 | 类型     | react  |  vue  |
-| -------- | :-----: | :----:   |
+| -------- | :----- | :----   |
 | `1渐进式框架` | ✔  | ✔  |
 | `2虚拟dom` | ✔  | ✔  |
 | `2虚拟dom`-特点 | 一个根实例 + 树形后代多实例  | 一个根实例 + 树形后代多实例  |
@@ -17,13 +20,21 @@
 | `3数据流`-props | 单向数据流 | 单向数据流 |
 | `3数据流`-data | 在 constructor 方法内部设置 this.state = {} | data(){return {}}，首层为响应式数据 |
 | `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | defineProperty、proxy 添加 watcher 给每个数据；<br>也可以主动 this.hello = 'world'，数据变动添加到更新队列 |
+| `3数据流`-数组更新 | only setState | 支持直接 arr.push() 或者 arr = [...arr, newItem] |
 | `4组件`-格式 | 标准 es6 class 对象, `.js` | vue 指定格式, `.vue` |
 | `4组件`-根组件渲染 | ReactDOM.render(element, document.body) | new Vue({ele, router, template, components}) |
 | `4组件`-实例 | 每个组件都是一个 react 实例 | 每个组件都是一个 vue 实例 |
-| `4组件`-jsx | React.createElement(component, props, ...children) 的语法糖 | createElement |
-| `4组件`-jsx-内容变量 | {hello} | {{hello}} |
+| `4组件`-自定义组件命名 | 名称必须大写开头 | 名称可以大写小写开头 |
+| `4组件`-jsx-解析 | React.createElement(component, props, ...children) 的语法糖 | render: createElement => createElement(...) |
+| `4组件`-jsx-内容变量 | {hello} | {{hello}}、v-html |
 | `4组件`-jsx-属性变量 | `<span title={this.state.title}>` | `<span v-bind:title="title">` |
+| `4组件`-jsx-属性批量传递 | {...childPros} | v-bind="childPros" |
 | `4组件`-jsx-属性变量不传值 | 默认为 true | 默认为 true |
+| `4组件`-jsx-动态生成节点 | jsx array，可以通过 map 或普通函数 return 节点 | v-html, v-for |
+| `4组件`-jsx-class绑定 | className={this.state.helloClass}，**组件根元素呢？** | bind 中可以是字符串、数组、对象，用在组件上可以渲染到组件的根元素上 |
+| `4组件`-jsx-style绑定 | style={styleObject} | :style="styleObject"，多个的话支持数组 |
+| `4组件`-jsx-防xss攻击 | react 会把所有内容在渲染前解析成字符串 | vue 会把所有内容在渲染前解析成字符串，但是不会转换v-html 的值，会有 xss 攻击风险 |
+| `4组件`-jsx-隐身元素 | React.Fragment 或 <></> | template |
 | `5生命周期`-实例创建前 | constructor() | beforeCreate() |
 | `5生命周期`-实例创建成功 | - | created() |
 | `5生命周期`-实例挂载前 | getDerivedStateFromProps() | beforeMount() |
@@ -46,7 +57,14 @@
 
 ### 2.1 指令
 
-1. v-bind: 节点属性插入变量
+1. v-bind: v-bind:href="", 简写 `:href=""`，节点属性插入变量
+2. v-once: 节点一次性插值，当变量变化的时候，该节点的值不会更新
+3. v-html: 节点输出内部 innerHTML (不要对用户提供的内容使用 v-html，容易导致 xss 攻击)
+4. v-if, v-else, v-else-if, v-show
+5. v-on: 邦定事件，v-on:click=""，简写`@click=""`
+6. v-for
+
+> 指令修饰：@click.prevent=""
 
 ### 2.2 实例属性
 
@@ -62,7 +80,10 @@
 1. 内部响应式数据需要使用到 props 数据：使用 `watch` 监听 props 数据，动态更新 data 内部属性值
 2. 复杂计算构成的普通数据：使用 `computed`，当一个状态需要由其他数据决定的时候，包括 props 数据、响应式数据、普通数据，但是 computed 数据本身只能作为普通数据，不能用于响应式数据
 
-计算属性 computed 特点：`数据缓存`，当依赖数据变化时才会去更新缓存
+计算属性 computed 特点：
+
+1. `数据缓存`，当依赖数据变化时才会去更新缓存
+2. `setter 反响更新其它数据`，本来计算属性是只有 getter，但是可以强行增加 setter，反响操作，更新其他值
 
 ## 3 标准示例
 
