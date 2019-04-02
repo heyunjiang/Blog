@@ -1,9 +1,27 @@
 # react vs vue
 
-> 每当自己对 vue 或 react 有疑惑的时候，则可以来这里查看相关  
-> 总结归纳方式：通读 vue 官方文档，每到一个知识点，同 react 官方文档对比来看，待总结完了，再完整看 react 官方文档一编
+author: heyunjiang  
+time: 2019.3.27  
+update: 2019.4.2  
 
-已经总结到：基础 - vue 实例，该**模板语法**了
+> 每当自己对 vue 或 react 有疑惑的时候，则可以来这里查看相关  
+> 总结归纳方式：通读 vue 官方文档，每到一个知识点，同 react 官方文档对比来看，待总结完了，再完整看 react 官方文档一编；日后做项目，如果有发现新的特点或者有所项目感悟，也可以总结到这里来
+
+已经总结到：基础 - vue 组件注册，该[深入-prop](https://cn.vuejs.org/v2/guide/components-props.html)了
+
+目录
+
+[1 整体对比](#1-整体对比)  
+[2 vue 特色](#2-vue-特色)  
+&nbsp;&nbsp;[2.1 指令](#2.1-指令)  
+&nbsp;&nbsp;[2.2 实例属性](#2.2-实例属性)  
+&nbsp;&nbsp;[2.3 computed vs watch](#2.3-computed-vs-watch)  
+[3 标准示例](#3-标准示例)  
+[5 项目经验总结](#5-项目经验总结)  
+&nbsp;&nbsp;[5.1 父子组件数据组织](#5.1-父子组件数据组织)  
+&nbsp;&nbsp;[5.2 表单可编辑状态数据回滚](#5.2-表单可编辑状态数据回滚)  
+&nbsp;&nbsp;[5.3 使用 v-if 阻止组件渲染与发起 http 请求](#5.3-使用-v-if-阻止组件渲染与发起-http-请求)  
+&nbsp;&nbsp;[5.4 组件使用 v-model](#5.4-组件使用-v-model)  
 
 ## 1 整体对比
 
@@ -19,12 +37,14 @@
 | `3数据流`-响应式数据 | - | 双向数据邦定 |
 | `3数据流`-props | 单向数据流 | 单向数据流 |
 | `3数据流`-data | 在 constructor 方法内部设置 this.state = {} | data(){return {}}，首层为响应式数据 |
-| `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | defineProperty、proxy 添加 watcher 给每个数据；<br>也可以主动 this.hello = 'world'，数据变动添加到更新队列 |
+| `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | 1. 响应式数据：defineProperty、proxy 添加 watcher 给每个数据；<br>2. 也可以主动 this.hello = 'world'，数据变动添加到更新队列；<br>3. this.$set(this.hello, 'world', 27) 添加响应式数据，或者更新数组、对象的值，直接更新数组对应下标值、更新对象属性是不能将数据添加到更新队列，界面无法更新；<br>4. v-model 双向邦定标单数据 |
 | `3数据流`-数组更新 | only setState | 支持直接 arr.push() 或者 arr = [...arr, newItem] |
 | `4组件`-格式 | 标准 es6 class 对象, `.js` | vue 指定格式, `.vue` |
 | `4组件`-根组件渲染 | ReactDOM.render(element, document.body) | new Vue({ele, router, template, components}) |
 | `4组件`-实例 | 每个组件都是一个 react 实例 | 每个组件都是一个 vue 实例 |
 | `4组件`-自定义组件命名 | 名称必须大写开头 | 名称可以大写小写开头 |
+| `4组件`-全局注册 |  | Vue.component()<br>一些通用、常用组件可以考虑全局注册，通过 webpack 进行目录性质的全局注册 |
+| `4组件`-局部注册 | export default class Hello extends React.component {} | export default {name:'Hello', data(){return {}}} |
 | `4组件`-jsx-解析 | React.createElement(component, props, ...children) 的语法糖 | render: createElement => createElement(...) |
 | `4组件`-jsx-内容变量 | {hello} | {{hello}}、v-html |
 | `4组件`-jsx-属性变量 | `<span title={this.state.title}>` | `<span v-bind:title="title">` |
@@ -46,8 +66,11 @@
 | `5生命周期`-实例销毁前 | componentWillUnmount() | beforeDestroy() |
 | `5生命周期`-实例销毁成功 | componentDidUnmount() | destroyed() |
 | `5生命周期`-实例错误处理 | getDerivedStateFromError()、componentDidCatch() | errorCaptured() |
-| `事件`-邦定 | onClick="clickCallback" | v-on:click="clickCallback" 或 @click="clickCallback" |
-| `事件`-兼容性 | ✔  | ✔  |
+| `6事件`-邦定 | onClick="clickCallback" | v-on:click="clickCallback" 或 @click="clickCallback" |
+| `6事件`-兼容性 | ✔  | ✔  |
+| `6事件`-访问原始event |   | @click="func($event)"  |
+| `6事件`-事件修饰 |   | .stop, .prevent, .capture, .self, .once, .passive，按键修饰、系统修饰  |
+| `6事件`-自定义事件并触发 |   | 定义：@personalEvent="func";<br> 触发：@click="this.$emit('personalEvent')")  |
 | `扩展`-状态管理 | redux  | vuex  |
 
 > 待补充：  
@@ -62,7 +85,8 @@
 3. v-html: 节点输出内部 innerHTML (不要对用户提供的内容使用 v-html，容易导致 xss 攻击)
 4. v-if, v-else, v-else-if, v-show
 5. v-on: 邦定事件，v-on:click=""，简写`@click=""`
-6. v-for
+6. v-for: 循环，增加 key 是为了提高效率，方便追踪到具体元素，而不是所有元素都去比较
+7. v-model: 双向邦定标单数据，属于语法糖，本质是监听事件更新数据，会忽略value、checked、selected 等特性，支持 input 框的 v-model.lay 属性，在 change 时更新，而不是 input 的时候更新
 
 > 指令修饰：@click.prevent=""
 
@@ -151,14 +175,14 @@ export default {
 
 ## 5 项目经验总结
 
-### 5.1 父子组件信息交互
+### 5.1 父子组件数据组织
 
 通常实现一个功能模块，需要将该功能模块拆分成多个模块，模块之间信息通过 `props` 传递数据与方法
 
 1. `index.vue`：入口文件，作为其他组件的父组件，包含通用状态
 2. 多层嵌套、多子组件实例，建议使用状态管理
 
-### 5.2 标单可编辑状态数据回滚
+### 5.2 表单可编辑状态数据回滚
 
 表单数据更新，应当允许数据回滚，比如数据用户编辑出错，选择取消编辑，则数据应当回滚
 
@@ -177,10 +201,26 @@ currentInfo：当前表单双向数据邦定数据，由 originalInfo 而来，�
 1. 如果项目中用到的 vuex 状态管理，就可以多个子组件共享一套数据，而不用重复去发起数据请求了
 2. 如果使用动态加载技术，也可以实现在需要的时候再去加载这个组件，但是组件属于内部组件，而不是模块组件的话，则
 
-****
+### 5.4 组件使用 v-model
 
+一直以来，深受 react 的影响，保持数据单向流动。在 vue 支持 组件 v-model 后，这里总结一下如何使用
 
+在表单上是使用 v-model 等同于同时使用 v-bind 和 v-on，比如
 
+```vue
+<input v-model="searchText">
+
+// 等同于
+<input
+  v-bind:value="searchText"
+  v-on:input="searchText = $event.target.value"
+>
+```
+
+所以，在组件上使用 v-model 就比如满足以下条件
+
+1. 组件内部默认会传一个 prop.value
+2. 触发邦定事件 `this.$emit('input', $event.target.value)
 
 ## 参考文章
 
