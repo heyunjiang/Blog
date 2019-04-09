@@ -14,9 +14,9 @@ update: 2019.01.16
 [6. promise 应用](#6-promise-应用)  
 [7. promise 模拟实现](#7-promise-模拟实现)  
 
-创建 promise 中的代码会立即执行，then 内部任务属于 microtask 任务，会在本轮事件结束之前调用
+创建 promise 中的代码会立即执行，then 内部任务属于 microtask 任务，会在本轮事件结束之前调用; 而 macrotask 会在下轮事件开始之前调用
 
-> 而 macrotask 会在下轮事件开始之前调用
+> 了解 promise 所有特性，直接把它实现一次就行，或者看它的模拟实现了
 
 ```javascript
 // 解释一下下面代码的执行逻辑
@@ -111,7 +111,7 @@ Promise.reject(thenable)
 
 ### 5.1 resolve(param) 函数参数 param 传递给 then 方法的第一个参数函数，并且 resolve 执行后将通过构造函数生成的 promise 对象的状态变成 fulfilled。如果这个 param 参数为一个 promise ，那么这个 promise 对象的状态如何变化呢？
 
-答：构造函数通过 resolve 方法传递参数，同 then 方法返回值。如果传递的是一个 promise 对象，resolve 方法会作一个判断，如果是 promise 对象，则后一个对象会立即调用 `promise.then(resolve, reject)`，此刻后一个对象调用前一个对象的 `resolve | reject` 方法，后一个对象状态是已经确定了的，这就让后一个 promise 对象决定了前一个 promise 对象的状态了。
+答：构造函数通过 resolve 方法传递参数 promiseB，同 then 方法返回值。如果传递的是一个 promise 对象 `promiseB`，resolve 方法会作一个判断，如果是 promise 对象，则 promiseB 会立即调用 `promise.then(resolve, reject)`，此刻 promiseB 调用前一个对象的 `resolve | reject` 方法，promiseB 状态是已经确定了的，这就让 promiseB 决定了前一个 promise 对象的状态了。
 
 ### 5.2 promise 对象的状态是否必须从 pending 变成 fulfilled 或 rejected？
 
@@ -153,14 +153,14 @@ function myPromise(callback) {
   this.statu = PENGDING;
   this.fullfilledCallbackArray = []; // 保存 fullfilled 任务，当异步调用 resolve 时执行
   this.rejectedCallbackArray = []; // 保存 rejeced 任务，当异步调用 reject 时执行
-  // 执行这个函数参数
+  // 1 执行这个函数参数
   callback(resolve, reject)
   function resolve(value) {
-    // 如果返回的是一个 promise 对象，那么当前对象的状态就由该返回的 promise 对象决定了，因为直接传递的就是 resolve, reject 。如果返回的 promise 对象状态为 fullfilled ，那么当前 promise 对象状态就为 fullfilled，rejected 也一样。
+    // 2 如果返回的是一个 promise 对象，那么当前对象的状态就由该返回的 promise 对象决定了，因为直接传递的就是 resolve, reject 。如果返回的 promise 对象状态为 fullfilled ，那么当前 promise 对象状态就为 fullfilled，rejected 也一样。
     if(value instanceof myPromise) {
       return value.then(resolve, reject)
     }
-    // 异步执行
+    // 3. resolve 及 reject 内部异步执行，因为需要等待 then 的参数添加到任务队列中
     setTimeout(() => {
       that.statu = FULLFILLED;
       that.result = value;
@@ -179,25 +179,24 @@ function myPromise(callback) {
     })
   }
 }
-// then 方法，返回一个新的 promise
+// 4 then 方法，返回一个新的 promise
 myPromise.prototype.then = function (fullfilledCallback, rejectedCallback) {
   const that = this; // 原 promise 对象的 this
-  if(this.statu === FULLFILLED) {
-    return new myPromise((resolve, reject) => {
+  return new myPromise((resolve, reject) => {
+    if(this.statu === FULLFILLED) {
+      // 原对象执行完毕，已经调用 resolve()，场景是没有链式调用，多是用在 promiseA+ 上面
       setTimeout(() => {
         let value = fullfilledCallback(that.result)
         resolve(value)
       })
-    })
-  } else if(this.statu === REJECTED && rejectedCallback) {
-    return new myPromise((resolve, reject) => {
+    } else if(this.statu === REJECTED && rejectedCallback) {
+      // 原对象执行完毕，已经调用 reject()
       setTimeout(() => {
         let value = rejectedCallback(that.reason)
         reject(value)
       })
-    })
-  } else if(this.statu === PENGDING) {
-    return new myPromise((resolve, reject) => {
+    } else if(this.statu === PENGDING) {
+      // 如果原对象还在执行过程中，还没有来得及调用 resolve() 或者 reject()
       that.fullfilledCallbackArray.push((result) => {
         let value = fullfilledCallback(result);
         resolve(value)
@@ -206,8 +205,8 @@ myPromise.prototype.then = function (fullfilledCallback, rejectedCallback) {
         let value = rejectedCallback(reason)
         reject(value)
       });
-    })
-  }
+    }
+  })
 }
 myPromise.prototype.catch = function (rejectedCallback) {
   return this.then(null, rejectedCallback)

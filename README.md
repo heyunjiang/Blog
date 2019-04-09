@@ -34,7 +34,7 @@
   - ✔ [es2015-Symbol](es/es6-Symbol.md)
   - ✔ [es2015-promise](es/es6-promise.md)
   - ✔ [es2015-generator](es/es6-generator.md)
-  - [es2015-async](es/es6-async.md)
+  - ✔ [es2015-async](es/es6-async.md)
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-作用域.md)
   - ✔ [深入js-语句与表达式](es/深入js-语句与表达式.md)
