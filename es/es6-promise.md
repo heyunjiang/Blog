@@ -164,6 +164,7 @@ function myPromise(callback) {
     setTimeout(() => {
       that.statu = FULLFILLED;
       that.result = value;
+      // resolve 异步执行的是 then 传入的方法
       that.fullfilledCallbackArray.forEach(item => {
         item(value)
       })

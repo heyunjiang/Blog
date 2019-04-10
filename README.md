@@ -70,6 +70,7 @@
   - fis基础
   - ✔ [babel plugin](webpack/babel.md)
 - 框架
+  - [mvvm](other/mvvm.md) 都在用 mvvm ，到底什么 mvvm 是什么？
   - [源码解读-antd](react/源码解读-antd.md)
   - react
     - ✔ [源码解读-dva](react/源码解读-dva.md)
@@ -97,8 +98,8 @@
   - ✔ [常见问题及答案](git/常见问题及答案.md)
 - 软件工程
   - [学习资源](software/资源.md) 这里记录我学习相关的资源链接
-  - [项目日常感悟](software/项目开发的日常感悟.md)
-  - [项目中遇到的问题](software/项目中遇到的问题.md)
+  - ✔ [项目日常感悟](software/项目开发的日常感悟.md)
+  - ✔ [项目中遇到的问题](software/项目中遇到的问题.md)
   - ✔ [MBA](software/MBA.md)
 - 设计模式、技巧
   - [高阶组件](designModal/HOC.md)
