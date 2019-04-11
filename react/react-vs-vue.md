@@ -201,26 +201,20 @@ currentInfo：当前表单双向数据邦定数据，由 originalInfo 而来，�
 1. 如果项目中用到的 vuex 状态管理，就可以多个子组件共享一套数据，而不用重复去发起数据请求了
 2. 如果使用动态加载技术，也可以实现在需要的时候再去加载这个组件，但是组件属于内部组件，而不是模块组件的话，则
 
-### 5.4 组件使用 v-model
+### 5.4 组件抽离原则
 
-一直以来，深受 react 的影响，保持数据单向流动。在 vue 支持 组件 v-model 后，这里总结一下如何使用
+组件抽离类型
 
-在表单上是使用 v-model 等同于同时使用 v-bind 和 v-on，比如
+1. 页面模块抽离：一个页面由多个模块组成，比如 `header + leftList + rightContent + footer` ，每个模块都单独拆分，公共数据由统一父组件管理
+2. 通用模块抽离：项目内不同页面可能使用到相同的模块，比如 `文件上传、评论列表` 等，需要抽离出来
+3. 通用组件抽离：通常是特性组件，是你自行设计的通用组件，可以跨项目使用的
 
-```vue
-<input v-model="searchText">
+组件抽离原则
 
-// 等同于
-<input
-  v-bind:value="searchText"
-  v-on:input="searchText = $event.target.value"
->
-```
-
-所以，在组件上使用 v-model 就比如满足以下条件
-
-1. 组件内部默认会传一个 prop.value
-2. 触发邦定事件 `this.$emit('input', $event.target.value)
+1. readme：每个组件要有一个 readme.md 的说明文件 (或者至少在组件入口 index.vue 中要一段说明注释)
+2. props：组件的 props 要设计的合理，每个 prop 至少包含如下字段 `type, required, desc`
+3. 注释：组件内部各项操作要有注释
+4. 编码规范：符合 vue 官方风格指南，包括组件命名、选项顺序等
 
 ## 参考文章
 

@@ -1,0 +1,35 @@
+{
+	"Print to console": {
+        "prefix": "vue",
+        "body": [
+            "<template>",
+            "  <div></div>",
+            "</template>",
+			"<script>",
+			"\/**",
+			" * @title ",
+			" * @desc ",
+			" * @author heyunjiang",
+			" * @date ",
+			" */",
+			"export default {",
+			"  name: \"\",",
+			"  components: {},",
+			"  mixins: [],",
+			"  props: {},",
+            "  data() {",
+            "    return {}",
+			"  },",
+			"  computed: {},",
+			"  watch: {},",
+            "  created() {},",
+			"  methods: {}",
+			"}",
+			"</script>",
+			"<style lang=\"scss\" scoped>\n",
+            "</style>",
+            "$2"
+        ],
+        "description": "Log output to console"
+    }
+}
