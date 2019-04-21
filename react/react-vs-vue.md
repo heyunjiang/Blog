@@ -7,7 +7,7 @@ update: 2019.4.2
 > 每当自己对 vue 或 react 有疑惑的时候，则可以来这里查看相关  
 > 总结归纳方式：通读 vue 官方文档，每到一个知识点，同 react 官方文档对比来看，待总结完了，再完整看 react 官方文档一编；日后做项目，如果有发现新的特点或者有所项目感悟，也可以总结到这里来
 
-已经总结到：基础 - vue 组件注册，该[深入-prop](https://cn.vuejs.org/v2/guide/components-props.html)了
+已经总结到：基础 - vue 深入-prop，该自定义事件
 
 目录
 
@@ -37,7 +37,7 @@ update: 2019.4.2
 | `3数据流`-响应式数据 | - | 双向数据邦定 |
 | `3数据流`-props | 单向数据流 | 单向数据流 |
 | `3数据流`-data | 在 constructor 方法内部设置 this.state = {} | data(){return {}}，首层为响应式数据 |
-| `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | 1. 响应式数据：defineProperty、proxy 添加 watcher 给每个数据；<br>2. 也可以主动 this.hello = 'world'，数据变动添加到更新队列；<br>3. this.$set(this.hello, 'world', 27) 添加响应式数据，或者更新数组、对象的值，直接更新数组对应下标值、更新对象属性是不能将数据添加到更新队列，界面无法更新；<br>4. v-model 双向邦定标单数据 |
+| `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | 1. 响应式数据：defineProperty、proxy 添加 watcher 给每个组件的 data 对象；<br>2. 也可以主动 this.hello = 'world'，数据变动添加到更新队列；<br>3. this.$set(this.hello, 'world', 27) 添加响应式数据，或者更新数组、对象的值，直接更新数组对应下标值、更新对象属性是不能将数据添加到更新队列，界面无法更新；<br>4. v-model 双向邦定标单数据 |
 | `3数据流`-数组更新 | only setState | 支持直接 arr.push() 或者 arr = [...arr, newItem] |
 | `4组件`-格式 | 标准 es6 class 对象, `.js` | vue 指定格式, `.vue` |
 | `4组件`-根组件渲染 | ReactDOM.render(element, document.body) | new Vue({ele, router, template, components}) |
@@ -55,6 +55,7 @@ update: 2019.4.2
 | `4组件`-jsx-style绑定 | style={styleObject} | :style="styleObject"，多个的话支持数组 |
 | `4组件`-jsx-防xss攻击 | react 会把所有内容在渲染前解析成字符串 | vue 会把所有内容在渲染前解析成字符串，但是不会转换v-html 的值，会有 xss 攻击风险 |
 | `4组件`-jsx-隐身元素 | React.Fragment 或 <></> | template |
+| `4组件`-props |  | 1.大小写不敏感，在模版中可以采用 `kebab-case` 规则 <br> 2.使用 v-bind 批量传递 prop <br> 3.组件 props 默认存在继承特性，即父组件可以增加未在子组件中定义的prop，比如 class，默认是应用在子组件根节点上，可以使用 `inheritAttrs: false` 禁止继承 |
 | `5生命周期`-实例创建前 | constructor() | beforeCreate() |
 | `5生命周期`-实例创建成功 | - | created() |
 | `5生命周期`-实例挂载前 | getDerivedStateFromProps() | beforeMount() |
@@ -70,7 +71,8 @@ update: 2019.4.2
 | `6事件`-兼容性 | ✔  | ✔  |
 | `6事件`-访问原始event |   | @click="func($event)"  |
 | `6事件`-事件修饰 |   | .stop, .prevent, .capture, .self, .once, .passive，按键修饰、系统修饰  |
-| `6事件`-自定义事件并触发 |   | 定义：@personalEvent="func";<br> 触发：@click="this.$emit('personalEvent')")  |
+| `6事件`-自定义-定义事件并触发 |   | 定义：@personalEvent="func";<br> 触发：@click="this.$emit('personalEvent')")  |
+| `6事件`-自定义-事件名 |   | 要求必须定义和调用时一致，这个和组件名、props名不一样  |
 | `扩展`-状态管理 | redux  | vuex  |
 
 > 待补充：  
@@ -84,7 +86,7 @@ update: 2019.4.2
 2. v-once: 节点一次性插值，当变量变化的时候，该节点的值不会更新
 3. v-html: 节点输出内部 innerHTML (不要对用户提供的内容使用 v-html，容易导致 xss 攻击)
 4. v-if, v-else, v-else-if, v-show
-5. v-on: 邦定事件，v-on:click=""，简写`@click=""`
+5. v-on: 邦定事件，v-on:click=""，简写`@click=""`，可以自定义事件，在组件内部调用 this.$emit() 触发
 6. v-for: 循环，增加 key 是为了提高效率，方便追踪到具体元素，而不是所有元素都去比较
 7. v-model: 双向邦定标单数据，属于语法糖，本质是监听事件更新数据，会忽略value、checked、selected 等特性，支持 input 框的 v-model.lay 属性，在 change 时更新，而不是 input 的时候更新
 
@@ -215,6 +217,8 @@ currentInfo：当前表单双向数据邦定数据，由 originalInfo 而来，�
 2. props：组件的 props 要设计的合理，每个 prop 至少包含如下字段 `type, required, desc`
 3. 注释：组件内部各项操作要有注释
 4. 编码规范：符合 vue 官方风格指南，包括组件命名、选项顺序等
+
+### 5.5 
 
 ## 参考文章
 
