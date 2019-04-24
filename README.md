@@ -97,7 +97,6 @@
 - git
   - ✔ [常见问题及答案](git/常见问题及答案.md)
 - 软件工程
-  - [学习资源](software/资源.md) 这里记录我学习相关的资源链接
   - ✔ [项目日常感悟](software/项目开发的日常感悟.md)
   - ✔ [项目中遇到的问题](software/项目中遇到的问题.md)
   - ✔ [项目经验](https://github.com/heyunjiang/Blog/blob/master/react/react-vs-vue.md#5-%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93)
