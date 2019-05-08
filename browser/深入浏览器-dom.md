@@ -71,7 +71,7 @@ document object model: 是 html 和 xml 文档的编程接口，提供了对文�
 
 一：element api
 
-1. appendChild() removeChild() replaceChild() insertBefore() *没有 insertAfter()*
+1. appendChild() removeChild() replaceChild() insertBefore() *没有 insertAfter()* 注意：appendChild 会将原节点移除，然后在新地方生成，也就是挪动
 2. innerHTML
 3. style, className, id, lang, title: 节点常用属性 property 快捷访问或设置方式
 4. `attributes`: 节点属性集合，伪数组， `NamedNodeMap`
