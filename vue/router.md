@@ -104,6 +104,18 @@ const router = new VueRouter({
 1. webpack 会处理 es6 提供的 import 引入的组件，会拆分成独立文件，然后在需要使用到的时候才会远程加载，从而减少文件体积
 2. vue 支持异步组件，后续拿到组件时可以局部注册
 
+## 8 静态路由 vs 动态路由
+
+静态路由：实现配置好，在应用初始化创建 router 对象时传入的配置，后续根据 url 变化渲染加载不同的组件，将组件内部的 `<router-view>` 与 路由配置的 children 匹配  
+动态路由：在 react 中，动态路由的概念是没有配置，route 本身作为一个组件，将 route 组件 prop 的 `path` 属性与浏览器 url 的 path 作匹配，成功才显示内容；路由嵌套也是在 route 加载的 component 组件内部再加载一个 route ；vue 还不知道。
+
+总结区别
+
+1. 配置：静态路由有配置，动态路由没有配置
+2. 组件化：动态路由本身就是一个组件，静态路由不是
+3. 编写时：静态路由依靠 router-view, 而动态路由则需要在可能渲染到的地方都写上
+
 ## 参考文章
 
-[vue router](https://router.vuejs.org/zh/)
+[vue router](https://router.vuejs.org/zh/)  
+[react-router 4](https://react-router.docschina.org)
