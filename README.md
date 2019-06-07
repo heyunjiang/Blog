@@ -87,6 +87,7 @@
     - [vue vs react](react/react-vs-vue.md) : 可以直接参考 vue 及 react 相关知识点
   - vue
     - ✔ [vue 双向绑定原理](vue/vue响应式原理.md)
+    - ✔ [vue router](vue/router.md) 路由使用，路由配置，路由守卫，静态路由，动态路由
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
@@ -96,6 +97,7 @@
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
 - git
   - ✔ [常见问题及答案](git/常见问题及答案.md)
+  - ✔ [git知识点总结](git/git知识点总结.md)
 - 软件工程
   - ✔ [项目日常感悟](software/项目开发的日常感悟.md)
   - ✔ [项目中遇到的问题](software/项目中遇到的问题.md)
