@@ -34,7 +34,13 @@ git 虽然日常使用，也能操作 clone, pull, push, merge, reset, revert, l
 ### 3.3 git reset
 
 1. `git reset --hard commitId`：用于回滚到对应 commit 记录
-2. `git reset HEAD readme.md`：用于撤销文件当前修改，不过是将暂存区的恢复到
+2. `git reset HEAD readme.md`：用于撤销文件当前修改，不过是将暂存区的恢复到工作区
+
+参数详解
+
+1. --hard: `git reset --hard <commitId>`，撤销本次commit，并且不保存本次修改。注意，如果你 pull 下来了别人的，并且回滚到你之前的某个 commit ，很容易把别人的代码给搞没了
+2. --soft: `git reset --soft <commitId>`，撤销本次commit，并且保存 add，恢复代码到暂存区
+3. --mixed: 为默认参数，`git reset --mixed HEAD^`,等同于 `git reset HEAD^`。撤销本次 commit, 并且撤销本次 add ，恢复代码到工作区
 
 > `git checkout -- readme.md` 用于撤销工作区的修改，原理就是用本地版本库中的文件替换工作区的文件
 
