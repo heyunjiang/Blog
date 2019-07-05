@@ -10,6 +10,9 @@ author: heyunjiang
 &nbsp;&nbsp;[2.2 插件](#2.2-插件)  
 &nbsp;&nbsp;[2.3 构建项目](#2.3-构建项目)  
 [3 cli常见知识点归纳](#3-cli常见知识点归纳)  
+&nbsp;&nbsp;[3.1 vue create --help 支持的命令集合](#3.1-vue-create---help-支持的命令集合)  
+&nbsp;&nbsp;[3.2 预设配置](#3.2-预设配置)  
+[4 vue.config.js](#4-vue.config.js)  
 
 ## 1 背景
 
@@ -24,6 +27,11 @@ author: heyunjiang
 
 1. 基于 @vue/cli 搭建交互式的项目脚手架 (what?还有这种操作，用脚手架构建脚手架，此刻 @vue/cli 已经不只是一个脚手架了)
 2. 快速开始零配置原型开发：需要使用 `npm install -g @vue/cli-service-global`，用于快速查看一个 vue 组件的样子，不用再去搭建开发环境，相当于把开发环境搞成了全局配置命令了
+3. 一个运行时依赖 - `@vue/cli-service`，用于启动 webpack 服务、可通过 vue.config.js 扩展配置、插件拓展配置
+4. 一套丰富的插件集合：`@vue/cli-plugin-eslint` 等插件
+5. 图形化界面
+
+> 总结：vue-cli 就是为了方便快速的构建项目
 
 构成
 
@@ -97,14 +105,13 @@ generator 在如下2种方式被调用
 
 #### 2.2.4 使用插件
 
-1. 向已有项目增加插件：`vue add @vue/cli-plugin-eslint`
+1. 向已有项目增加插件：`vue add @vue/cli-plugin-eslint`，可以使用 `vue invoke @vue/cli-plugin-eslint` 命令增加插件，该命令跳过安装过程，接受和 vue add 相同的参数
 2. 新建项目时使用插件：在 preset 内部指定插件 npm 包
 3. 使用其他项目的已经安装好了的插件：在 package.json 中设置 `vuePlugins.resolveFrom` 可以引用其他项目的插件
 4. 使用本地的插件：`vuePlugins.service`
 
 ```json
 // 使用插件 package.json
-
 {
     "vuePlugins": {
         "resolveFrom": ".config", // 使用其他项目包含 package.json 的文件夹(service 插件，非 generator 插件)
@@ -119,7 +126,26 @@ generator 在如下2种方式被调用
 
 前面知道 servece, generator 的用法，那么 prompts 用来干嘛呢？
 
-prompts 是用于创建项目时的初始化对话，暂时先不考虑学习，因为我们采用 preset 统一配置了
+prompts 是用于插件激活时的对话，2种场景，分为项目创建时、vue invoke 时
+
+由于我们编写的插件时第三方插件，不属于 vue 内置插件(@vue/vue-cli-plugin-eslint 等才是)，所以 prompts 中要使用数组，下面归纳一下实现过程，以 vue-cli-plugin-applo 为例
+
+```javascript
+// prompts
+module.exports = [
+  {
+    type: 'input',
+    name: 'apolloEngineKey',
+    message: 'API Key (create one at https://engine.apollographql.com):',
+    validate: input => !!input
+  }
+]
+
+// generator
+module.exports = (api, options, rootOptions) => {
+    console.log(options.apolloEngineKey)
+}
+```
 
 ### 2.3 构建项目
 
@@ -139,7 +165,7 @@ prompts 是用于创建项目时的初始化对话，暂时先不考虑学习，
 8. -f, --force：覆盖目标目录可能存在的配置(覆盖已有目录？？？)
 9. -c, --clone：使用 git clone 获取远程预设选项
 10. -x, --proxy：使用指定的代理创建项目(怎么玩？)
-11. -b, --bare：创建项目时省略默认组件中的新手指导信息
+11. -b, --bare：创建项目时省略默认组件中的新手指导信息 
 12. -h, --help：输出使用帮助信息
 
 ### 3.2 预设配置
@@ -163,12 +189,19 @@ prompts 是用于创建项目时的初始化对话，暂时先不考虑学习，
 }
 ```
 
-### 3.2.1 预置配置的插件管理
+预置配置的插件管理
 
 1. 指定版本： `version: ^3.0.0`
 2. 允许插件的命令提示： `prompts: true`，注意，这个和插件的 prompts.js 文件功能不同，prompts.js 用于控制 vue-cli 的创建项目时整体的会话
 
-### 3.3 vue invoke
+## 4 vue.config.js
+
+该文件存在于根目录，用于被 `@vue/cli-service` 加载。它是一个项目配置文件，有如下作用，归纳：  
+1. 修改 webpack 一些常用配置 (也可以通过插件 index.js 来修改，但是插件的使用建议是增加或删除配置，而此处是修改配置，2者用处不同)
+2. vue 是否支持 template ，即使用包含运行时编译器的 vue 构建版本
+3. nodemodules 可选部分支持 babel 编译
+4. integrity 安全支持
+5. pluginOptions 插件选项支持，向第三方插件传递选项
 
 ## 参考文档
 

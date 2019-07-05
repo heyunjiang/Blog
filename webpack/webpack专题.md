@@ -14,7 +14,8 @@ time: 2018.8.23
  &nbsp; &nbsp; [1.9 客户端缓存](#19-客户端缓存)  
  &nbsp; &nbsp; [1.10 设置mode](#110-设置mode)  
 [2.webpack 深入](#2-webpack-深入)  
-[3.常见问题](#3-常见问题)
+[3.常见问题](#3-常见问题)  
+&nbsp; &nbsp; [3.1 -4048](#3.1--4048)  
 
 ## 1 webpack 基础
 
@@ -28,17 +29,24 @@ time: 2018.8.23
 
 特点：采用异步 I/O ，多层次缓存文件，构建与编译速度极快
 
+将资源作为模块依赖，webpack 添加进资源图谱中然后处理，会有如下好处  
+1. 脚本和样式表压缩、合并，减少网络请求
+2. 文件丢失错误提前报错：在项目编译时就报错，而不是到使用时才报 404
+3. 缓存：增加打包出来资源的名称 hash 值
+
+> 因为 webpack 就是一个模块打包器，学习它的知识点，就是学习它的打包规则，包括统一入口、文件怎么处理、文件怎么输出。其他 webpack-dev-server 等都是附带的，衍生出来的，跟它本质工作没有多少关系
+
 ### 1.2 webpack 常用概念介绍
 
-1. npx： nodejs 8.2 之后版本支持 `npx` 命令，用于调用webpack的二进制文件
+1. npx： nodejs 8.2 之后版本支持 `npx` 命令，用于调用webpack的二进制文件。具体怎么用？
 2. 文件转译(编译): webpack自身只支持 `import` 和 `export` 的转译，如果要支持其他语法，比如es6/7/8/9的，需要使用 `bable` 或 `buble` 的loader
-3. package.json script命令：npm 命令；使用npx与npm不同，npx只是一种cli命令，功能相对于npm来说弱很多
+3. package.json 内的 script 命令：npm 命令；使用npx与npm不同，npx只是一种cli命令，功能相对于npm来说弱很多
 4. webpack 配置文件加载：webpack默认加载 `webpack.config.js` ，可以通过 `--config` 在 `webpack` 命令中指定要加载的配置文件
 5. 静态资源管理：通过 `file-loader` 等可以处理一系列的静态资源，包括css、图片、字体、xml、svg等
-6. 输出bundle：可以通过设置多个入口文件控制输出多个bundle，以达到分离chunk目的
-7. 开发时错误定位: 使用 `source map`
+6. 输出bundle：可以通过设置多个入口文件控制输出多个bundle，以达到分离chunk目的，那么 bundle 和 chunk 到底什么区别？bundle 用于常规自己写的模块，chunk 用于包含一些不变的模块，比如第三方库
+7. 开发时错误定位: 使用 `source map`，一个大家遵守约定的文件，通常用第三方库或插件来实现错误定位，比如呢？
 8. tree-shaking：删除代码中从来没有用到的代码。(前提：使用es6的import、export，和第三方压缩精简工具，比如uglifyjs)
-9. chunk: 一个 chunk 就是生成一个 js 文件。由多个模块组合成一个chunk，构建出来的项目包含多个chunk，可以用于 chunk 异步加载，减少初始化时间
+9. chunk: 一个 chunk 就是生成一个 js 文件。由多个模块组合成一个chunk，构建出来的项目包含多个chunk，可以用于 chunk 异步加载，减少初始化时间。怎么定义哪些模块包含呢？使用 CommonsChunkPlugin 插件时，指定 name 和 entry 中的名称一致则可确定哪些模块需要导出一个 chunk
 
 ### 1.3 常用Loader
 
@@ -145,7 +153,7 @@ export default hot(module)(Error)
 
 ### 1.8 代码分离及懒加载
 
-1. 多入口+ `CommonsChunkPlugin` ： 当存在多个bundle的时候，使用 `CommonsChunkPlugin` 提取公共部分
+1. 多入口+ `CommonsChunkPlugin` ： 当存在多个bundle的时候，使用 ~~CommonsChunkPlugin~~ `SplitChunksPlugin` 提取公共部分
 2. 动态导入(懒加载)： `import()` 、 `require.ensure`
 
 ```javascript
@@ -175,8 +183,7 @@ new webpack.optimize.CommonsChunkPlugin({
 })
 ```
 
-使用 `HashedModuleIdsPlugin`，用于解决在entry中已经命名的chunk在使用 `CommonsChunkPlugin`打包后hash值变化的问题
-
+使用 `HashedModuleIdsPlugin`，用于解决在entry中已经命名的chunk在使用 `CommonsChunkPlugin`打包后hash值变化的问题  
 前后2次使用 `CommonsChunkPlugin` 的顺序要保证一致，因为webpack是根据解析顺序来控制hash值生成的
 
 ### 1.10 设置mode
@@ -229,9 +236,9 @@ var componentA = context.resolve('componentA');
 
 ### 2.4 模块变量
 
-这些变量，会在webpack编译的时候，替换为真正的功能，这里作为语法糖类似的存在
+这些变量，会在 webpack 编译的时候，替换为真正的功能，这里作为语法糖类似的存在
 
-有es6(commonjs)、nodejs、webpack 3个类型模块变量
+有 es6(commonjs)、nodejs、webpack 3个类型模块变量
 
 1. module.loaded：模块正在执行/执行完成
 2. module.hot：是否启用HMR

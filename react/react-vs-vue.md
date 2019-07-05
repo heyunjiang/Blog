@@ -7,7 +7,7 @@ update: 2019.4.2
 > 每当自己对 vue 或 react 有疑惑的时候，则可以来这里查看相关  
 > 总结归纳方式：通读 vue 官方文档，每到一个知识点，同 react 官方文档对比来看，待总结完了，再完整看 react 官方文档一编；日后做项目，如果有发现新的特点或者有所项目感悟，也可以总结到这里来
 
-已经总结到：基础 - vue 深入-prop，该自定义事件
+已经总结到：基础 - vue 深入-自定义事件，该 slot ，都用过，目的是完善文档，寻找自己不熟悉的点
 
 目录
 
@@ -21,7 +21,7 @@ update: 2019.4.2
 &nbsp;&nbsp;[5.1 父子组件数据组织](#5.1-父子组件数据组织)  
 &nbsp;&nbsp;[5.2 表单可编辑状态数据回滚](#5.2-表单可编辑状态数据回滚)  
 &nbsp;&nbsp;[5.3 使用 v-if 阻止组件渲染与发起 http 请求](#5.3-使用-v-if-阻止组件渲染与发起-http-请求)  
-&nbsp;&nbsp;[5.4 组件使用 v-model](#5.4-组件使用-v-model)  
+&nbsp;&nbsp;[5.4 组件抽离原则](#5.4-组件抽离原则)  
 
 ## 开头：为什么要使用框架
 
@@ -29,7 +29,7 @@ update: 2019.4.2
 2. 框架带给我们了什么？
 3. 有什么优势？
 
-基于以上3个问题，我自己分析了 vue, react 2框架，结合自身使用、官方文档、其他同学的经验来看，总结以下几点
+基于以上3个问题，我自己分析了 vue, react 两框架，结合自身使用、官方文档、其他同学的经验来看，总结以下几点
 
 1. 快速构建项目：搭配 webpack, npm 等工具，快速构建项目
 2. 标准化开发模式：框架统一提供元素集合、配置项、组件生命周期、样式等，开发者按照统一模式开发项目
@@ -49,11 +49,11 @@ update: 2019.4.2
 | `2虚拟dom` | ✔  | ✔  |
 | `2虚拟dom`-特点 | 一个根实例 + 树形后代多实例  | 一个根实例 + 树形后代多实例  |
 | `2虚拟dom`-更新方式 | diff新旧虚拟树?  | diff?  |
-| `3数据流`-响应式数据 | - | 双向数据邦定 |
+| `3数据流`-响应式数据 | 非响应式数据 | 双向数据邦定 |
 | `3数据流`-props | 单向数据流 | 单向数据流 |
-| `3数据流`-data | 在 constructor 方法内部设置 this.state = {} | data(){return {}}，首层为响应式数据 |
-| `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | 1. 响应式数据：defineProperty、proxy 添加 watcher 给每个组件的 data 对象；<br>2. 也可以主动 this.hello = 'world'，数据变动添加到更新队列；<br>3. this.$set(this.hello, 'world', 27) 添加响应式数据，或者更新数组、对象的值，直接更新数组对应下标值、更新对象属性是不能将数据添加到更新队列，界面无法更新；<br>4. v-model 双向邦定标单数据 |
-| `3数据流`-数组更新 | only setState | 支持直接 arr.push() 或者 arr = [...arr, newItem] |
+| `3数据流`-data | 在 constructor 方法内部设置 this.state = {} | data(){return {}}，首层为响应式数据？ |
+| `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | 1. 响应式数据：defineProperty、proxy 添加 watcher 给每个组件的 data 对象；<br>2. 也可以主动 this.hello = 'world'，数据变动添加到更新队列；<br>3. this.$set(this.hello, 'world', 27) 添加响应式数据，或者更新数组、对象的值，直接更新数组对应下标值、更新对象属性是不能将数据添加到更新队列，界面无法更新；<br>4. v-model、v-bind.sync 双向邦定标单数据 |
+| `3数据流`-数组更新 | this.setState() | 支持直接 arr.push() 或者 arr = [...arr, newItem] |
 | `4组件`-格式 | 标准 es6 class 对象, `.js` | vue 指定格式, `.vue` |
 | `4组件`-根组件渲染 | ReactDOM.render(element, document.body) | new Vue({ele, router, template, components}) |
 | `4组件`-实例 | 每个组件都是一个 react 实例 | 每个组件都是一个 vue 实例 |
@@ -61,15 +61,15 @@ update: 2019.4.2
 | `4组件`-全局注册 |  | Vue.component()<br>一些通用、常用组件可以考虑全局注册，通过 webpack 进行目录性质的全局注册 |
 | `4组件`-局部注册 | export default class Hello extends React.component {} | export default {name:'Hello', data(){return {}}} |
 | `4组件`-jsx-解析 | React.createElement(component, props, ...children) 的语法糖 | render: createElement => createElement(...) |
-| `4组件`-jsx-内容变量 | {hello} | {{hello}}、v-html |
-| `4组件`-jsx-属性变量 | `<span title={this.state.title}>` | `<span v-bind:title="title">` |
-| `4组件`-jsx-属性批量传递 | {...childPros} | v-bind="childPros" |
+| `4组件`-jsx-内容变量 | {hello} | jsx 同 react 一致，模板：{{hello}}、v-html |
+| `4组件`-jsx-属性变量 | `<span title={this.state.title}>` | jsx 同 react 一致，模板：`<span v-bind:title="title">` |
+| `4组件`-jsx-属性批量传递 | {...childPros} | jsx 同 react 一致，模板：v-bind="childPros" |
 | `4组件`-jsx-属性变量不传值 | 默认为 true | 默认为 true |
-| `4组件`-jsx-动态生成节点 | jsx array，可以通过 map 或普通函数 return 节点 | v-html, v-for |
-| `4组件`-jsx-class绑定 | className={this.state.helloClass}，**组件根元素呢？** | bind 中可以是字符串、数组、对象，用在组件上可以渲染到组件的根元素上 |
-| `4组件`-jsx-style绑定 | style={styleObject} | :style="styleObject"，多个的话支持数组 |
-| `4组件`-jsx-防xss攻击 | react 会把所有内容在渲染前解析成字符串 | vue 会把所有内容在渲染前解析成字符串，但是不会转换v-html 的值，会有 xss 攻击风险 |
-| `4组件`-jsx-隐身元素 | React.Fragment 或 <></> | template |
+| `4组件`-jsx-动态生成节点 | jsx array，可以通过 map 或普通函数 return 节点 | jsx 同 react 一致，模板：v-html, v-for |
+| `4组件`-jsx-class绑定 | className={this.state.helloClass}，**组件根元素呢？** | jsx 同 react 一致，模板：bind 中可以是字符串、数组、对象，用在组件上可以渲染到组件的根元素上 |
+| `4组件`-jsx-style绑定 | style={styleObject} | jsx 同 react 一致，模板：:style="styleObject"，多个的话支持数组 |
+| `4组件`-jsx-防xss攻击 | react 会把所有内容在渲染前解析成字符串 | jsx 同 react 一致，模板：vue 会把所有内容在渲染前解析成字符串，但是不会转换v-html 的值，会有 xss 攻击风险 |
+| `4组件`-jsx-隐身元素 | React.Fragment 或 <></> | jsx 同 react 一致，模板：template |
 | `4组件`-props |  | 1.大小写不敏感，在模版中可以采用 `kebab-case` 规则 <br> 2.使用 v-bind 批量传递 prop <br> 3.组件 props 默认存在继承特性，即父组件可以增加未在子组件中定义的prop，比如 class，默认是应用在子组件根节点上，可以使用 `inheritAttrs: false` 禁止继承 |
 | `5生命周期`-实例创建前 | constructor() | beforeCreate() |
 | `5生命周期`-实例创建成功 | - | created() |
@@ -85,13 +85,17 @@ update: 2019.4.2
 | `6事件`-邦定 | onClick="clickCallback" | v-on:click="clickCallback" 或 @click="clickCallback" |
 | `6事件`-兼容性 | ✔  | ✔  |
 | `6事件`-访问原始event |   | @click="func($event)"  |
-| `6事件`-事件修饰 |   | .stop, .prevent, .capture, .self, .once, .passive，按键修饰、系统修饰  |
-| `6事件`-自定义-定义事件并触发 |   | 定义：@personalEvent="func";<br> 触发：@click="this.$emit('personalEvent')")  |
-| `6事件`-自定义-事件名 |   | 要求必须定义和调用时一致，这个和组件名、props名不一样  |
+| `6事件`-事件修饰 |   | .stop, .prevent, .capture, .native, .self, .once, .passive，按键修饰、系统修饰  |
+| `6事件`-自定义-定义事件并触发 |   | 定义：@personalEvent="func";<br> 触发：this.$emit('personalEvent')  |
+| `6事件`-自定义-事件名 |   | 要求必须定义和调用时一致，这个和组件名、props名不一样，事件名采用 kebab-case 方式  |
 | `扩展`-状态管理 | redux  | vuex  |
 
-> 待补充：  
-> 1. 在不同生命周期时，框架做了什么事情
+待补充：  
+1. 在不同生命周期时，框架做了什么事情
+2. 指令 v-if 的实现原理，vue-loader 是如何处理的，AST, 需要详细总结
+3. 组件实例个数如何计算，占用内存大小跟组件个数有关系吗？
+4. vue 模板如何解析，结合 vue-loader，不同于 jsx
+5. .vue 组件如何生成实例的
 
 ## 2 vue 特色
 
@@ -102,7 +106,7 @@ update: 2019.4.2
 3. v-html: 节点输出内部 innerHTML (不要对用户提供的内容使用 v-html，容易导致 xss 攻击)
 4. v-if, v-else, v-else-if, v-show
 5. v-on: 邦定事件，v-on:click=""，简写`@click=""`，可以自定义事件，在组件内部调用 this.$emit() 触发
-6. v-for: 循环，增加 key 是为了提高效率，方便追踪到具体元素，而不是所有元素都去比较
+6. v-for: 循环，增加 key 是为了提高效率，方便追踪到具体元素，而不是所有元素都去比较；支持数组、对象、整数
 7. v-model: 双向邦定标单数据，属于语法糖，本质是监听事件更新数据，会忽略value、checked、selected 等特性，支持 input 框的 v-model.lay 属性，在 change 时更新，而不是 input 的时候更新
 
 > 指令修饰：@click.prevent=""
@@ -125,6 +129,13 @@ update: 2019.4.2
 
 1. `数据缓存`，当依赖数据变化时才会去更新缓存
 2. `setter 反响更新其它数据`，本来计算属性是只有 getter，但是可以强行增加 setter，反响操作，更新其他值
+
+### 2.4 slot 插槽
+
+1. 具名插槽
+2. 动态插槽
+3. 后备内容：如果组件之间有内容，则不适用插槽内容
+4. 
 
 ## 3 标准示例
 
@@ -232,6 +243,7 @@ currentInfo：当前表单双向数据邦定数据，由 originalInfo 而来，�
 2. props：组件的 props 要设计的合理，每个 prop 至少包含如下字段 `type, required, desc`
 3. 注释：组件内部各项操作要有注释
 4. 编码规范：符合 vue 官方风格指南，包括组件命名、选项顺序等
+5. 组件体积：代码行数要限制在1k行以内
 
 ### 5.5 接口数据缓存
 

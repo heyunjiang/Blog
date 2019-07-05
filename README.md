@@ -89,7 +89,7 @@
     - ✔ [vue 双向绑定原理](vue/vue响应式原理.md) vue 原理
     - ✔ [vue router](vue/vue生态-router.md) vue-router, 路由使用，路由配置，路由守卫，静态路由，动态路由
     - [vue vuex](vue/vue生态-vuex.md) vue 状态管理
-    - [vue-cli](vue/vue生态-vue-cli.md) vue-cli
+    - ✔ [vue-cli](vue/vue生态-vue-cli.md) vue-cli
     - [vue vs react](react/react-vs-vue.md) : vue 基本知识点
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等

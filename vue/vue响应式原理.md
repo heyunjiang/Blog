@@ -2,6 +2,14 @@
 
 > 关键词：响应式数据、根级响应式数据及其限制、异步更新队列
 
+目录
+
+[1 shim vs polyfill](#1-shim-vs-polyfill)  
+[2 如何追踪数据变化](#2-如何追踪数据变化)  
+[3 vue 的响应式数据](#3-vue-的响应式数据)  
+[4 异步更新队列](#4-异步更新队列)  
+[5 如何更新 dom](#5-如何更新-dom)  
+
 ## 1 shim vs polyfill
 
 shim: 使用浏览器的已有(旧)的api，来实现一个新的api功能
@@ -24,11 +32,11 @@ data () {
 
 ![data](./data.png)
 
-## 3 数据监测并触发更新限制
+## 3 vue 的响应式数据
 
 vue 不能监测到对象属性的添加或删除，只能监测到getter/setter，这是由javascript语言特性限制的。
 
-> **响应式属性**：在初始化实例之前声明根级属性，这些就是响应式属性。响应式属性具有 vue动态添加的 getter/setter 方法，用于监听数据变化。vue创建响应式数据(增加getter/setter)，是在组件实例化的时候创建的，这些数据必须存在于data对象上。
+**响应式属性**：在初始化实例之前声明根级属性，这些就是响应式属性。响应式属性具有 vue动态添加的 getter/setter 方法，用于监听数据变化。vue创建响应式数据(增加getter/setter)，是在组件实例化的时候创建的，这些数据必须存在于data对象上。
 
 vue不允许在已经创建的实例上动态添加新的**根级**响应式属性。但是可以使用 `Vue.set(object, key, value)` 、 `this.$set(object, key, value)` 或 `this.someObject = Object.assign({}, this.someObject, { a: 1, b: 2 })`，在非根级对象上添加新的属性及其值。
 
