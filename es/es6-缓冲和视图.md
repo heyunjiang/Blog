@@ -16,15 +16,22 @@ javascript 采用了缓冲和视图来实现，用以保证最大的灵活性和
 
 视图：为了访问到缓冲区中的数据，javascript 提供了一些视图数值类型，视图提供了上下文，用户可以直接操作视图。
 
-****
-
 类数组视图: Int8Array, Unit8Array, Unit8ClampedArray, Int16Array, Unit16Array, Int32Array, Unit32Array, Float32Array, Float64Array
 
-数据视图: DataView 是一种底层接口，它提供了操作缓冲区中任意数据的读写接口。
+数据视图: DataView 是一种底层接口，它提供了操作缓冲区中任意数据的读写接口
 
-****
+StringView: 非 native 视图，也就是浏览器没有原生提供，[源码](https://github.com/madmurphy/stringview.js)
 
-构建 ArrayBuffer 对象，以及创建它的视图例子
+## 3 应用场景
+
+webGL, fileReader, base64
+
+## 4 使用方式
+
+`new ArrayBuffer(length)`
+
+1. length: 单位字节，表示缓冲区大小
+2. 返回：已经构建好的二进制数据缓冲区
 
 ```javascript
 var buffer = new ArrayBuffer(16);
@@ -33,10 +40,6 @@ for (var i = 0; i < int32View.length; i++) {
   int32View[i] = i * 2;
 }
 ```
-
-## 3 应用场景
-
-webGL, fileReader ...
 
 ## 参考文章
 
