@@ -86,6 +86,8 @@ update: 2019.4.2
 | `6事件`-兼容性 | ✔  | ✔  |
 | `6事件`-访问原始event |   | @click="func($event)"  |
 | `6事件`-事件修饰 |   | .stop, .prevent, .capture, .native, .self, .once, .passive，按键修饰、系统修饰  |
+| `6事件`-v-model |   | 在自定义组件上使用 v-model ，需要在组件内部声明 model 配置，然后 emit 事件  |
+| `6事件`-v-bind.sync |  | 实现原理类似 v-model ，只不是 emit 事件时需要加前缀 `update`  |
 | `6事件`-自定义-定义事件并触发 |   | 定义：@personalEvent="func";<br> 触发：this.$emit('personalEvent')  |
 | `6事件`-自定义-事件名 |   | 要求必须定义和调用时一致，这个和组件名、props名不一样，事件名采用 kebab-case 方式  |
 | `扩展`-状态管理 | redux  | vuex  |
@@ -135,7 +137,6 @@ update: 2019.4.2
 1. 具名插槽
 2. 动态插槽
 3. 后备内容：如果组件之间有内容，则不适用插槽内容
-4. 
 
 ## 3 标准示例
 
