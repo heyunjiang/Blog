@@ -41,6 +41,10 @@ for (var i = 0; i < int32View.length; i++) {
 }
 ```
 
+## 5 浏览器支持
+
+TypedArray, buffer 在主流浏览器，pc | 移动端都支持
+
 ## 参考文章
 
 [mdn javascript 类数组对象](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Typed_arrays)
