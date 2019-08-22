@@ -131,7 +131,7 @@
     - ✔ [冒泡排序](计算机网络/算法-冒泡排序最优.md)
 - 技术方向
   - [webGL](webGL/入门.md): 3D
-  - svg
+  - [svg](html/svg入门.md) svg 入门学习
   - canvas: 2D
   - webRTC: 实时通信技术
   - docker基础: 容器技术
