@@ -65,9 +65,41 @@ vue 官方提供的缩写：增加 .sync 修饰符
 
 主要用于表单控件绑定数据，控制 props.value 和 input 事件，单选、复选则是 props.checked 和 change 事件。需要在子组件中配置 model 选项
 
+```javascript
+model: {
+    prop: 'value',
+    event: 'change'
+},
+props: {
+    value: Object
+}
+```
+
 ### 1.7 $refs 访问 vnode
 
-> 其他：provite + inject，$attrs, $listeners 
+### 1.8 provide inject
+
+父组件提供 provide 属性，返回一个对象，子组件通过 inject 访问父组件的属性
+
+```javascript
+// 父组件
+provide: function() {
+    return {
+        getMap: this.getMap
+    }
+}
+
+// 子组件
+inject: ['getMap]
+```
+
+### 1.9 $attrs, $listeners
+
+访问使用当前组件时，父组件传递的所有的 属性 + 监听器
+
+### 1.10 $root
+
+访问根组件的属性和方法
 
 ## 参考文章
 

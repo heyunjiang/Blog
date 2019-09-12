@@ -2,7 +2,7 @@
 
 ![abilityTree](./images/abilityTree.jpg)
 
-个人技术总结，技术发展方向
+个人技术总结，技术发展方向：目标是一名卓越的软件工程师，从前端入手，让前端能力成为我的杀手锏，同时也能解决其他软件工程方面的能力
 
 个人实践，并深入分析之后总结
 
@@ -90,7 +90,9 @@
     - ✔ [vue router](vue/vue生态-router.md) vue-router, 路由使用，路由配置，路由守卫，静态路由，动态路由
     - [vuex](vue/vue生态-vuex.md) vue 状态管理
     - ✔ [vue-cli](vue/vue生态-vue-cli.md) vue-cli
-    - ✔ [vue组件通信](vue/vue组件通信.md) vue 组件间的10种通信方式
+    - ✔ [vue 组件通信](vue/vue组件通信.md) vue 组件间的 10 种通信方式
+    - ✔ [vue 组件复用](vue/vue组件复用.md) vue 组件优化：10 种复用方式
+    - [vue 组件抽离规范](vue/vue组件抽离规范.md) vue 组件抽离原则
     - [vue深入](vue/vue深入.md) vue 深入知识点
     - ✔ [vue vs react](react/react-vs-vue.md) vue 基本知识点
   - [校验：eslint](react/基本使用-eslint.md)
