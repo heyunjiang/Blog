@@ -61,6 +61,7 @@
   - [web 存储](PWA/web存储.md)
   - ✔ [跨域实现的几种方法](other/跨域实现的几种方法.md)
   - [浏览器安全](browser/深入浏览器-安全.md) 常见 xss 攻击及防御
+  - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 新技能 - ui 自动化测试
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
   - webpack 运行原理
