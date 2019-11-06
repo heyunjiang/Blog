@@ -23,7 +23,7 @@
   - ✔ [深入css-选择器及权重](css/深入css-选择器及权重.md)
   - [常见知识归纳](css/常见知识归纳.md) 包含了 css 一些常用知识点：盒子模型、选择器、字体使用、rem等
   - [预处理器-less](css/预处理器-less.md)
-  - 预处理器-postcss
+  - css 工具-postcss
   - transform 动画
   - animate 动画
   - [动画-flip](css/动画-flip.md) flip技术让过渡动画更流畅
@@ -62,6 +62,7 @@
   - ✔ [跨域实现的几种方法](other/跨域实现的几种方法.md)
   - [浏览器安全](browser/深入浏览器-安全.md) 常见 xss 攻击及防御
   - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 新技能 - ui 自动化测试
+  - [关于前端监控的几点思考](browser/关于前端监控的几点思考.md)
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
   - webpack 运行原理
