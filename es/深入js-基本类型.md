@@ -309,6 +309,26 @@ es6: 空位一律处理成 `undefined`
 
 [es6-缓冲和视图](./es6-缓冲和视图.md)
 
+#### 1.3.10 数组复制
+
+```javascript
+const arr = [1, 2]
+let brr;
+
+// 1 ...
+brr = [...arr];
+// 2 Array.from
+brr = Array.from(arr);
+// 3 concat
+brr = [].concat(arr);
+// 4 Array.of
+brr = Array.of(...arr);
+// 5 slice
+brr = arr.slice(0);
+// 6 map
+brr = arr.map(item => item);
+```
+
 ### 1.4 object
 
 #### 1.4.1 属性名表达式

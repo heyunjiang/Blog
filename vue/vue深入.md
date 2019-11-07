@@ -96,11 +96,22 @@ export default Vue
 3. 写法不同: 预编译版本在运行时已经不包含编译需要的代码，所以不能再写运行时编译的一些风格代码，比如：`Vue.compile()`
 4. 打包后体积：预编译版本体积更小，因为不再包含编译需要的代码，只包含需要运行的 vue 代码
 
-#### 5.1.1 运行时编译 compileToFunctions 生成 render 和 createEmptyVNode 有什么不同吗？
-
-答案：通过 createEmptyVNode 赋值的 render 函数，实际是一个生成空节点的方法，而运行时编译好的 render 方法，是要生成非空节点 `createElement`。
-
 ### 5.2 当数据发生改变时，vue 是什么时机去更新虚拟树然后更新 dom 呢？
+
+### 5.3 我们每个组件都会调用一次 new Vue 吗？
+
+### 5.4 this.$nextTick 和 setTimeout 有什么不同？
+
+答案路径：`vue/src/core/util/next-tick.js`
+
+答案简述：nextTick 代码很短，下面是一些关键技术的总结
+
+1. 闭包实现保存任务队列：将所有的回掉函数保存在一个数组中
+2. 状态 pending: 用于表示上个nextTick任务是否在执行过程中，如果是则继续放入队列，待下次任务nextTick调用时执行(极端情况下会有 pending 为 true)
+3. 空参数：如果 this.$nextTick 为空参数，则返回一个 promise 实例，再次执行时可以作为 microtask 运行
+4. nextTick 内部采用多种情况实现：promise -> MutationObserver -> setImmediate -> setTimeout，只有当前一种情况不支持时，会降级采用后一种方法。所以在 chrome 高版本中，nextTick 可以理解为 promise 微任务的执行
+
+> 如果不清楚 microtask, macrotask, 普通浏览器任务的执行顺序的，可以看我这篇文章 [深入浏览器-事件循环](../browser/深入浏览器-事件循环.md)
 
 ## 参考文章
 
