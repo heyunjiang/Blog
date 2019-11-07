@@ -10,7 +10,7 @@ author: heyunjiang
 目录
 
 [背景](#背景)  
-[1 编译 compile](#1-编译-compile)
+[1 编译 compile](#1-编译-compile)  
 [2 虚拟 dom](#2-虚拟-dom)  
 &nbsp;&nbsp;[2.1 根组件初始化](#2.1-根组件初始化)  
 &nbsp;&nbsp;[2.2 组件 $mount 方法执行](#2.2-组件-$mount-方法执行)  
@@ -56,7 +56,7 @@ vue 提供了2种版本的源码
 
 ```javascript
 // vue 构造函数关键代码
-unction Vue (options) {
+function Vue (options) {
   this._init(options)
 }
 
@@ -117,3 +117,4 @@ export default Vue
 
 [1 vue 官方文档](https://cn.vuejs.org/v2/guide/) 这次除了教程，也把 api 详细过一遍  
 [2 vue 技术揭秘](https://ustbhuangyi.github.io/vue-analysis/)
+[3 mdn mutationobserver](https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserver/observe)
