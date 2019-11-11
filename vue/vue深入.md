@@ -12,8 +12,12 @@ author: heyunjiang
 [背景](#背景)  
 [1 编译 compile](#1-编译-compile)  
 [2 虚拟 dom](#2-虚拟-dom)  
-&nbsp;&nbsp;[2.1 根组件初始化](#2.1-根组件初始化)  
-&nbsp;&nbsp;[2.2 组件 $mount 方法执行](#2.2-组件-$mount-方法执行)  
+[3 响应式系统](#3-响应式系统)  
+[4 响其他 vue 知识细节点应式系统](#4-其他-vue-知识细节点)  
+[5 问题](#5-问题)  
+&nbsp;&nbsp;[5.1 vue 提供的预编译版本和运行时编译版本有什么不同？](#5.1-vue-提供的预编译版本和运行时编译版本有什么不同？)  
+&nbsp;&nbsp;[5.2 当数据发生改变时，vue 是什么时机去更新虚拟树然后更新 dom 呢？](#5.2-当数据发生改变时，vue-是什么时机去更新虚拟树然后更新-dom-呢？)  
+&nbsp;&nbsp;[5.4 this.$nextTick 和 setTimeout 有什么不同？](#5.4-this.$nextTick-和-setTimeout-有什么不同？)  
 
 ## 背景
 
@@ -34,46 +38,18 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 
 ## 1 编译 compile
 
-> 在 vue 生成虚拟节点之前，我们先来看看 vue 的模板编译，即我们写的模板是怎么转换成 vue 的 `createElement` 方法的。
-
 从我们编写 template 到生成真实 dom，中间有一个过程，即把模板编译成 createElement 函数，这个过程叫做编译。  
 虽然我们可以直接写 jsx，但是它远没有写模板来的方便，vue 为 template 提供了一些便捷写法，包括指令、特定标签等。
 
-vue 提供了2种版本的源码
-
-1. runtime + compiler：可以在运行时编译
-2. runtime：需要通过 vue-loader 预编译，转为 createElement 函数
-
-编译的源码路径： `import { compileToFunctions } from './compiler/index'`
+编译总结的[地址](./vue源码解读/compiler.md)
 
 ## 2 虚拟 dom
 
 > 这里包含了数据 -> vtree -> rtree 的一整个过程。
 
-下面介绍 new Vue 之后发生的一系列过程
+虚拟 dom 总结的[地址](./vue源码解读/数据驱动.md)
 
-### 2.1 根组件初始化
-
-```javascript
-// vue 构造函数关键代码
-function Vue (options) {
-  this._init(options)
-}
-
-initMixin(Vue)
-stateMixin(Vue)
-eventsMixin(Vue)
-lifecycleMixin(Vue)
-renderMixin(Vue)
-
-export default Vue
-```
-
-在 `this._init()` 函数执行过程中，前面都是初始化我们 vue 组件中定义好的 `lifecycle`, `events`, `render`, `injections`, `state`, `provide`。在生命周期初始化之后，数据 injections 初始化之前，会触发生命周期 `beforeCreate`，在数据 provide 初始化完成之后，触发生命周期 `created`。
-
-### 2.2 组件 $mount 方法执行
-
-组件初始化之后，就会调用 $mount 方法，执行挂载。
+关键词：$mount, _render, _update, watcher
 
 ## 3 响应式系统
 
@@ -112,6 +88,12 @@ export default Vue
 4. nextTick 内部采用多种情况实现：promise -> MutationObserver -> setImmediate -> setTimeout，只有当前一种情况不支持时，会降级采用后一种方法。所以在 chrome 高版本中，nextTick 可以理解为 promise 微任务的执行
 
 > 如果不清楚 microtask, macrotask, 普通浏览器任务的执行顺序的，可以看我这篇文章 [深入浏览器-事件循环](../browser/深入浏览器-事件循环.md)
+
+### 5.5 vue 及其他框架，为什么要设计一个 vtree 来映射真实 dom，直接操作真实 dom 不好吗？
+
+1. 规范化直接操作 dom 比通过 vtree 操作 dom 更快
+2. 复杂应用需要定义完整规范操作dom，很难自己实现，而 vtree 则是一套优化 dom 操作的另一种方案
+3. vtree 通过定义一个数据对象，该对象比真实 dom 对象属性少很多，用户直接操作的是这个虚拟对象，不直接操作 dom，通过拦截用户的不规范化操作来达到优化性能的目的
 
 ## 参考文章
 
