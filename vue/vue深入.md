@@ -15,9 +15,12 @@ author: heyunjiang
 [3 响应式系统](#3-响应式系统)  
 [4 响其他 vue 知识细节点应式系统](#4-其他-vue-知识细节点)  
 [5 问题](#5-问题)  
-&nbsp;&nbsp;[5.1 vue 提供的预编译版本和运行时编译版本有什么不同？](#5.1-vue-提供的预编译版本和运行时编译版本有什么不同？)  
+&nbsp;&nbsp;[5.1 vue 提供的预编译版本和运行时编译版本有什么不同？](#5.1-vue-提供的预编译版本和运行时编译版本有什么不同？) ✔   
 &nbsp;&nbsp;[5.2 当数据发生改变时，vue 是什么时机去更新虚拟树然后更新 dom 呢？](#5.2-当数据发生改变时，vue-是什么时机去更新虚拟树然后更新-dom-呢？)  
-&nbsp;&nbsp;[5.4 this.$nextTick 和 setTimeout 有什么不同？](#5.4-this.$nextTick-和-setTimeout-有什么不同？)  
+&nbsp;&nbsp;[5.3 我们每个组件都会调用一次 new Vue 吗？](#5.3-我们每个组件都会调用一次-new-Vue-吗？)  
+&nbsp;&nbsp;[5.4 this.$nextTick 和 setTimeout 有什么不同？](#5.4-this.$nextTick-和-setTimeout-有什么不同？) ✔   
+&nbsp;&nbsp;[5.5 vue 及其他框架，为什么要设计一个 vtree 来映射真实 dom，直接操作真实 dom 不好吗？](#5.5-vue-及其他框架，为什么要设计一个-vtree-来映射真实-dom，直接操作真实-dom-不好吗？) ✔   
+&nbsp;&nbsp;[5.6 vue vnode 节点关系是怎样保存的呢？](#5.6-vue-vnode-节点关系是怎样保存的呢？)  
 
 ## 背景
 
@@ -59,6 +62,9 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 
 1. `flow`: vue 采用 flow 做代码静态类型检查，由于 babel 和 eslint 都有相应的插件支持，改动较小
 2. `function`: vue 采用 function + prototype 实现，而不是 es6 的 class 实现，为什么？
+3. apply + concat + array 实现数组扁平化：`Array.prototype.concat.apply([], arr)`，利用 apply 第二个参数为数组 和 concat 参数多个实现数组的第一级扁平化，如果嵌套多级，还需要做一个递归来实现
+4. for 循环内部支持 continue
+5. 默认 `key` ：在数组规范化的时候会为复杂结构 normalizeArrayChildren 生成默认 key
 
 ## 5 问题
 
@@ -94,6 +100,10 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 1. 规范化直接操作 dom 比通过 vtree 操作 dom 更快
 2. 复杂应用需要定义完整规范操作dom，很难自己实现，而 vtree 则是一套优化 dom 操作的另一种方案
 3. vtree 通过定义一个数据对象，该对象比真实 dom 对象属性少很多，用户直接操作的是这个虚拟对象，不直接操作 dom，通过拦截用户的不规范化操作来达到优化性能的目的
+
+### 5.6 vue vnode 节点关系是怎样保存的呢？
+
+### 5.7 key 是怎么实现优化渲染的？
 
 ## 参考文章
 
