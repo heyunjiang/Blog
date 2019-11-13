@@ -20,7 +20,7 @@ author: heyunjiang
 &nbsp;&nbsp;[5.3 我们每个组件都会调用一次 new Vue 吗？](#5.3-我们每个组件都会调用一次-new-Vue-吗？)  
 &nbsp;&nbsp;[5.4 this.$nextTick 和 setTimeout 有什么不同？](#5.4-this.$nextTick-和-setTimeout-有什么不同？) ✔   
 &nbsp;&nbsp;[5.5 vue 及其他框架，为什么要设计一个 vtree 来映射真实 dom，直接操作真实 dom 不好吗？](#5.5-vue-及其他框架，为什么要设计一个-vtree-来映射真实-dom，直接操作真实-dom-不好吗？) ✔   
-&nbsp;&nbsp;[5.6 vue vnode 节点关系是怎样保存的呢？](#5.6-vue-vnode-节点关系是怎样保存的呢？)  
+&nbsp;&nbsp;[5.6 vue vnode 节点关系是怎样保存的呢？](#5.6-vue-vnode-节点关系是怎样保存的呢？) ✔  
 
 ## 背景
 
@@ -82,6 +82,8 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 
 ### 5.3 我们每个组件都会调用一次 new Vue 吗？
 
+猜测：不会
+
 ### 5.4 this.$nextTick 和 setTimeout 有什么不同？
 
 答案路径：`vue/src/core/util/next-tick.js`
@@ -102,6 +104,40 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 3. vtree 通过定义一个数据对象，该对象比真实 dom 对象属性少很多，用户直接操作的是这个虚拟对象，不直接操作 dom，通过拦截用户的不规范化操作来达到优化性能的目的
 
 ### 5.6 vue vnode 节点关系是怎样保存的呢？
+
+答：通过 new VNode 生成的节点中，保存了如下信息
+
+```javascript
+    this.tag = tag
+    this.data = data
+    this.children = children
+    this.text = text
+    this.elm = elm
+    this.ns = undefined
+    this.context = context
+    this.fnContext = undefined
+    this.fnOptions = undefined
+    this.fnScopeId = undefined
+    this.key = data && data.key
+    this.componentOptions = componentOptions
+    this.componentInstance = undefined
+    this.parent = undefined
+    this.raw = false
+    this.isStatic = false
+    this.isRootInsert = true
+    this.isComment = false
+    this.isCloned = false
+    this.isOnce = false
+    this.asyncFactory = asyncFactory
+    this.asyncMeta = undefined
+    this.isAsyncPlaceholder = false
+```
+
+所以节点之间的关系总结如下：
+
+1. 全局一颗 vnode tree
+2. 每个节点保存了父节点、后代节点之间的引用关系
+3. 而具体每个对象的值又是保存在内存中
 
 ### 5.7 key 是怎么实现优化渲染的？
 
