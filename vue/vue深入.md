@@ -21,6 +21,8 @@ author: heyunjiang
 &nbsp;&nbsp;[5.4 this.$nextTick 和 setTimeout 有什么不同？](#5.4-this.$nextTick-和-setTimeout-有什么不同？) ✔   
 &nbsp;&nbsp;[5.5 vue 及其他框架，为什么要设计一个 vtree 来映射真实 dom，直接操作真实 dom 不好吗？](#5.5-vue-及其他框架，为什么要设计一个-vtree-来映射真实-dom，直接操作真实-dom-不好吗？) ✔   
 &nbsp;&nbsp;[5.6 vue vnode 节点关系是怎样保存的呢？](#5.6-vue-vnode-节点关系是怎样保存的呢？) ✔  
+&nbsp;&nbsp;[5.7 key 是怎么实现优化渲染的？](#5.7-key-是怎么实现优化渲染的？)  
+[参考文章](#参考文章)  
 
 ## 背景
 
@@ -65,6 +67,7 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 3. apply + concat + array 实现数组扁平化：`Array.prototype.concat.apply([], arr)`，利用 apply 第二个参数为数组 和 concat 参数多个实现数组的第一级扁平化，如果嵌套多级，还需要做一个递归来实现
 4. for 循环内部支持 continue
 5. 默认 `key` ：在数组规范化的时候会为复杂结构 normalizeArrayChildren 生成默认 key
+6. Vue 是采用 function 面向对象实现，入口是在 `src/plateforms/` 下面
 
 ## 5 问题
 
@@ -82,7 +85,11 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 
 ### 5.3 我们每个组件都会调用一次 new Vue 吗？
 
-猜测：不会
+答案：会  
+答案简述：  
+1. `new Vue`：整个 vtree 是由许多个 vnode 组合起来，每个 vnode 有3种类型：文本节点、普通节点、vue 实例节点
+2. `Vue.prototype`: vue 的实例方法是定义在 Vue.prototype 原型上的，每个组件有自己的生命周期
+3. `编译结果`: 
 
 ### 5.4 this.$nextTick 和 setTimeout 有什么不同？
 
