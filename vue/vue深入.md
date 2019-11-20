@@ -17,7 +17,7 @@ author: heyunjiang
 [5 问题](#5-问题)  
 &nbsp;&nbsp;[5.1 vue 提供的预编译版本和运行时编译版本有什么不同？](#5.1-vue-提供的预编译版本和运行时编译版本有什么不同？) ✔   
 &nbsp;&nbsp;[5.2 当数据发生改变时，vue 是什么时机去更新虚拟树然后更新 dom 呢？](#5.2-当数据发生改变时，vue-是什么时机去更新虚拟树然后更新-dom-呢？)  
-&nbsp;&nbsp;[5.3 我们每个组件都会调用一次 new Vue 吗？](#5.3-我们每个组件都会调用一次-new-Vue-吗？)  
+&nbsp;&nbsp;[5.3 我们每个组件都会调用一次 new Vue 吗？](#5.3-我们每个组件都会调用一次-new-Vue-吗？) ✔  
 &nbsp;&nbsp;[5.4 this.$nextTick 和 setTimeout 有什么不同？](#5.4-this.$nextTick-和-setTimeout-有什么不同？) ✔   
 &nbsp;&nbsp;[5.5 vue 及其他框架，为什么要设计一个 vtree 来映射真实 dom，直接操作真实 dom 不好吗？](#5.5-vue-及其他框架，为什么要设计一个-vtree-来映射真实-dom，直接操作真实-dom-不好吗？) ✔   
 &nbsp;&nbsp;[5.6 vue vnode 节点关系是怎样保存的呢？](#5.6-vue-vnode-节点关系是怎样保存的呢？) ✔  
@@ -87,11 +87,11 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 
 ### 5.3 我们每个组件都会调用一次 new Vue 吗？
 
-答案：会  
+答案：不会，new 的是继承自 Vue 的新对象  
 答案简述：  
 1. `new Vue`：整个 vtree 是由许多个 vnode 组合起来，每个 vnode 有3种类型：文本节点、普通节点、vue 实例节点
 2. `Vue.prototype`: vue 的实例方法是定义在 Vue.prototype 原型上的，每个组件有自己的生命周期
-3. `编译结果`: 
+3. `组件实例`: 每个组件都是创建一个组件实例，每个组件的原型都是通过 extend Vue 来实现的，拥有对应的原型对象 id, Vue 的 id 为 0，其它组件原型从1开始加，然后会被缓存起来。在 vm._render 阶段只是实例化 vnode，在 patch 阶段才会调用 `createComponentInstanceForVnode` 实例化每个组件对象
 
 ### 5.4 this.$nextTick 和 setTimeout 有什么不同？
 
