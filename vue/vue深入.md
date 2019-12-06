@@ -22,6 +22,7 @@ author: heyunjiang
 &nbsp;&nbsp;[5.5 vue 及其他框架，为什么要设计一个 vtree 来映射真实 dom，直接操作真实 dom 不好吗？](#5.5-vue-及其他框架，为什么要设计一个-vtree-来映射真实-dom，直接操作真实-dom-不好吗？) ✔   
 &nbsp;&nbsp;[5.6 vue vnode 节点关系是怎样保存的呢？](#5.6-vue-vnode-节点关系是怎样保存的呢？) ✔  
 &nbsp;&nbsp;[5.7 key 是怎么实现优化渲染的？](#5.7-key-是怎么实现优化渲染的？)  
+&nbsp;&nbsp;[5.8 vue 是怎么计算需要更新渲染哪些组件呢？哪些组件不需要更新呢？](#5.8-vue-是怎么计算需要更新渲染哪些组件呢？哪些组件不需要更新呢？)  
 [参考文章](#参考文章)  
 
 ## 背景
@@ -124,41 +125,16 @@ vue 的三大核心点：编译、虚拟dom、响应式系统
 
 ### 5.6 vue vnode 节点关系是怎样保存的呢？
 
-答：通过 new VNode 生成的节点中，保存了如下信息
-
-```javascript
-    this.tag = tag
-    this.data = data
-    this.children = children
-    this.text = text
-    this.elm = elm
-    this.ns = undefined
-    this.context = context
-    this.fnContext = undefined
-    this.fnOptions = undefined
-    this.fnScopeId = undefined
-    this.key = data && data.key
-    this.componentOptions = componentOptions
-    this.componentInstance = undefined
-    this.parent = undefined
-    this.raw = false
-    this.isStatic = false
-    this.isRootInsert = true
-    this.isComment = false
-    this.isCloned = false
-    this.isOnce = false
-    this.asyncFactory = asyncFactory
-    this.asyncMeta = undefined
-    this.isAsyncPlaceholder = false
-```
-
-所以节点之间的关系总结如下：
+答：通过 new VNode 生成的实例节点中，保存了父子关系  
+节点之间的关系总结如下：
 
 1. 全局一颗 vnode tree
 2. 每个节点保存了父节点、后代节点之间的引用关系
 3. 而具体每个对象的值又是保存在内存中
 
 ### 5.7 key 是怎么实现优化渲染的？
+
+### 5.8 vue 是怎么计算需要更新渲染哪些组件呢？哪些组件不需要更新呢？
 
 ## 参考文章
 
