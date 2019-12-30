@@ -95,7 +95,7 @@
     - ✔ [vue 组件通信](vue/vue组件通信.md) vue 组件间的 10 种通信方式
     - ✔ [vue 组件复用](vue/vue组件复用.md) vue 组件优化：10 种复用方式
     - [vue 组件抽离规范](vue/vue组件抽离规范.md) vue 组件抽离原则
-    - [vue深入](vue/vue深入.md) vue 深入知识点
+    - ✔ [vue深入](vue/vue深入.md) vue 深入知识点 - 数据驱动、响应式系统、编译系统(未实现阅读)
     - ✔ [vue vs react](react/react-vs-vue.md) vue 基本知识点
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
