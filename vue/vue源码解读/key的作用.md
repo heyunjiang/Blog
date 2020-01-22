@@ -9,8 +9,7 @@ author: heyunjiang
 1. for 循环时用于优化渲染
 2. 用于组件更新，重新完整执行生命周期
 
-遇到的问题  
-1. 在 for 循环时，多个组件拥有了相同的 key，组件的渲染顺序、props值都出现了问题
+遇到的问题：在 for 循环时，多个组件拥有了相同的 key，组件的渲染顺序、props值都出现了问题
 
 ## 2 渲染流程
 
@@ -199,22 +198,42 @@ function patchVnode (
     index,
     removeOnly
   ) {
+    // 如果节点前后没有变化，则不更新
     if (oldVnode === vnode) {
       return
     }
-    // 拿到旧节点的 ele
+    // 更新数组队列中的 vnode 节点
+    if (isDef(vnode.elm) && isDef(ownerArray)) {
+      // clone reused vnode
+      vnode = ownerArray[index] = cloneVNode(vnode)
+    }
+    // 拿到旧节点的 elm，后续直接更新这个 dom 节点属性
     const elm = vnode.elm = oldVnode.elm
+    // 如果是静态节点，比如 v-once ，则不更新
+    if (isTrue(vnode.isStatic) &&
+      isTrue(oldVnode.isStatic) &&
+      vnode.key === oldVnode.key &&
+      (isTrue(vnode.isCloned) || isTrue(vnode.isOnce))
+    ) {
+      vnode.componentInstance = oldVnode.componentInstance
+      return
+    }
 
     let i
     const data = vnode.data
-    // 执行 prepatch 钩子函数
+    // 执行 prepatch 钩子函数 componentVNodeHooks 中定义了 prepatch 等函数
     if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
       i(oldVnode, vnode)
     }
-
+    // 找到新旧 vnode 的 children，缓存在内存中
     const oldCh = oldVnode.children
     const ch = vnode.children
-    
+
+    // 如果定义了
+    if (isDef(data) && isPatchable(vnode)) {
+      for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
+      if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
+    }
     // 如果新节点 vnode 下面不是 text
     if (isUndef(vnode.text)) {
       // 1 如果新旧 vnode 下面都有后代，则递归比较所有后代
@@ -255,8 +274,28 @@ function patchVnode (
 5. index：当前 vnode 在 ownerArray 中的下标
 6. removeOnly：是否只是移除 children 中的一项
 
-可以看出  
-1. vue vdom diff 采用深度优先遍历算法，递归更新所有后代
-2. 
+可以看出: vue vdom diff 采用深度优先遍历算法，递归更新所有后代
+
+## 3 key 的作用
+
+从日常开发体验来看，有如下作用
+
+1. 渲染优化：for 循环中，为每个项添加 key，有利于在长列表更新时，更快找到原先旧的节点，减少查找时间；vnode没有变化的不更新 `if (oldVnode === vnode) { return }`
+2. 组件生命周期重新走一遍：会重新 created、mounted 一次，因为前后 vdom 已经不是同一个了。sameNode 是通过 key 判断是否是同一节点
+
+## 4 重复 key 会有什么影响
+
+在官方文档上，是这么说的：“重复的 key 会造成渲染错误”，那么具体是怎么体现的呢？
+
+在同一个 for 循环中，在初次渲染时，是不会有问题，但是，在执行更新的时候，可能获取不到想要的 vnode 节点，而是同一个列表中的另一个具有相同 key 的节点，那么就可能会造成如下可能
+
+1. 父节点：
+2. 后代节点：
+3. 自身属性：
+
+## 5 为什么不推荐使用 index 作为 key
+
+在列表数据更新之后，为了尽可能利用之前的节点，我们也就要保证之前的 key 不变化；如果 key 变化了，则表示当前节点不是之前的节点了，而是会与另一个具有相同 key 的 vnode 做比较，然后 setTextContent 或 updateChildren 更新节点；  
+如果采用特有值的 key，如果在列表中插入一个值，所有的节点都会被复用，不会发生更新。
 
 ## 参考文章
