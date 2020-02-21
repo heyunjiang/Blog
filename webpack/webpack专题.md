@@ -44,7 +44,7 @@ time: 2018.8.23
 4. webpack 配置文件加载：webpack默认加载 `webpack.config.js` ，可以通过 `--config` 在 `webpack` 命令中指定要加载的配置文件
 5. 静态资源管理：通过 `file-loader` 等可以处理一系列的静态资源，包括css、图片、字体、xml、svg等
 6. 输出bundle：可以通过设置多个入口文件控制输出多个bundle，以达到分离chunk目的，那么 bundle 和 chunk 到底什么区别？bundle 用于常规自己写的模块，chunk 用于包含一些不变的模块，比如第三方库
-7. 开发时错误定位: 使用 `source map`，一个大家遵守约定的文件，通常用第三方库或插件来实现错误定位，比如呢？
+7. 开发时错误定位: 使用 `source map`，一个大家遵守约定的文件，通常用第三方库或插件来实现错误定位，比如 chrome-dev-tool
 8. tree-shaking：删除代码中从来没有用到的代码。(前提：使用es6的import、export，和第三方压缩精简工具，比如uglifyjs)
 9. chunk: 一个 chunk 就是生成一个 js 文件。由多个模块组合成一个chunk，构建出来的项目包含多个chunk，可以用于 chunk 异步加载，减少初始化时间。怎么定义哪些模块包含呢？使用 CommonsChunkPlugin 插件时，指定 name 和 entry 中的名称一致则可确定哪些模块需要导出一个 chunk
 
