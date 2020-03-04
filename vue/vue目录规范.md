@@ -6,8 +6,9 @@ time: 2020.3.4
 
 这里总结一下 vue 目录规范
 
-```md
-├── env                        # 环境变量
+```bash
+├── build                      # webpack.config.js
+├── config                     # webpack 快捷配置
 ├── public                     # 静态资源
 │   └── index.html             # html模板
 ├── src                        # 源代码
