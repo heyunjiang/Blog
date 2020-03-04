@@ -100,6 +100,7 @@
       - ✔ [vue深入 - 组件化](vue/vue源码解读/组件化.md) vue 组件化
       - [vue深入 - compiler](vue/vue源码解读/compiler.md) vue compiler 编译原理 ast
     - ✔ [vue vs react](react/react-vs-vue.md) vue 基本知识点
+    - ✔ [vue 目录规范](vue/vue目录规范.md) vue 目录规范
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
