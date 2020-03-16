@@ -88,9 +88,9 @@
     - ✔ [基本使用-react-router](react/基本使用-react-router.md) ：react-router 4
     - ✔ [vue vs react](react/react-vs-vue.md) : 可以直接参考 vue 及 react 相关知识点
   - vue
-    - [vue router](vue/vue生态-router.md) vue-router, 路由使用，路由配置，路由守卫，静态路由，动态路由
-    - [vuex](vue/vue生态-vuex.md) vue 状态管理
-    - ✔ [vue-cli](vue/vue生态-vue-cli.md) vue-cli
+    - ✔ [vue router](vue/vue生态-router.md) vue-router, 路由使用，路由配置，路由守卫，静态路由，动态路由
+    - ✔ [vuex](vue/vue生态-vuex.md) vue 状态管理
+    - ✔ [vue-cli](vue/vue生态-vue-cli.md) vue-cli 插件原理
     - ✔ [vue 组件通信](vue/vue组件通信.md) vue 组件间的 10 种通信方式
     - ✔ [vue 组件复用](vue/vue组件复用.md) vue 组件优化：10 种复用方式
     - [vue 组件抽离规范](vue/vue组件抽离规范.md) vue 组件抽离原则

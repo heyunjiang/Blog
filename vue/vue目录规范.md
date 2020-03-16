@@ -43,3 +43,7 @@ time: 2020.3.4
 └── package.json               # package.json
 └── package-lock.json          # 依赖包锁文件
 ```
+
+## 统一目录规范时需要解决的问题
+
+如果要统一已经进行中的项目，并且

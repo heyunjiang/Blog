@@ -1,6 +1,7 @@
 # vue router
 
 time: 2019.6.5  
+update: 2020.3.16  
 author: heyunjiang
 
 这里穿插着使用文档和 vue-router 源码阅读，都是带着问题读源码，读源码也要讲究方法，不是为了读源码而读源码
@@ -13,7 +14,7 @@ author: heyunjiang
 
 ## 2 路由基本知识
 
-> 完整学习一边之后，再来和介绍页的功能对比，看自己的掌握程度
+> 完整学习一遍之后，再来和介绍页的功能对比，看自己的掌握程度
 
 1. vue-router 是深度集成在 vue 内部的，当路径变化的时候，控制组件的展示与否。
 2. vue 组件是一个对象，该对象有3个属性：template, script, style
@@ -21,6 +22,9 @@ author: heyunjiang
 4. 组件内部访问路由信息：this.$route。使用 vuex-router-sync 后可以访问 store.state.route
 5. 路由嵌套：`<router-view>` 作为全局组件，可以用在组件内部，用于匹配路由配置的 `children` 配置
 6. 路由组合：`<router-view name="a">`，除了嵌套，也可以组合成兄弟元素。需要在配置中 component -> components
+7. 路由导航组件：`<router-link>` 总共就这2个全局组件
+8. 路由是作为 vue 插件实现
+9. 路由内部是通过监听浏览器历史状态的变化来更新路由，hash 和 history 模式，采用 popState 和 hashChange 事件支持
 
 ## 3 路由配置
 
@@ -30,7 +34,9 @@ author: heyunjiang
 const route = [{
     path: '/user/:userId',
     name: 'user',
-    component: User
+    component: User,
+    meta,
+    children
 }]
 ```
 
@@ -59,7 +65,7 @@ routes: [
 
 ### 3.4 路由传参
 
-使用 `props` 字段传参，比如 `{ path: '/user/:id', component: User, props: {} }`，在组件内部使用 props 接收。  
+使用 `props` 字段传参，比如 `{ path: '/user/:id', component: User, props: {} }`，在路由组件内部使用 props 接收。  
 参数类型有：布尔、对象、函数
 
 ### 3.5 路由元信息 meta
@@ -116,6 +122,13 @@ const router = new VueRouter({
 1. 配置：静态路由有配置，动态路由没有配置
 2. 组件化：动态路由本身就是一个组件，静态路由不是
 3. 编写时：静态路由依靠 router-view, 而动态路由则需要在可能渲染到的地方都写上
+
+## 9 hash 模式和 history 模式区别
+
+1. history 需要服务器端做配置，否则刷新前端会 404
+2. url 路径展示不同
+3. pushState 实现方式差异：hash 内部采用 `window.location['replace', 'assign]` 来更新历史信息，history 采用 html5 的 `pushState | replaceState` 来直接实现
+4. history 模式可以不更新 URL 来改变浏览器历史记录信息，而 hash 不能
 
 ## 参考文章
 
