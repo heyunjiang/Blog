@@ -61,7 +61,7 @@
   - [web 存储](PWA/web存储.md)
   - ✔ [跨域实现的几种方法](other/跨域实现的几种方法.md)
   - [浏览器安全](browser/深入浏览器-安全.md) 常见 xss 攻击及防御
-  - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 新技能 - ui 自动化测试
+  - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 亮点技能 - ui 自动化测试
   - [关于前端监控的几点思考](browser/关于前端监控的几点思考.md)
 - 构建工具
   - ✔ [webpack基础](webpack/webpack专题.md)
@@ -106,7 +106,7 @@
   - 模拟: mock
   - Rxjs: [中文官网](https://cn.rx.js.org/)
 - pwa
-  - ✔ [webWorkers](PWA/webWorkers.md)
+  - ✔ [webWorkers](PWA/webWorkers.md) 亮点技能 - pwa
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
 - git
   - ✔ [常见问题及答案](git/常见问题及答案.md)
