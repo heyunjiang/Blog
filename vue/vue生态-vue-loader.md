@@ -114,6 +114,43 @@ export function initAssetRegisters (Vue: GlobalAPI) {
 从这个方法可以看出，我们在全局或者局部注册组件时，才会去调用 Vue.extend 去实例化一个组件，并且返回实例化后的组件  
 在我们编写组件时，通过 vue-loader 处理之后，是不会去生成 vue 实例的
 
+问：全局注册组件，和局部注册组件有什么区别？  
+答：2者都是通过 Vue.extend 去实例化一个新组件，并把这个组件对象挂载在自身 vue 示例对象上。
+在编译之后，执行 render 的 _createElement 生成 vnode 实例时，会去查找 `this.options.components` 对象，如果找到，则顺利执行 createComponent 方法生成 vnode 实例，如果找不到，则生成 html 自定义标签。
+2者区别，全局注册，会在每个 vue 实例的 options.components 对象上都有这个全局组件属性，而局部注册，只有在当前组件实例上有这个组件属性。
+
+```javascript
+  // _createElement 源码
+  if (typeof tag === 'string') {
+    let Ctor
+    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    if (config.isReservedTag(tag)) {
+      // platform built-in elements
+      if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
+        warn(
+          `The .native modifier for v-on is only valid on components but it was used on <${tag}>.`,
+          context
+        )
+      }
+      vnode = new VNode(
+        config.parsePlatformTagName(tag), data, children,
+        undefined, undefined, context
+      )
+    } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+      // component
+      vnode = createComponent(Ctor, data, context, children, tag)
+    } else {
+      // unknown or unlisted namespaced elements
+      // check at runtime because it may get assigned a namespace when its
+      // parent normalizes children
+      vnode = new VNode(
+        tag, data, children,
+        undefined, undefined, context
+      )
+    }
+  }
+```
+
 ### 1.3 vue-loader 编译 .vue 文件
 
 为了测验一下 vue-loader 会如何对 .vue 组件进行处理，我们用 parcel 来构建一个 .vue 组件，看看输出结果
