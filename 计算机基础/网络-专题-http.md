@@ -52,6 +52,28 @@ Content-Length: 91
 Date: Thu, 01 Nov 2018 10:42:09 GMT
 ```
 
+常见 http 请求头字段解析
+
+1. Host: 客户端域名
+2. Connecttion：连接方式，keep-alive 表示长连接
+3. Accept：希望接收到数据格式
+4. Origin：
+5. User-agent：客户端代理信息
+6. Content-Type：post 数据格式
+7. Cookie
+8. cache-control：缓存时间控制，单位 s
+
+常见响应头字段解析
+
+1. Server：服务器代理信息
+2. Content-type：服务器返回数据类型，可以是 json, html, stream 等
+3. Date：日期
+4. Connection：连接方式， keep-alive 表示长连接
+5. Last-modify：上次更新日期，通常用于静态资源文件
+6. Etag
+7. Cache-control：缓存时间控制，单位 s
+8. Set-cookie
+
 ## 2 http 基本优化要点
 
 ### 2.1 带宽
