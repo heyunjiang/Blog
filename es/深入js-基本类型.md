@@ -15,7 +15,7 @@
 
 ## 1 7大变量类型
 
-boolean, number, string, null, undefined, object, symbol
+boolean, number, string, null, undefined, object, symbol，bigint
 
 symbol：[es6-Symbol](./es6-Symbol.md)  
 string: [es2015-模板字符串](./es6-模板字符串.md)
