@@ -57,7 +57,7 @@
   - ✔ [深入浏览器-dom](browser/深入浏览器-dom.md)
   - ✔ [深入浏览器-bom](browser/深入浏览器-bom.md)
   - ✔ [深入浏览器-浏览器](browser/深入浏览器-浏览器.md)
-  - ✔ [深入浏览器-事件循环](browser/深入浏览器-事件循环.md)
+  - ✔ [深入浏览器-事件循环](browser/深入浏览器-事件循环.md) 学习 chrome event loop，包括 macrotask, microtask, gc task, render task
   - [web 存储](PWA/web存储.md)
   - ✔ [跨域实现的几种方法](other/跨域实现的几种方法.md)
   - [浏览器安全](browser/深入浏览器-安全.md) 常见 xss 攻击及防御
