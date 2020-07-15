@@ -37,6 +37,29 @@ author: heyunjiang
 - worker ： 运行 HTML5 Web Worker 的代码。
 ```
 
+### 2.1 renderer 渲染源码分析
+
+入口文件：content/renderer/renderer_main.cc
+
+```c++
+int RendererMain(const MainFunctionParams& parameters) {
+  // 初始化 - blink 内核
+  blink::Platform::InitializeBlink();
+  // 初始化 - 跨平台
+  platform.PlatformInitialize();
+  // 初始化 - WebRTC
+  InitializeWebRtcModule();
+  // 沙箱激活
+  if (need_sandbox) {
+    should_run_loop = platform.EnableSandbox();
+    need_sandbox = false;
+  }
+  // 激活渲染主线程
+  new RenderThreadImpl(run_loop.QuitClosure(), std::move(main_thread_scheduler));
+}
+```
+
 ## 参考文章
 
-[简书-chromium 目录结构](https://www.jianshu.com/p/4afe92418bd9)
+[简书-chromium 目录结构](https://www.jianshu.com/p/4afe92418bd9)  
+[chromium源码阅读--Browser进程初始化](https://www.cnblogs.com/danxi/p/7685629.html)
