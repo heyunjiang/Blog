@@ -21,9 +21,9 @@ update: 2018.8.7
 
 ## 1 关于babel
 
-babel 只是一个编译器，将你写的代码进行编译，分三个阶段：解析(parsing)、转换(transforming)、生成(generation)
+babel 只是一个编译器，将你写的代码进行编译，es6 -> es5，分三个阶段：解析(parsing)、转换(transforming)、生成(generation)
 
-可以在webpack、浏览器、编辑器等工具里面使用babel，babel都为其制定了使用方式及相关工具
+可以在 webpack、浏览器、编辑器等工具里面使用babel，babel都为其制定了使用方式及相关工具
 
 现在我掌握到什么程度：能熟练运用常用babel plugins，还没有尝试自己编写
 
