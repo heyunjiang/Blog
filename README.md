@@ -35,6 +35,7 @@
   - ✔ [es2015-promise](es/es6-promise.md)
   - ✔ [es2015-generator](es/es6-generator.md)
   - ✔ [es2015-async](es/es6-async.md)
+  - ✔ [es2015-模块化](es/es6-模块化.md) import export 关系
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-作用域.md)
   - ✔ [深入js-语句与表达式](es/深入js-语句与表达式.md)
@@ -126,7 +127,7 @@
   - W3C标准
   - ES规范
 - 计算机基础
-  - [计算机组成原理](计算机基础/结构-计算机组成原理.md)
+  - ✔ [计算机组成原理](计算机基础/结构-计算机组成原理.md)
   - ✔ [vultr 搭梯子](计算机基础/vultr搭梯子.md)  科学上网，你懂的
   - 操作系统
   - 计算机网络
