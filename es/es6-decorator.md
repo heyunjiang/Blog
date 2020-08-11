@@ -8,10 +8,10 @@ time: 2018.4.17
 
 上次面试，别人问到我这个问题，当时没有回答上来，都对这2个东西只是简单的了解，没有熟练的使用，没有去掌握其中的原理，一直是心中的一个遗憾
 
-## derocrator 实现了什么功能
+## 1 derocrator 实现了什么功能
 
-1. 对类的修饰，类名为第一个参数，修饰的是类的实例，不是直接操作的类，但是可以通过 `实例.prototype` 操作原型
-2. 对类的属性修饰 (方法也是类的属性，类的属性的值有bool、number、function等，就是js的7大类型)
+1. 对类的修饰，类名为第一个参数，修饰的是类本身，可以通过 `实例.prototype` 操作原型
+2. 对类的属性修饰，修饰的是类属性的描述符 `descriptor` (方法也是类的属性，类的属性的值有bool、number、function等，就是js的7大类型)
 3. 不能用于函数，这个就是跟高阶组件最大的区别
 
 **core-decorators** : 可用的第三方模块，提供常用的几种decorator：this绑定、readonly、父类方法覆盖判断
@@ -28,7 +28,7 @@ class A {}
 A = decorator(A) || A;
 ```
 
-### 1. decorator 传参 vs 不传参
+## 2 decorator 传参 vs 不传参
 
 **不传参**
 
@@ -65,11 +65,11 @@ MyClass.isTestable // false
 
 > 2者区别：decorator构造嵌套函数层级不同; 需要传参的decorator在使用的使用，相当于执行了一次 `@testable(true)`
 
-### 2. 执行时机
+## 3 执行时机
 
 decorator作为es6的语法，目前在常规浏览器中不能直接使用，所以它的执行，是在编译阶段执行的
 
-### 3. 对类的属性的修饰
+## 4 对类的属性的修饰
 
 ```javascript
 class Person {
@@ -93,7 +93,9 @@ function readonly(target, name, descriptor){
 2. name: 修饰的属性名称，这里是 `name`
 3. descriptor: 修饰的属性的描述对象(descriptor包含了属性的枚举、值等)
 
-### 4. decorator不可用于函数
+说明我们使用修饰器时，其实改变的是对象本身属性、对象 descriptor 属性
+
+## 5 decorator不可用于函数
 
 阮一峰大神说的是存在函数提升，在声明函数的时候，decorator还没有被赋值，所以不可以作用于函数。
 
@@ -134,13 +136,13 @@ function loggingDecorator(wrapped) {
 const wrapped = loggingDecorator(doSomething);
 ```
 
-### 5. mixin & trait
+## 6 mixin & trait
 
 2者主要功能：都是修饰器，可以为类增加属性，扩展类
 
 但是trait更能强大，mixin自己写，trait使用第三方库 `traits-decorator` ，它提高了防止同名方法重复、排除方法及方法别名等功能
 
-### decorator vs HOC(高阶组件)
+## 7 decorator vs HOC(高阶组件)
 
 相同点
 
