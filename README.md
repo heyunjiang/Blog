@@ -12,6 +12,12 @@
 > 新技术：关注新技术，先总结其能做什么，再考虑能否在项目中融合使用进去  
 > 项目开发目标：首要完成项目，其次 **提升自己技术能力**，正是玉伯的：业务为正，专业为奇。
 
+本地开发神器
+
+1. parcel：支持入口文件 html，快速启动一个本地服务。用于自己写的 js 库快速调试，或者启动包含第三方库的单文件 vue 组件
+2. vue-cli：支持入口文件 vue，快速启动一个本地服务。用于纯 vue 文件，如果使用了第三方库，比如 elementui ，则需要回到 parcel 快速启动服务
+3. webpack：灵活配置，常用语打包 lib 文件，发布为 npm package 资源
+
 - html
   - ✔ [深入html-标签语义化](html/深入html-标签语义化.md)
 - css
@@ -35,6 +41,7 @@
   - ✔ [es2015-promise](es/es6-promise.md)
   - ✔ [es2015-generator](es/es6-generator.md)
   - ✔ [es2015-async](es/es6-async.md)
+  - ✔ [es2015-class](es/es6-class.md)
   - ✔ [es2015-模块化](es/es6-模块化.md) import export 关系
   - ✔ [深入js-编码规则](es/深入js-编码规则.md)
   - ✔ [深入js-词法作用域](es/深入js-作用域.md)
