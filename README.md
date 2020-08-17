@@ -114,6 +114,9 @@
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
   - Rxjs: [中文官网](https://cn.rx.js.org/)
+- 可视化
+  - ✔ [可视化实现方案](可视化/可视化实现方案.md) 4种可视化实现方案
+  - zRender 源码分析
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md) 亮点技能 - pwa
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
@@ -149,7 +152,7 @@
 - 技术方向
   - [webGL](webGL/入门.md): 3D
   - [svg](html/svg入门.md) svg 入门学习
-  - canvas: 2D
+  - canvas2d: 2D
   - webRTC: 实时通信技术
   - docker基础: 容器技术
   - webAssembly: 提升项目运行效率，能在浏览器中跑的另一种语言
