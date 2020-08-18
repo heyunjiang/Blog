@@ -16,5 +16,5 @@ author: heyunjiang
 3. 绘制 rect 对象，zrender 封装独立对象实现了哪些功能？
 
 另外，自己还有以下目的学习源码  
-1. 对 zrender 实现有全面了解的兴趣
+1. 对 zrender 实现有全面了解的兴趣，对比 canvas2d api 来学习
 2. 辅助建立自己的可视化体系
