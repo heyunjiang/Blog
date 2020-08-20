@@ -117,6 +117,8 @@
 - 可视化
   - ✔ [可视化实现方案](可视化/可视化实现方案.md) 4种可视化实现方案
   - zRender 源码分析
+- 性能优化
+  - [系统性能衡量及优化](性能优化/系统性能衡量及优化.md) 系统性能如何衡量、如何优化、chrome-dev-tool
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md) 亮点技能 - pwa
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)
