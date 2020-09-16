@@ -21,6 +21,10 @@ s.includes('Hello', 0) // true
 // 字符串补全长度
 'x'.padStart(5, 'ab') // 'ababx'
 'x'.padEnd(5, 'ab') // 'xabab'
+
+// charCodeAt, fromCharCode utf-16 编码与字符转换
+String.fromCharCode(10) // '回车'
+'s'.charCodeAt(0) // 115
 ```
 
 ### 1.1 字符串的 length 属性
