@@ -4,6 +4,16 @@ time: 2018.9.11
 update: 2020.7.7  
 author: heyunjiang
 
+目录  
+背景  
+1. es6 模块化设计思想
+2. import
+3. export
+4. import()
+5. 模块加载
+6. javascript code module
+参考文章
+
 ## 背景
 
 使用 vue, react 组件化开发很久了，一直都是按照指定的模式开发，虽然说没有啥问题，但是也不知道个中缘由。  
@@ -78,7 +88,7 @@ export default world;
 es6 模块加载
 
 ```javascript
-<script type="module" src="./foo.js"></script> // 默认带有 defer 属性，异步加载
+<script type="module" src="./foo.js"></script> // 默认带有 defer 属性，异步加载，不需要再设置 defer 属性
 ```
 
 ### 5.2 nodejs 记载模块
@@ -98,8 +108,37 @@ es modules 方式
 1. 如果想使用 import export 命令，则需要指定文件后缀名 `.mjs` 或者 package.json `type = module`
 2. 如果目录在 package.json 中指定了 `main` 字段，则会直接去加载 main 指定路径文件。也可以指定 exports 字段，优先级 exports > main
 
-> 我们在日常业务开发中，通常都是使用 nodejs 环境，让 webpack 处理一下 import export。我们平时写的 import export，都是 es module，但是 webpack 打包结果不一样，是啥原因呢。 
+> 我们在日常业务开发中，通常都是使用 nodejs 环境，让 webpack 处理一下 import export。我们平时写的 import export，都是 es module，但是 webpack 打包结果不一样，是啥原因呢。  
+> 答：是为了兼容不支持 esm 的浏览器
+
+## 6 javascript code module
+
+1. `.js`：es6 之前支持的 js 文件格式
+2. `.mjs`：浏览器支持的标准 es module 格式，使用 import, export 实现
+3. `.jsm`：js module，非标准(2020.10.26)
+
+不同于 esmodule，js code module 是独立的 js 代码块，没有特殊的导出对象  
+使用方式如下  
+```javascript
+// 定义 jsm，文件格式为 jsm
+var bar = {
+  name : "bar",
+  size : 3
+};
+```
+
+```javascript
+// 使用 jsm，这个URL必须是在磁盘上的一个文件
+Components.utils.import("resource://app/my_module.jsm");
+// 卸载 jsm
+Components.utils.unload()
+```
+
+特性  
+1. jsm 被加载之后由浏览器缓存起来，后续所有其他地方引用组件，是属于对象内存共享，不同于 esm 的独立
+2. 引入方式：resource(常用), chrome mainfest
 
 ## 参考文章
 
-[es6 阮一峰](https://es6.ruanyifeng.com/#docs/module)
+[es6 阮一峰](https://es6.ruanyifeng.com/#docs/module)  
+[js code module](https://developer.mozilla.org/zh-CN/docs/Mozilla/JavaScript_code_modules)
