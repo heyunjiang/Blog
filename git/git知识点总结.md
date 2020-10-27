@@ -29,7 +29,7 @@ git 虽然日常使用，也能操作 clone, pull, push, merge, reset, revert, l
 ### 3.2 git log
 
 1. `git log --pretty=oneline` 用于在一行展示提交记录
-2. `git reflog` 用于记录每一次的操作命令，该命令用于记录自己的操作
+2. `git reflog` 用于记录每一次的操作命令，该命令用于记录自己的操作；属于本地操作记录，包括每次commit，即使不在 HEAD 指针链上；主要用于恢复 git reset --hard 引起的问题。同 git log 一样，也是基于 commit 操作
 
 ### 3.3 git reset
 
@@ -64,6 +64,8 @@ git stash 用于将工作区内容放到暂存区，然后去其他分支处理�
 ### 3.8 git rebase
 
 把分叉的提交历史“整理”成一条直线，看上去更直观。缺点是本地的分叉提交已经被修改过了。一般不建议使用
+
+将 dev 分支修改内容 copy 到 master，看起来就像是 master 修改记录，会丢失 dev 修改记录，但是看起来更简洁。有舍也有得
 
 ### 3.9 git tag
 
