@@ -266,3 +266,8 @@ var componentA = context.resolve('componentA');
 预估原因： 是即将要加载的包版本和cache中的版本冲突，新版本的npm对其的操作与旧版本不同
 
 可以尝试重复npm install命令，也有可能原因是npm不稳定 
+
+
+## 参考文章
+
+[webpack 打包原理](https://segmentfault.com/a/1190000021494964?utm_source=sf-related)
