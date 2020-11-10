@@ -77,7 +77,7 @@
   - [ast的思考](builder/ast的思考.md)
   - webpack 运行原理
   - webpack loader
-  - webpack plugin
+  - [webpack-plugin](webpack-plugin.md)
   - rollup基础
   - fis基础
   - ✔ [babel plugin](builder/babel.md)

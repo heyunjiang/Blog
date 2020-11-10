@@ -15,6 +15,7 @@ author
 目前了解到  
 1. ast 有一套标准规范，浏览器、babel 对 ast 有自己的实现
 2. ast 格式有 ExpressionStatement、FunctionDeclaration、CallExpression、Identifier 等显示声明，能明确知道表达式、变量、函数声明等格式
+3.  编译原理最基本的就是 ast
 
 ## 参考文章
 
