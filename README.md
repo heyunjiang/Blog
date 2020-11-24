@@ -55,6 +55,7 @@
   - [深入js-this](es/深入js-this.md)  说明了 this 指向问题
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
   - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+0.2 问题、退出循环等问题
+  - [typescript浅尝](es/typescript浅尝.md) ts 基础总结
 - nodejs
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
@@ -160,7 +161,6 @@
   - docker基础: 容器技术
   - webAssembly: 提升项目运行效率，能在浏览器中跑的另一种语言
   - flutter: 移动应用开发，替代 android ios
-  - typescript: 强类型语言
   - GraphQL: vs restful
 - 用户体验
   - [字体优化](用户体验/字体优化.md)
