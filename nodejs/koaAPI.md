@@ -104,7 +104,7 @@ app.on('error', (err, ctx) => {
 6. ctx.app：应用程序的实例引用
 7. ctx.cookies.get(name, options)：koa 获取 cookie，使用 [Cookies](https://github.com/pillarjs/cookies) 模块
 8. ctx.cookies.set(name, value, options)：koa 设置 cookie
-9. ctx.throw(status, msg, properties)：ctx 抛出错误。`不太懂`
+9. ctx.throw(status, msg, properties)：ctx 抛出错误。
 10. ctx.assert(value, status, msg, properties)： 类似 invarient ，当 !value 时，抛出错误
 11. ctx.respond：通过设置 `ctx.respond = false` ，可以绕过 koa 内置的 response 处理，操作原始的 response 对象
 

@@ -20,16 +20,16 @@ time: 2018.11.12
 ```javascript
 // koa use 源码
 use(fn) {
-    if (typeof fn !== 'function') throw new TypeError('middleware must be a function!');
-    if (isGeneratorFunction(fn)) {
-      deprecate('Support for generators will be removed in v3. ' +
-                'See the documentation for examples of how to convert old middleware ' +
-                'https://github.com/koajs/koa/blob/master/docs/migration.md');
-      fn = convert(fn);
-    }
-    debug('use %s', fn._name || fn.name || '-');
-    this.middleware.push(fn);
-    return this;
+  if (typeof fn !== 'function') throw new TypeError('middleware must be a function!');
+  if (isGeneratorFunction(fn)) {
+    deprecate('Support for generators will be removed in v3. ' +
+              'See the documentation for examples of how to convert old middleware ' +
+              'https://github.com/koajs/koa/blob/master/docs/migration.md');
+    fn = convert(fn);
+  }
+  debug('use %s', fn._name || fn.name || '-');
+  this.middleware.push(fn);
+  return this;
 }
 ```
 

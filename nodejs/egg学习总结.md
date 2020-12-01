@@ -11,6 +11,7 @@ update: 2020.11.10
 ## 2 带着问题
 
 1. 启动的 nodejs 服务，如果只做中间层，其在整个应用中的架构中是什么位置？如果与其他服务通信？
+2. egg 是如何同 koa 整合的？
 
 ## 3 egg 知识点
 
@@ -114,3 +115,14 @@ describe('test/app/middleware/robot.test.js', () => {
 
 插件本身就是一个 mini 的 app，用于实现一些特定的功能，可插拔，通常包含以下功能：service, middleware, config, extend 等，但是不包括 router, controller，自身也不能定义 plugin.js，能声明其他插件依赖，但是不能决定其他插件的开启与否。
 
+### 3.7 定时任务
+
+应用场景
+
+1. 定时上报应用状态
+2. 定时从远程接口更新本地缓存
+3. 定时进行文件切割、临时文件删除
+
+## 参考文章
+
+[egg 官网](https://eggjs.org/zh-cn/basics/schedule.html)

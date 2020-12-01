@@ -18,3 +18,7 @@ author: heyunjiang
 解决方案： `open ~/.bash_profile` 修改配置为 `export PATH=/usr/local/bin:$PATH;`，就能找到 npm 对应目录了
 
 结论：目前对 mac 系统了解较少，限于简单使用，这里记录的是问题与解决方案，没有深入原理
+
+## 2 mac 常用命令
+
+1. 
