@@ -123,6 +123,23 @@ describe('test/app/middleware/robot.test.js', () => {
 2. 定时从远程接口更新本地缓存
 3. 定时进行文件切割、临时文件删除
 
+## 4 数据库
+
+这里总结下 mysql 使用技巧  
+1. egg 插件：egg-typeorm
+2. typeorm: orm 组件库
+3. orm：object-relationship-mapping，是关系型数据库的面向对象模式实现
+
+ORM 简要总结  
+1. class - table，一个类对应一个 table 表
+2. object - record，一个 object 对应一条数据
+3. attribute - record value，一个 object 属性对应一条数据中的某列值
+
+总结：  
+1. orm 是一种关系型数据库操作由面向对象方式的操作规范，而 typeorm 是一个 orm 的 `数据库框架`
+
 ## 参考文章
 
-[egg 官网](https://eggjs.org/zh-cn/basics/schedule.html)
+[egg 官网](https://eggjs.org/zh-cn/basics/schedule.html)  
+[orm 阮一峰](http://www.ruanyifeng.com/blog/2019/02/orm-tutorial.html)  
+[github typeorm](https://github.com/typeorm/typeorm)
