@@ -440,7 +440,7 @@ Object.getOwnPropertyDescriptor(obj, 'foo')
 //  }
 ```
 
-如果设置对象属性描述对象的 `enumerable` 值为 false，那么下列操作就会忽略这个属性
+如果设置对象属性描述对象的 `enumerable` 值为 false，那么下列操作就会忽略这个属性，不会遍历到这个属性
 
 1. for...in 循环
 2. Object.keys()
@@ -450,7 +450,7 @@ Object.getOwnPropertyDescriptor(obj, 'foo')
 下列操作可以获取到 `enumerable` 值为 false 的属性
 
 1. Object.getOwnPropertyNames
-2. Reflect.ownKeys
+2. Reflect.ownKeys：Reflect 对象是 es6 提供给 Object 的一个辅助操作对象，只能使用它的静态方法，比如 Reflect.deleteProperty()
 3. Object.getOwnPropertyDescriptors
 
 > es6 规定： __proto__ 属性只需浏览器部署，其他环境可以不用部署
