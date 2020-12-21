@@ -57,9 +57,9 @@
   - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+0.2 问题、退出循环等问题
   - [typescript浅尝](es/typescript浅尝.md) ts 基础总结
 - nodejs
+  - [nodejs 基础](nodejs/基础知识.md)
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
-  - [nodejs 基础](nodejs/基础知识.md) 学习 nodejs 时，要配合 javascript 严格模式学习
   - ✔ [koaAPI](nodejs/koaAPI.md) koa 实现了 http 服务器方面功能，包括 response, request, context 3大api
   - [koa 进阶](nodejs/koa进阶.md) 学习 koa 如何使用
 - 浏览器
