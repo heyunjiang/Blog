@@ -59,7 +59,7 @@
 - nodejs
   - [nodejs 基础](nodejs/基础知识.md)
   - ✔ [node-模块化](nodejs/node-模块化.md) 模块加载缓存、包装器
-  - node-process
+  - [node-process](nodejs/node-process.md)
   - [node-crypto](nodejs/node-crypto.md) 加密
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
