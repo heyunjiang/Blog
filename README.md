@@ -58,9 +58,12 @@
   - ✔ [typescript浅尝](es/typescript浅尝.md) ts 基础总结
 - nodejs
   - [nodejs 基础](nodejs/基础知识.md)
-  - ✔ [node-模块化](nodejs/node-模块化.md) 模块加载缓存、包装器
-  - ✔ [node-process](nodejs/node-process.md)
-  - ✔ [node-crypto](nodejs/node-crypto.md) 加密
+  - [node-模块化](nodejs/node-模块化.md) 模块加载缓存、包装器
+  - [node-process](nodejs/node-process.md)
+  - node-threads 工作线程
+  - [node-cluster](nodejs/node-cluster.md) 多进程
+  - [node-crypto](nodejs/node-crypto.md) 加密
+  - node-stream 流
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
   - ✔ [koaAPI](nodejs/koaAPI.md) koa 实现了 http 服务器方面功能，包括 response, request, context 3大api
