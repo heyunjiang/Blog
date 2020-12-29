@@ -24,3 +24,16 @@ author: heyunjiang
 15. process.version：返回 nodejs 版本
 
 ## 2 child_process 子进程
+
+包含了 process 的部分能力，比如 kill, pid 等方法，这里归纳一些子进程特色
+
+1. 模块引入：require('child_process')
+2. child_process.spawn 异步衍生子进程，spawnSync 同步实现
+3. 父子进程通信：message 事件 + send() 实现
+4. 管道数据：process.stderr、process.stdin、process.stdout，这3个管道默认会在父子进程中创建
+
+核心是 spawn | spawnSync，下面这些方法都是基于这2者来实现
+
+1. child_process.exec()：衍生 shell 并且在 shell 中运行命令，同步 execSync
+2. child_process.execFile()：直接衍生命令而不先衍生 shell，同步 execFileSync
+3. child_process.fork()：衍生新的 nodejs 进程
