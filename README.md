@@ -64,6 +64,7 @@
   - [node-cluster](nodejs/node-cluster.md) 多进程
   - [node-crypto](nodejs/node-crypto.md) 加密
   - node-stream 流
+  - node-timer
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
   - ✔ [koaAPI](nodejs/koaAPI.md) koa 实现了 http 服务器方面功能，包括 response, request, context 3大api
