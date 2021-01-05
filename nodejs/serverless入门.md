@@ -25,8 +25,8 @@ author: heyunjiang
 5. 括缩容：一版指横向括缩容，增加机子台数
 6. 冷启动流程：系统资源调度、下载函数代码、启动容器、启动 runtime、函数初始化、函数执行
 7. cass: container as a service，指的是容器服务
-8. docker 与 vm 不同：docker 基于同一进程，是在不同线程级别操作，共享内存，优点是轻量、启动速度更快、代码执行速度更快。可以将 docker 部署在任何 docker 引擎上
-9. 容器括缩容：监听容器指标 cpu 利用率、内存使用率、硬盘使用率、网络链接数等，某一指标超出预估水位，则需要扩容，低于水位，则缩容
+8. docker 与 vm 不同：docker 基于同一进程，是在不同线程级别操作，共享内存，优点是轻量、启动速度更快(启动一个进程，而非os)、代码执行速度更快。可以将 docker 部署在任何 docker 引擎上
+9. 容器括缩容：监听容器指标 cpu 利用率、内存使用率、硬盘使用率、网络链接数等，某一指标超出预估水位，则需要扩容，低于水位，则缩容，也称 `弹性服务`
 
 > 云服务发展历史：裸机房、vm 虚拟机、Iaas、Paas、Baas、Caas、ServerLess  
 
@@ -36,7 +36,7 @@ author: heyunjiang
 
 ## 4 Baas
 
-1. 后端 Baas 化包含：数据库、dns、网关、
+1. 后端 Baas 化包含：数据库、dns、网关、中间件、日志等
 2. 微服务调用：RPC
 3. Serverless Baas 服务调用：HTTP
 4. 微服务10要素：`API、服务调用、服务发现；日志、链路追踪；容灾、监控、括缩容；发布管道；鉴权`
@@ -45,3 +45,19 @@ author: heyunjiang
 7. 服务编排：服务节点合并，是操作动态网络节点的一种高级说法
 8. JWT：通过统一鉴权服务，生成 JWT 字符串，也就是数字签名，预签名，每次 http 请求都带上
 9. 发布：发布管道，发布流水线，cicd，灰度
+
+## 5 k8s
+
+1. 原名 kubernetes，用于自动部署、扩展和管理容器化应用程序的开源系统，不限制使用 docker
+2. 使用 `kubectl` cli 管理 k8s
+3. 容器镜像服务：属于一个仓库平台，阿里有提供私有镜像服务，类似于 npm 仓库。而本地可以制作个人镜像，发布到镜像仓库中，类似于 npm 发布
+4. 云原生：一套通用的云服务商解决方案，用以解决受单一云服务商限制的解决方案，让用户可以自己选择某一个服务对应的云服务商。而 k8s 就是云原生的核心
+5. k8s集群：由 master 节点 + worker 节点组成
+6. k8s集群 - master: master 节点由 api server、kube-controller-manager、etcd 等组成，负责维护集群状态，管理 worker 节点，保证职责单一，不会运行容器实例
+7. k8s集群 - worker：也就是 k8s node 节点，每个 k8s 集群包含多个 worker 节点，每个节点内部包含多个 pod，pod 是容器运行的最小单位，它包含了一个集群 ip；一个 pod 可以运行一个或多个容器实例，会共享 pod 端口，一般只运行一个容器
+8. k8s集群 - 集群网络：每个 k8s 集群构建自己的网络，内部每个 pod 由自己的 ip，集群内部互通；跨集群通信需要暴露服务，通过 http 访问
+
+## 参考文章
+
+[kubectl - k8s 管理工具](https://kubernetes.io/zh/docs/tasks/tools/install-kubectl/)  
+[serverless 指南](http://serverless.ink/)
