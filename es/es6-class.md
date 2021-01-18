@@ -43,3 +43,25 @@ author: heyunjiang
 4. 静态方法会被继承：但是不会被实例化对象访问
 5. `super` 对象：访问 `super.x` 表示访问的 `父类实例 | 父类原型` 的方法，也就是 `A.prototype.x`，注意不是父类的方法。而设置属性时 `super.x` 设置，此刻修改实例的属性，修改的也是子类 this 对象的属性，因为子类在 constructor 中通过 `super()` 将父类实例的属性，全部绑定在自身实例的 this 对象上了，所以 `super.x === this.x` 2者设置属性值都是一样的。(通常不建议使用 super 设置值，super 只用于读取值)
 6. `prototype` 和 `__proto__` 属性：实例的 __proto__ 属性指向父类的 prototype 属性，而对象本身的 __proto__ 属性指向的是父类本身，es5 和 es6 都是一样
+
+## 4 class vs function
+
+class 类和 function 实现的对象，有什么不同？
+
+相同点：  
+1. es6 的 class 是 function 的语法糖，typeof class 也是 function
+2. 都可以通过 new 实例化一个对象
+3. es6 class 内部定义方法同 function.prototype，都是挂在原型上
+4. 多态：2种继承之后，都可以对相同方法重新实现，达到多态
+5. this 实现：在实例化时，都是通过将类属性添加到 this 对象上，包括从父类继承的属性
+6. 
+
+不同点：  
+1. 关键字支持：es6 class 支持 static 关键字，表现同 function 对象直接挂载属性
+2. class 封装：内部属性、方法封装，不可枚举，而 function.prototype 属性默认可以枚举
+3. class 继承：使用 extends 关键字继承，使用 super 调用父类构造函数，而 function 需要开发者主动实现 function 原型属性获取继承
+4. class 不可执行：不可直接像函数一样加括号执行 class，即使 typeof class 为 function；必须通过 new 来执行
+5. 严格模式：es6 class 默认全局严格模式
+6. 变量提升：class 名不可提升，提前访问会出问题
+
+> ts class：与 es6 class 和 function 有差别

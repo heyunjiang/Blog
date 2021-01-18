@@ -16,6 +16,7 @@ update: 2020.12.28
 [3 tsx](#3-tsx)  
 [4 泛型](#4-泛型)  
 [5 技巧](#5-技巧)  
+[6 与es6 class区别](#6-与es6-class区别)  
 
 ## 1 typescript 简介
 
@@ -88,6 +89,9 @@ class 包含了 属性、constructor、方法
 9. interface: 定义接口，接口之间也可以继承，接口还可以继承类(ts 特有，并且只会继承类的非静态属性、非静态方法)
 10. implements：实现接口，多个接口用逗号隔开
 
+问：private 或 protected 属性，可以通过实例访问吗？  
+答：不可，只能在类内部访问
+
 ### 2.5 declare
 
 作用：方便编辑器定位、代码补全
@@ -148,3 +152,8 @@ swap([7, 'seven']);
 
 1. 跨过 ts 编译错误：断言为 any 可以跨国 ts 错误，例如 `(window as any).hello`
 2. ts 对全局对象有做类型定义，比如 Math, addEventListener 等，在我们使用的时候，ts 做类型推论，如果类型不匹配则会编译报错
+
+## 6 与es6 class区别
+
+1. 编译结果: ts class 编译结果为 es5 function，es6 class 由 v8 本身提供
+2. 关键字: ts 支持更完整关键字，而 es6 只支持 static、extends、super 三个
