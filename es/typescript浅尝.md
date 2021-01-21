@@ -13,6 +13,8 @@ update: 2020.12.28
 &nbsp;&nbsp;[2.2 function](#2.2-function)  
 &nbsp;&nbsp;[2.3 declare](#2.3-declare)  
 &nbsp;&nbsp;[2.4 class](#2.4-class)  
+&nbsp;&nbsp;[2.5 declare](#2.5-declare)  
+&nbsp;&nbsp;[2.6 module](#2.6-module)  
 [3 tsx](#3-tsx)  
 [4 泛型](#4-泛型)  
 [5 技巧](#5-技巧)  
@@ -99,6 +101,14 @@ class 包含了 属性、constructor、方法
 1. 使用 `declare` 关键字定义声明语句
 2. 声明文件以 `.d.ts` 结尾
 
+### 2.6 module
+
+在 nodejs 中，默认采用的是 commonjs 规范，如果想使用 es6 规范，则必须声明为 .mjs，在 ts 中对于模块有不同的实现
+
+1. ts 中默认支持 export 和 import 关键字，使用方式同 es6 一致
+2. export = 和 import =: ts 规定，如果使用 export = 来兼容 commonjs 的导出对象(即 commonjs 和 es6 混用)，则必须使用 import = require 来实现
+3. 除了和 export =  搭配，ts 支持 commonjs require 加载文件吗？
+
 ## 3 tsx
 
 在 typescript 实现的 jsx 命名为 `tsx`
@@ -157,3 +167,7 @@ swap([7, 'seven']);
 
 1. 编译结果: ts class 编译结果为 es5 function，es6 class 由 v8 本身提供
 2. 关键字: ts 支持更完整关键字，而 es6 只支持 static、extends、super 三个
+
+## 参考文档
+
+[ts 中文](https://www.tslang.cn/docs/handbook/modules.html)
