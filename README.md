@@ -57,14 +57,26 @@
   - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+0.2 问题、退出循环等问题
   - ✔ [typescript浅尝](es/typescript浅尝.md) ts 基础总结
 - nodejs
-  - [nodejs 基础](nodejs/基础知识.md)
   - [node-模块化](nodejs/node-模块化.md) 模块加载缓存、包装器
-  - [node-process](nodejs/node-process.md)
-  - node-threads 工作线程
+  - [node-process](nodejs/node-process.md) 当前进程属性、方法
   - [node-cluster](nodejs/node-cluster.md) 多进程
-  - [node-crypto](nodejs/node-crypto.md) 加密
-  - node-stream 流
-  - node-timer
+  - [node-crypto](nodejs/node-crypto.md) OpenSSL 加解密实现
+  - node-threads 工作线程，用于 cpu 密集计算，不适用于 i/o 密集
+  - node-fs 文件系统
+  - node-调试 debugger 能力
+  - node-error 错误对象
+  - node-全局对象
+  - node-http http, http2, https 系列总结
+  - node-socket net 实现 tcp | ipc 功能，dgram 实现 udp 功能
+  - node-path 路径解析、拼装
+  - node-repl 用户交互，需要时再查看 api，一般使用 commander 之类的库实现
+  - node-buffer 二进制操作工具，同时包含 string_decoder 解码 buffer 为字符串
+  - node-tls nodejs 对 tls/ssl 的实现，包括密钥、证书等
+  - node-url URL 的处理与解析
+  - node-vm 解析和执行 javascript 代码，基于 v8
+  - node-zlib 提供了对 gzip, deflate/inflate, brotli 的压缩实现
+  - node-stream 流，包含 readline 逐行读取、实现 stream 的类统计
+  - [node-timer](nodejs/node-timer.md) 定时器与事件循环
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
   - ✔ [koaAPI](nodejs/koaAPI.md) koa 实现了 http 服务器方面功能，包括 response, request, context 3大api

@@ -3,11 +3,15 @@
 time: 2020.12.22  
 author
 
-## 调试方式
+## 1 调试方式
 
 1. console.log
 2. node debugger、node inspector、vscode
 3. 测试驱动开发（tdd | bdd）
+
+## 2 debugger
+
+
 
 ## 参考文章
 
