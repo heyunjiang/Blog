@@ -19,6 +19,7 @@ update: 2020.12.28
 [4 泛型](#4-泛型)  
 [5 技巧](#5-技巧)  
 [6 与es6 class区别](#6-与es6-class区别)  
+[7 ts 踩坑归纳](#7-ts-踩坑归纳)  
 
 ## 1 typescript 简介
 
@@ -167,6 +168,16 @@ swap([7, 'seven']);
 
 1. 编译结果: ts class 编译结果为 es5 function，es6 class 由 v8 本身提供
 2. 关键字: ts 支持更完整关键字，而 es6 只支持 static、extends、super 三个
+
+## 7 ts 踩坑归纳
+
+这里总结 ts 开发中遇到的问题
+
+### 7.1 es6 编译为 commonjs 时引用标准包 path，使用时会调用 path.default 导致访问失败
+
+生成错误：TypeError: Cannot read property 'isAbsolute' of undefined  
+原因分析：ts 编译时将 es6 import 转为 require 后，使用时默认会去读取 default 作为入口属性，但是标准包在 commonjs require 时，并没有 default 属性  
+解决方案：修改 ts 编译配置 tsconfig.json `"esModuleInterop": true`，这个会默认包裹一层 default 属性
 
 ## 参考文档
 
