@@ -40,14 +40,17 @@ update: 2020.12.28
 3. 函数参数类型限定： `function greeter(person: string)` ，可用类型： string 、interface、any、boolean、number、`Array<number>`、void、null、undefined
 4. 接口： 使用 `interface` 关键字，使用不需要 implements ，由 class、object 去实现
 5. 类： `class` ，构造函数 `constructor` ，如果在构造函数的参数使用 `public` 关键字，等于创建了同名的类成员变量，可以直接通过类的实例 + `.` 方式访问
-6. 类型断言：使用 `as` 关键字，可用于接口、类的断言，用以解决 ts 报错的不确定性问题。`let strLength: number = (someValue as string).length;`；也可以使用 <any>5 来做类型断言
+6. 类型断言：使用 `as` 关键字，可用于接口、类的断言，用以解决 ts 报错的不确定性问题。`let strLength: number = (someValue as string).length;`；也可以使用 `(<string>someValue).length` 来做类型断言
 7. 类型别名：使用 `type` 关键字，type NameOrResolver = Name | NameResolver
-8. 枚举：使用 `enum` 关键字，enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat} 约定取值范围，会被编译为从 0 开始递增的数组
+8. 枚举：使用 `enum` 关键字，enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat} 约定取值范围，会被编译为从 0 开始递增的数组。在 ts 中作为一种数据结构，编译之后为数组和对象的结合体
 
-类型判断  
-1. 变量：采用冒号 `:`，例如 let myFavoriteNumber: string | number;
+类型声明  
+1. 普通类型：采用冒号 `:`，例如 let myFavoriteNumber: string | number;
 2. 数组：let hello: number[], 泛型 `let hello: Array<number>`，类数组 `let hello: IArguments = arguments`
-3. 对象：使用 `interface` 判断属性及值类型
+3. 对象：使用 `interface` 声明属性及值类型，或者简单对象则使用 `object` 声明
+4. 函数：(data: object) => boolean，或者使用 interface 来声明
+
+> 尖括号里面始终表示类型，可以是基础类型，有可以是定义好的 interface、object 等数据类型
 
 ### 2.1 interface
 
@@ -91,9 +94,6 @@ class 包含了 属性、constructor、方法
 8. readonly：可以用在属性、索引签名或 contructor 中
 9. interface: 定义接口，接口之间也可以继承，接口还可以继承类(ts 特有，并且只会继承类的非静态属性、非静态方法)
 10. implements：实现接口，多个接口用逗号隔开
-
-问：private 或 protected 属性，可以通过实例访问吗？  
-答：不可，只能在类内部访问
 
 ### 2.5 declare
 
@@ -147,6 +147,8 @@ class MyComponent extends React.Component<Props, {}> {
 
 ## 4 泛型
 
+数组泛型：let arr: Array<number> = []; 通过使用 对象 + 尖括号 形式构造泛型声明
+
 在定义函数、接口、类时不指定类型，在使用时再确定。一般很少使用泛型，都使用 any 替代了
 
 ```typescript
@@ -154,10 +156,14 @@ function swap<T, U>(tuple: [T, U]): [U, T] {
     return [tuple[1], tuple[0]];
 }
 
-swap([7, 'seven']);
+swap([7, 'seven']); // 相当于使用了类型推论 swap<number, string>([7, 'seven'])
 ```
 
 泛型约束：由于是使用时才确定泛型变量的具体类型，所以不能直接读取泛型变量的属性
+
+泛型的作用  
+1. 声明数组、函数、接口等参数数据类型
+2. 泛型约束：对传入的参数进行条件约束，比如要求有 .length 属性，则使用 extends Lengthwise，还有其他的呢？
 
 ## 5 技巧
 
