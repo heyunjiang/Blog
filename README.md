@@ -18,6 +18,8 @@
 2. vue-cli：支持入口文件 vue，快速启动一个本地服务。用于纯 vue 文件，如果使用了第三方库，比如 elementui ，则需要回到 parcel 快速启动服务
 3. webpack：灵活配置，常用语打包 lib 文件，发布为 npm package 资源
 
+抓包工具：chrome-dev-tool、whistle、wireshark
+
 - html
   - ✔ [深入html-标签语义化](html/深入html-标签语义化.md)
 - css
