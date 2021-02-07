@@ -120,12 +120,12 @@
     - ✔ [基本使用-react-router](react/基本使用-react-router.md) ：react-router 4
     - ✔ [vue vs react](react/react-vs-vue.md) : 可以直接参考 vue 及 react 相关知识点
   - vue
-    - ✔ [vue router](vue/vue生态-router.md) vue-router, 路由使用，路由配置，路由守卫，静态路由，动态路由
-    - ✔ [vuex](vue/vue生态-vuex.md) vue 状态管理
-    - ✔ [vue-cli](vue/vue生态-vue-cli.md) vue-cli 插件原理
+    - ✔ [vue生态 router](vue/vue生态-router.md) vue-router, 路由使用，路由配置，路由守卫，静态路由，动态路由
+    - ✔ [vue生态 vuex](vue/vue生态-vuex.md) vue 状态管理
+    - ✔ [vue生态 vue-cli](vue/vue生态-vue-cli.md) vue-cli 插件原理
     - ✔ [vue 组件通信](vue/vue组件通信.md) vue 组件间的 10 种通信方式
     - ✔ [vue 组件复用](vue/vue组件复用.md) vue 组件优化：10 种复用方式
-    - [vue 组件抽离规范](vue/vue组件抽离规范.md) vue 组件抽离原则
+    - ✔ [vue 目录规范](vue/vue目录规范.md) vue 目录规范
     - ✔ [vue深入](vue/vue深入.md) vue 整体深入架构入口，介绍了 vue 整体模块
       - ✔ [vue深入 - vue代码架构组织分析](vue/vue源码解读/vue代码架构组织分析.md) vue 代码架构组织分析
       - ✔ [vue深入 - 响应式系统](vue/vue源码解读/响应式系统.md) vue 响应式系统
@@ -133,7 +133,6 @@
       - ✔ [vue深入 - 组件化](vue/vue源码解读/组件化.md) vue 组件化
       - [vue深入 - compiler](vue/vue源码解读/compiler.md) vue compiler 编译原理 ast
     - ✔ [vue vs react](react/react-vs-vue.md) vue 基本知识点
-    - ✔ [vue 目录规范](vue/vue目录规范.md) vue 目录规范
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock

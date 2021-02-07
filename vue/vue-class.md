@@ -22,5 +22,13 @@ export default class YourComponent extends Vue {
 
 ## 2 疑问
 
-1. 这里是 vue2 的写法，vue2 是基于 function 来实现的，这里怎么是 class？
-2. decorator 在这里是如何工作的，目前不是还没有进入标准吗？
+1. 这里是 vue2 的写法，vue2 是基于 function 来实现的，这里怎么是 class？官方提供了 class 版本
+2. decorator 在这里是如何工作的，目前不是还没有进入标准吗？babel 支持了
+3. 它能支持 ts 写法？支持，也是源于 vue-cli-plugin-typescript，还是 babel
+
+## 参考文章
+
+[vue-class-component](https://class-component.vuejs.org/) vue class 写法  
+[vue-property-decorator](https://github.com/kaorun343/vue-property-decorator) 对 vue-class-component 的 decorator 补充实现
+
+
