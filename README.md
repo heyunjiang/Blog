@@ -127,6 +127,7 @@
     - ✔ [vue 组件复用](vue/vue组件复用.md) vue 组件优化：10 种复用方式
     - [vue 组件抽离规范](vue/vue组件抽离规范.md) vue 组件抽离原则
     - ✔ [vue深入](vue/vue深入.md) vue 整体深入架构入口，介绍了 vue 整体模块
+      - ✔ [vue深入 - vue代码架构组织分析](vue/vue源码解读/vue代码架构组织分析.md) vue 代码架构组织分析
       - ✔ [vue深入 - 响应式系统](vue/vue源码解读/响应式系统.md) vue 响应式系统
       - ✔ [vue深入 - 数据驱动](vue/vue源码解读/数据驱动.md) vue 数据驱动 vnode
       - ✔ [vue深入 - 组件化](vue/vue源码解读/组件化.md) vue 组件化
