@@ -21,7 +21,7 @@ author: heyunjiang
 1. 可读流：fs.createReadStream
 2. 可写流：fs.createWriteStream
 3. 可读可写流：net.socket
-4. Duplex流：在读写过程中可以转换或修改数据的流，比如 zlib.createDeflate
+4. Duplex流：在读写过程中可以转换或修改数据的流，比如 zlib.createDeflate, tcp socket, crypto 双工流；转换流有 zlib, crypto，特点是 readable 和 writable 是相关联的
 
 ## 3 流的缓冲
 
@@ -60,8 +60,58 @@ stream.Writable class
 
 ## 5 可读流
 
-两种读取模式  
-1. flowing：流动模式
-2. pausing：暂停模式
+### 5.1 可读流的两种读取模式
+
+可读流的2种模式，是对 nodejs 流数据内部状态管理的一种抽象
+
+1. flowing：流动模式，数据自动从底层系统读取，通过 EventEmitter 接口的事件尽可能快的提供给应用程序
+2. pausing：暂停模式，必须显示调用 stream.read() 读取数据块
+
+2者区别  
+1. 流动模式简单，通过事件监听即可从可读流中获取数据
+2. 暂停模式可以让开发者灵活控制数据生产
+
+所有可读流默认为暂停模式，但是可以切换到流动模式。  
+如果定义了 readable 事件句柄，则始终为暂停模式，通过 readable.read() 消费数据。  
+从暂停模式切换到流动模式  
+1. 添加 data 事件句柄
+2. 调用 stream.resume()
+3. 调用 stream.pipe() 将数据发送到可写流
+
+也可以从流动模式切换到暂停模式  
+1. 调用 stream.unpipe() 移除所有管道，并且会使 data 事件失效
+2. 如果自身没有管道目标，则可以调用 stream.pause()；如果有管道，则 pause 无效
+
+注意：  
+1. 去除 data 事件句柄不能暂停流。如果有管道，数据依然会产生；如果没有管道，数据不产生
+2. 只有提供了消费流或者忽略流的机制，可读流才会产生数据
+3. 从暂停模式切换到流动模式，如果没有定义 data 事件或管道，则会丢失数据，后续不再产生数据
+
+### 5.2 可读流的三种状态
+
+1. readable.readableFlowing === null 表示没有提供消费流的机制，不会产生数据
+2. readable.readableFlowing === false 调用 readable.pause | unpipe | 接受到背压，则会变成 false
+3. readable.readableFlowing === true 如果原本处于 null，则直接绑定 data 事件，可切换到 true；如果原本为 false，则需要调用 readable.resume 并绑定 data 事件，或添加管道 ，才可以切换到 true
+
+### 5.3 stream.readable 类
+
+1. 支持的事件：close, data, error, end(可写流中写完为 finish), pause, readable, resume
+2. readable.destroy(error)：销毁流，搭配 readable.destroyed
+3. readable.isPaused()：注意是方法，不是属性
+4. readable.pause()
+5. readable.pipe(destination, options)：建立管道，将可读流数据导向可写流；返回的是可写流引用(应该是目标可读流，文档写错了)，可以链式调用
+6. readable.read(size)：如果没有 size，则返回缓冲区中所有数据；通常需要搭配 while 循环使用读取
+7. readable.resume()
+8. readable.setEncoding('utf8)
+9. readable.unpipe(destination)：destination 不传则会解绑所有管道
+10. readable.unshift(chunk, encoding)：将数据放回缓冲区中，让其他消费者消费
+
+## 6 实例
+
+1. 可写流：fs.createWriteStream('file.txt')
+2. 可读流：readable.on('data', cb)
+3. 管道：readable.pipe()
+
+## 7 手动实现可读可写流
 
 ## 参考文章
