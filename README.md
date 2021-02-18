@@ -65,7 +65,7 @@
   - [node-crypto](nodejs/node-crypto.md) OpenSSL 加解密实现
   - node-threads 工作线程，用于 cpu 密集计算，不适用于 i/o 密集
   - node-fs 文件系统
-  - node-调试 debugger 能力
+  - [node-调试](nodejs/node-调试.md) debugger 能力
   - node-error 错误对象
   - node-全局对象
   - node-http http, http2, https 系列总结

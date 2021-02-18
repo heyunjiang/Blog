@@ -10,7 +10,7 @@ nodejs 默认使用 commonjs 模块，这里列举模块加载和使用方式
 2. 模块加载缓存：多次 require 同一个模块文件，该文件可能只会执行一次，后续被缓存起来。即使存在循环依赖，也只会加载一次
 3. `模块缓存规则`：不同目录加载的文件，最终缓存的模块名字不一样，也就是会根据不同目录执行多次；依赖缓存名为当前模块的 node_modules 目录下
 4. 核心模块：位于 nodejs 源码的 lib 目录下，nodejs 会默认首先加载核心模块，即使存在同名模块(即最好不要构建与核心模块同名的 npm 包)
-5. exports.：导出资源使用 `exports.`
+5. exports.：导出资源使用 `exports.`，它是 module.exports 的简写
 6. 模块循环加载：会将被循环依赖的模块的未执行完全副本交给当前模块，让当前模块读取
 7. 默认后缀：如果未带依赖模块后缀，则按如下优先级查找：`.js .json .node`
 8. 入口文件：nodejs 按如下优先级加载入口文件: package.json 中的 main 字端、index.js、index.node
@@ -88,6 +88,8 @@ sourcemap.findEntry(lineNumber, columnNumber)
 1. 模块加载缓存，有什么优势与缺点？
 2. 模块加载缓存，缓存的位置是那里？
 3. 为什么 nodejs 模块可以直接使用 exports? 因为有模块包装器
+
+## 4 commonjs module 与 es6 module 有什么异同？
 
 ## 参考地址
 

@@ -7,7 +7,7 @@ time: 2019.01.22
 在 javascript 中类数组对象有多个，比如: ArrayBuffer, arguments, domList ...  
 类数组和正常的数组 Array 不同，通过调用 Array.isArray() 来判断类数组，会返回 false。
 
-对于原始二进制数据的存储于访问，不能通过普通 Array 对象及其方法来实现。  
+对于原始二进制数据的存储与访问，不能通过普通 Array 对象及其方法来实现。  
 javascript 采用了缓冲和视图来实现，用以保证最大的灵活性和效率。
 
 ## 2 缓冲和视图
@@ -24,7 +24,7 @@ StringView: 非 native 视图，也就是浏览器没有原生提供，[源码](
 
 ## 3 应用场景
 
-webGL, fileReader, base64
+webGL, fileReader, base64, stream
 
 ## 4 使用方式
 
