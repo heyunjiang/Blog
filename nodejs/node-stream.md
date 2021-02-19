@@ -3,6 +3,16 @@
 time: 2020.2.18  
 author: heyunjiang
 
+目录  
+[1 流是什么](#1-流是什么)  
+[2 流的类型](#2-流的类型)  
+[3 流的缓冲](#3-流的缓冲)  
+[4 可写流](#4-可写流)  
+[5 可读流](#5-可读流)  
+[6 实例](#6-实例)  
+[7 手动实现可读可写流](#7-手动实现可读可写流)  
+[8 背压](#8-背压)  
+
 ## 背景
 
 通过 nodejs stream 对流加深理解
@@ -99,7 +109,7 @@ stream.Writable class
 2. readable.destroy(error)：销毁流，搭配 readable.destroyed
 3. readable.isPaused()：注意是方法，不是属性
 4. readable.pause()
-5. readable.pipe(destination, options)：建立管道，将可读流数据导向可写流；返回的是可写流引用(应该是目标可读流，文档写错了)，可以链式调用
+5. readable.pipe(destination, options)：建立管道，将可读流数据导向可写流；返回的是可写流的可读流引用，可以链式调用
 6. readable.read(size)：如果没有 size，则返回缓冲区中所有数据；通常需要搭配 while 循环使用读取
 7. readable.resume()
 8. readable.setEncoding('utf8)
@@ -110,8 +120,17 @@ stream.Writable class
 
 1. 可写流：fs.createWriteStream('file.txt')
 2. 可读流：readable.on('data', cb)
-3. 管道：readable.pipe()
+3. 管道：readable.pipe()，pipeline(readableStream, writableStream, writableStream, ..., cb)
 
 ## 7 手动实现可读可写流
 
+## 8 背压
+
+背压：背压是指数据在传输过程中，有一大堆数据在缓冲中积压着，原因可能是数据在经历复杂的运算，或者其他原因，缓存中的数据不能及时被消费，缓存中的数据越来越大  
+问题描述：大量实例证明，在 readable 传递数据给 writable 时，接受方接受和处理数据速度是要慢于发送方，因为磁盘写入速度会慢于读取速度，就会导致数据积压在缓冲 buffer 区。  
+影响：当前进程占用过高内存，gc 执行更加频繁，每次 gc 耗时更多；其他进程占用内存减少，执行效率降低；  
+解决方案：pipe 积压处理
+
 ## 参考文章
+
+[数据流中的积压问题](https://nodejs.org/zh-cn/docs/guides/backpressuring-in-streams/)

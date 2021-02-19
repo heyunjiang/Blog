@@ -77,7 +77,7 @@
   - node-url URL 的处理与解析
   - node-vm 解析和执行 javascript 代码，基于 v8
   - node-zlib 提供了对 gzip, deflate/inflate, brotli 的压缩实现
-  - node-stream 流，包含 readline 逐行读取、实现 stream 的类统计
+  - [node-stream](nodejs/node-stream.md) 流的原理，包含 readline 逐行读取、实现 stream 的类统计
   - [node-timer](nodejs/node-timer.md) 定时器与事件循环
   - ✔ [cli工具](nodejs/cli工具.md)
   - ✔ [npm发包](nodejs/npm发包.md)
