@@ -68,7 +68,7 @@
   - [node-调试](nodejs/node-调试.md) debugger 能力
   - node-error 错误对象
   - node-全局对象
-  - node-http http, http2, https 系列总结
+  - [node-http](nodejs/node-http.md) http, http2, https 系列总结
   - node-socket net 实现 tcp | ipc 功能，dgram 实现 udp 功能
   - node-path 路径解析、拼装
   - node-repl 用户交互，需要时再查看 api，一般使用 commander 之类的库实现
@@ -94,9 +94,9 @@
   - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 亮点技能 - ui 自动化测试
   - [关于前端监控的几点思考](browser/关于前端监控的几点思考.md)
 - builder
-  - ✔ [webpack基础](builder/webpack专题.md)
   - [npm基础](builder/npm专题.md)
   - [ast的思考](builder/ast的思考.md)
+  - ✔ [webpack基础](builder/webpack专题.md)
   - webpack 运行原理
   - webpack loader
   - [webpack-plugin](webpack-plugin.md)

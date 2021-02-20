@@ -48,7 +48,7 @@ var regexp = new RegExp(/^[xyz]+/, 'g')
 ### 1.2 RegExp对象方法
 
 1. RegExp.prototype.exec: 表示匹配，成功返回数组
-2. RegExp.prototype.text: 表示匹配，成功返回布尔值
+2. RegExp.prototype.test: 表示匹配，成功返回布尔值
 3. RegExp.prototype[Symbol.match]：字符串的match方法调用对象，每次取出一个匹配
 4. RegExp.prototype[Symbol.replace]：字符串的replace方法调用对象
 5. RegExp.prototype[Symbol.search]：字符串的search方法调用对象
@@ -72,9 +72,9 @@ var regexp = new RegExp(/^[xyz]+/, 'g')
 3. (?:...) : 非捕获型分组
 4. (...) : 捕获型分组
 5. ()? : 分组可选
-6. [...] : 字符类
+6. [...] : 字符集，匹配其中任意一个即可，可以使用 `-` 来表示范围
 7. A-Za-z : 表示从A到Z和从a到z，总共52个字母
-8. \ : 转义字符
+8. \ : 转义字符，将特殊字符作普通字符处理，将普通字符作特殊字符处理
 9. {0, 3} : 0到3次
 10. + : 至少一次
 11. * : 任意次数
@@ -210,3 +210,7 @@ r1.exec(s) // ['aaa']
 > String.prototype.replace也是可以匹配多次的
 
 > 可以在第一次匹配的时候，指定 `r1.lastIndex` 值，表示从哪个位置开始匹配
+
+## 参考文章
+
+[mdn 正则表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions)
