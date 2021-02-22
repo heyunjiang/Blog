@@ -76,11 +76,48 @@ export default {
 
 通过设置 `functional` 在 template 根节点上，或添加 functional: true 属性，可以让当前组件变为函数式组件；  
 通过设置 `v-once` 在 template 根节点上，可以让内容只计算一次就缓存起来，后续不再更新。  
-2者有什么区别？
+2者有什么区别？  
+1. 有没有状态：函数式组件没有状态，没有实例对象 this，可以通过 context 对象访问 props, slots 等属性
+2. 是否重新渲染：v-once 会在计算一次之后就被缓存，后续即使 data 等数据改变，也不会重新渲染
+
+> 问：函数式组件中的 props 是响应式的吗？是
 
 ## 6 transition 过度动画
 
 可以控制在初始、离开、进入、active 等时机的动画、相应的 @enter 等钩子函数，包括列表 flip 过度动画都可以实现。后续做动画相关的，可以深入研究这块
+
+## 7 render
+
+1. `.vue 文件`：template 最终都会通过 vue-loader 编译为 render 函数，内部使用 compiler 模块编译
+2. `template 选项`，会被 compileToFunctions 方法编译成 render、staticRenderFns 函数，内部使用 compiler 模块编译
+3. `render 函数`，我们也可以直接写 render 函数，内部返回 createElement('div', [createElement('span', 'hello'), this.$slots.default]) 来生成内容
+4. `jsx`: 是因为有一个 babel 插件 @vue/babel-preset-jsx，在 babel 转换的时候，将 jsx 转换成普通 render 的 createElement 方法
+
+```javascript
+// createElement 函数参数
+createElement({
+  // string | object | function，必填
+  'div',
+  // 与模板中 attribute 属性对应, 可选
+  {
+    class: {
+      foo: true,
+      bar: false
+    },
+    style: {
+      fontSize: '12px'
+    },
+    attrs: {
+      id: 'hello'
+    },
+    props: {},
+    key: 'key',
+    ...
+  },
+  // children, string | array, 可选
+  []
+})
+```
 
 ## 参考文章
 
