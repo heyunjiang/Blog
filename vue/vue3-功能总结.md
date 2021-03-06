@@ -20,6 +20,11 @@ author: heyunjiang
 13. v-if v-for 优先级：vue2 v-for 优先级更高，vue3 v-if 优先级更高
 14. 异步组件：vue3 函数式组件为纯函数，异步组件需要使用 `defineAsyncComponent` 明确指定
 15. 自定义指令生命周期更改为类组件生命周期
+16. 组件 attribute 继承：默认组件单个根元素会继承未声明 prop 的 attribute，多个根元素则会给出警告，可以使用 inheritAttrs: false 来放弃继承
+17. 事件命名：自定义事件需要使用 kebab-case 命名，或者全部小写，大写是不支持的
+18. emits 选项：在 emits 选项数组中把当前组件 emit 的所有事件都汇总，方便管理，并且可以做事件拦截判断有效性
+19. teleport：使用 `<teleport to="#endofbody">` 来将子组件渲染到特定的 dom 元素下
+20. 
 
 ### 1.1 全局插件使用
 
@@ -41,6 +46,7 @@ app.use(VueRouter)
 1. v-model 替代了 v-bind.sync 双向数据绑定
 2. v-model:title="pageTitle"
 3. 可以使用多个 v-model
+4. 单个 v-model，组件内部对应的是默认 modelValue
 
 ## 2 问题归纳
 
