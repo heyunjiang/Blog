@@ -24,7 +24,6 @@ author: heyunjiang
 17. 事件命名：自定义事件需要使用 kebab-case 命名，或者全部小写，大写是不支持的
 18. emits 选项：在 emits 选项数组中把当前组件 emit 的所有事件都汇总，方便管理，并且可以做事件拦截判断有效性
 19. teleport：使用 `<teleport to="#endofbody">` 来将子组件渲染到特定的 dom 元素下
-20. 
 
 ### 1.1 全局插件使用
 
@@ -52,6 +51,12 @@ app.use(VueRouter)
 
 1. vue2 各组件是 vm.$options._base.extend(object) 对象，生成的 vue 实例，那么 vue3 组件是继续使用 createApp 来生成实例的吗？
 2. vue2 一些全局对象挂载在 Vue 对象上有什么不好的点？1. 同时实例化多个 Vue 实例，则不能独享私有配置 2. 全局配置污染测试用例，比如全局的 mixin, use 等包含一些命名不规范的属性和方法
+
+## 3 响应式 api
+
+1. reactive: reactive({key: value})
+2. ref: ref(0)，用于封装独立原始值，作为响应式对象，返回包裹后的引用对象；直接访问这个对象，需要访问对象的 value 属性，而对象作为 reactive 封装的对象属性时，会自动展开，不用访问其 value 属性
+3. toRefs：响应式对象数据解耦需要使用 toRefs 包裹，后续使用到再了解实现原理
 
 ## 参考文章
 
