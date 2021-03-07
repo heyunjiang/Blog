@@ -52,11 +52,32 @@ app.use(VueRouter)
 1. vue2 各组件是 vm.$options._base.extend(object) 对象，生成的 vue 实例，那么 vue3 组件是继续使用 createApp 来生成实例的吗？
 2. vue2 一些全局对象挂载在 Vue 对象上有什么不好的点？1. 同时实例化多个 Vue 实例，则不能独享私有配置 2. 全局配置污染测试用例，比如全局的 mixin, use 等包含一些命名不规范的属性和方法
 
-## 3 响应式 api
+## 3 组合式 api
+
+组合式 api 的目的，是为了将逻辑代码块抽离，在需要的组件内部合理组装
+
+```javascript
+import { reactive, ref, toRefs, onMounted, watch, computed, provide, inject... } from 'vue'
+```
 
 1. reactive: reactive({key: value})
 2. ref: ref(0)，用于封装独立原始值，作为响应式对象，返回包裹后的引用对象；直接访问这个对象，需要访问对象的 value 属性，而对象作为 reactive 封装的对象属性时，会自动展开，不用访问其 value 属性
 3. toRefs：响应式对象数据解耦需要使用 toRefs 包裹，后续使用到再了解实现原理
+4. onMounted()：通常在 setup 选项中使用，加入的方法会在 mounted 生命周期中执行。在 mounted 函数内部哪个位置执行呢？
+5. watch()：通常在 setup 选项中使用，用于监听 ref 生成的响应式对象
+6. computed()：通常在 setup 选项中使用，用于动态计算 ref 生成的响应式对象，具有返回值，这点与 watch 不同
+7. 剩余其他在 setup 选项中使用的生命周期方法：onBeforeMount、onBeforeUpdate、onUpdated、onBeforeUnmount、onUnmounted、onErrorCaptured、onRenderTracked、onRenderTriggered
+8. provide, inject 也可以作为独立的 api 使用
+
+### 3.1 setup 选项
+
+1. 作为独立选项，并且放置在 props 之下，data 之前
+2. 执行时机在组件创建之前，那具体在什么时候呢？是在 beforeCreate 之后吗？
+3. 参数为：props, context
+4. 作用：返回的内容(return obj, arr or string 等等)，是直接挂载到当前组件实例 this 对象上，用作给其他生命周期方法、method、watch、computed、template 等使用
+5. context对象包含属性：attrs, slots, emit
+6. 不能访问的实例属性：data, computed, methods
+7. 返回 render 函数：会替代 template 和组件自身的 render 吗？
 
 ## 参考文章
 
