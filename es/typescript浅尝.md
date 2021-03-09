@@ -50,7 +50,7 @@ update: 2020.12.28
 3. 对象：使用 `interface` 声明属性及值类型，或者简单对象则使用 `object` 声明
 4. 函数：(data: object) => boolean，或者使用 interface 来声明
 
-> 尖括号里面始终表示类型，可以是基础类型，有可以是定义好的 interface、object 等数据类型
+> 尖括号里面始终表示类型，可以是基础类型，有可以是定义好的 interface、object 等数据类型，也又可能是定义的泛型
 
 ### 2.1 interface
 

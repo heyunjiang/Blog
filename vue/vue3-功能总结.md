@@ -50,7 +50,9 @@ app.use(VueRouter)
 ## 2 问题归纳
 
 1. vue2 各组件是 vm.$options._base.extend(object) 对象，生成的 vue 实例，那么 vue3 组件是继续使用 createApp 来生成实例的吗？
-2. vue2 一些全局对象挂载在 Vue 对象上有什么不好的点？1. 同时实例化多个 Vue 实例，则不能独享私有配置 2. 全局配置污染测试用例，比如全局的 mixin, use 等包含一些命名不规范的属性和方法
+2. vue2 一些全局对象挂载在 Vue 对象上有什么不好的点？1. 同时实例化多个 Vue 实例，则不能独享私有配置 2. 全局配置污染测试用例，比如全局的 mixin, use 
+3. vue3 响应式系统，对比 vue2，除了使用 proxy 来拦截，是使用什么方式来更新呢？vue2 是 dep + watcher 来实现
+4. vue3 数据驱动原理，也就是编译生成 render 函数，通过 render 生成 vnode，vnode 生成 dom 流程，是否与 vue2 不同
 
 ## 3 组合式 api
 
