@@ -9,7 +9,7 @@ author: heyunjiang
 目前已知：vue3 使用 proxy 代替 vue2 的 defineProperty，但是 vue2 的 dep + watcher 对象是被什么代替了呢？  
 并且，reactive 和 ref 是如何通知更新组件的，收集当前组件 vm 时机
 
-## 1 响应式流程
+## 1 渲染流程
 
 ### 1.1 全局 createApp
 
@@ -283,5 +283,78 @@ const render: RootRenderFunction = (vnode, container, isSVG) => {
 接下来学习点  
 1. vue3 生命周期
 2. vue3 diff 实现
+
+## 2 响应式原理
+
+```javascript
+// demo
+const count = ref(0)
+const obj = reactive({
+  count
+})
+
+obj.count++
+obj.count // -> 1
+count.value // -> 1
+```
+
+vue3 响应式系统入口是 ref + reactive，我们在 template, computed, methods 等组件地方使用到相关数据时，系统是如何将数据绑定到当前系统的呢？又是如何通过 proxy 通知更新的呢？
+
+```javascript
+export const mutableHandlers: ProxyHandler<object> = {
+  get,
+  set,
+  deleteProperty,
+  has,
+  ownKeys
+}
+export function reactive(target: object) {
+  return createReactiveObject(
+    target,
+    false,
+    mutableHandlers,
+    mutableCollectionHandlers
+  )
+}
+function createReactiveObject(
+  target: Target,
+  isReadonly: boolean,
+  baseHandlers: ProxyHandler<any>,
+  collectionHandlers: ProxyHandler<any>
+) {
+  const proxy = new Proxy(
+    target,
+    targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers // array, object 使用 baseHandlers, WeakSet, Map, WeakMap 使用 collectionHandlers，Set
+  )
+  return proxy
+}
+```
+
+归纳总结  
+1. reactive 支持的数据类型 Array, Object, Set, WeakSet, Map, WeakMap
+
+来看核心的 get, set
+
+```javascript
+function createGetter(isReadonly = false, shallow = false) {
+  return function get(target: Target, key: string | symbol, receiver: object) {
+    const targetIsArray = isArray(target)
+
+    if (!isReadonly && targetIsArray && hasOwn(arrayInstrumentations, key)) {
+      return Reflect.get(arrayInstrumentations, key, receiver)
+    }
+
+    const res = Reflect.get(target, key, receiver)
+
+    if (!isReadonly) {
+      track(target, TrackOpTypes.GET, key)
+    }
+
+    return res
+  }
+}
+```
+
+track
 
 ## 参考文章
