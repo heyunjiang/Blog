@@ -298,8 +298,8 @@ obj.count // -> 1
 count.value // -> 1
 ```
 
-vue3 响应式系统入口是 ref + reactive，我们在 template, computed, methods 等组件地方使用到相关数据时，系统是如何将数据绑定到当前系统的呢？又是如何通过 proxy 通知更新的呢？
-
+vue3 响应式系统入口是 ref + reactive，我们在 template, computed, methods 等组件地方使用到相关数据时，系统是如何将数据绑定到当前系统的呢？又是如何通过 proxy 通知更新的呢？  
+先看 proxy 入口代码  
 ```javascript
 export const mutableHandlers: ProxyHandler<object> = {
   get,
@@ -330,11 +330,9 @@ function createReactiveObject(
 }
 ```
 
-归纳总结  
-1. reactive 支持的数据类型 Array, Object, Set, WeakSet, Map, WeakMap
+归纳总结：reactive 支持的数据类型 Array, Object, Set, WeakSet, Map, WeakMap
 
-来看核心的 get, set
-
+来看核心的 get, set  
 ```javascript
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target: Target, key: string | symbol, receiver: object) {
@@ -353,8 +351,33 @@ function createGetter(isReadonly = false, shallow = false) {
     return res
   }
 }
-```
 
-track
+// track 源码
+export function track(target: object, type: TrackOpTypes, key: unknown) {
+  if (!shouldTrack || activeEffect === undefined) {
+    return
+  }
+  let depsMap = targetMap.get(target)
+  if (!depsMap) {
+    targetMap.set(target, (depsMap = new Map()))
+  }
+  let dep = depsMap.get(key)
+  if (!dep) {
+    depsMap.set(key, (dep = new Set()))
+  }
+  if (!dep.has(activeEffect)) {
+    dep.add(activeEffect)
+    activeEffect.deps.push(dep)
+    if (__DEV__ && activeEffect.options.onTrack) {
+      activeEffect.options.onTrack({
+        effect: activeEffect,
+        target,
+        type,
+        key
+      })
+    }
+  }
+}
+```
 
 ## 参考文章
