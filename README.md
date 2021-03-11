@@ -41,6 +41,8 @@
   - ✔ [es2015-模板字符串](es/es6-模板字符串.md)
   - ✔ [es2015-Symbol](es/es6-Symbol.md)
   - ✔ [es2015-promise](es/es6-promise.md)
+  - ✔ [es2015-proxy](es/es6-proxy.md)
+  - ✔ [es2015-set和map](es/es6-set和map.md)
   - ✔ [es2015-generator](es/es6-generator.md)
   - ✔ [es2015-async](es/es6-async.md)
   - ✔ [es2015-class](es/es6-class.md)
@@ -126,7 +128,7 @@
     - ✔ [vue 组件通信](vue/vue组件通信.md) vue 组件间的 10 种通信方式
     - ✔ [vue 组件复用](vue/vue组件复用.md) vue 组件优化：10 种复用方式
     - ✔ [vue 目录规范](vue/vue目录规范.md) vue 目录规范
-    - ✔ [vue深入](vue/vue深入.md) vue 整体深入架构入口，介绍了 vue 整体模块
+    - vue2 深入
       - ✔ [vue深入 - vue代码架构组织分析](vue/vue源码解读/vue代码架构组织分析.md) vue 代码架构组织分析
       - ✔ [vue深入 - 响应式系统](vue/vue源码解读/响应式系统.md) vue 响应式系统
       - ✔ [vue深入 - 数据驱动](vue/vue源码解读/数据驱动.md) vue 数据驱动 vnode
@@ -135,6 +137,8 @@
     - ✔ [vue vs react](react/react-vs-vue.md) vue 基本知识点
     - ✔ [vue2 边角知识](vue/vue2-边角.md)
     - ✔ [vue3 功能总结](vue/vue3-功能总结.md)
+    - vue3 深入
+      - [vue3 响应式系统](vue/vue3响应式系统.md)
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
