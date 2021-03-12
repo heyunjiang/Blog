@@ -252,12 +252,11 @@ export function createAppAPI<HostElement>(
 1. vue2 是通过 `new Vue` 生成实例 app 对象
 2. app.$mount 使用的是 vm._update 来渲染真实 dom
 3. 生成 vnode 时机：app.$mount 使用的是 mountComponent 来渲染，内部是通过 `vm._update(vm._render(), hydrating)`，通过 vm._render 生成 vnode，通过 vm._update 来渲染 vnode
-
-与 vue2 不同的是  
-1. vue2 Vue 对象在引入之后，会立马初始化一系列 mixin，而 vue3 是只暴露一系列 api，比如 createApp
-2. 
+4. 前期准备，vue2 是通过执行 mixin 来准备 vue.prototype 基本结构，vue3 是直接暴露 createApp，内部 component, vnode 基本结构是代码就写好了的
 
 ### 1.2 render 渲染
+
+根据 createApp 生成的 vnode 作为入口，调用 mountComponent 来渲染组件
 
 ```javascript
 const render: RootRenderFunction = (vnode, container, isSVG) => {
@@ -284,6 +283,160 @@ const render: RootRenderFunction = (vnode, container, isSVG) => {
 1. vue3 生命周期
 2. vue3 diff 实现
 
+### 1.3 mountComponent 渲染组件
+
+在 render 的 patch 函数中，是通过对 vnode 的类型来判断渲染，如果是组件，则会执行 mountComponent
+
+```javascript
+const mountComponent: MountComponentFn = (
+  initialVNode,
+  container,
+  anchor,
+  parentComponent,
+  parentSuspense,
+  isSVG,
+  optimized
+) => {
+  // 生成组件基本结构数据，object
+  const instance: ComponentInternalInstance = (initialVNode.component = createComponentInstance(
+    initialVNode,
+    parentComponent,
+    parentSuspense
+  ))
+  // 封装 setup 函数需要的参数对象，执行 setup，生成响应式数据，将 setup 返回值绑定到组件实例 instance 上
+  setupComponent(instance)
+  setupRenderEffect(
+    instance,
+    initialVNode,
+    container,
+    anchor,
+    parentSuspense,
+    isSVG,
+    optimized
+  )
+}
+```
+
+核心 setupRenderEffect
+```javascript
+const setupRenderEffect: SetupRenderEffectFn = (
+    instance,
+    initialVNode,
+    container,
+    anchor,
+    parentSuspense,
+    isSVG,
+    optimized
+  ) => {
+    // create reactive effect for rendering
+    instance.update = effect(function componentEffect() {
+      if (!instance.isMounted) {
+        let vnodeHook: VNodeHook | null | undefined
+        const { el, props } = initialVNode
+        const { bm, m, parent } = instance
+
+        // beforeMount hook
+        if (bm) {
+          invokeArrayFns(bm)
+        }
+        // onVnodeBeforeMount
+        if ((vnodeHook = props && props.onVnodeBeforeMount)) {
+          invokeVNodeHook(vnodeHook, parent, initialVNode)
+        }
+        const subTree = (instance.subTree = renderComponentRoot(instance))
+        patch(
+          null,
+          subTree,
+          container,
+          anchor,
+          instance,
+          parentSuspense,
+          isSVG
+        )
+        initialVNode.el = subTree.el
+        // mounted hook
+        if (m) {
+          queuePostRenderEffect(m, parentSuspense)
+        }
+        // onVnodeMounted
+        if ((vnodeHook = props && props.onVnodeMounted)) {
+          const scopedInitialVNode = initialVNode
+          queuePostRenderEffect(() => {
+            invokeVNodeHook(vnodeHook!, parent, scopedInitialVNode)
+          }, parentSuspense)
+        }
+        instance.isMounted = true
+        // #2458: deference mount-only object parameters to prevent memleaks
+        initialVNode = container = anchor = null as any
+      } else {
+        // updateComponent
+        // This is triggered by mutation of component's own state (next: null)
+        // OR parent calling processComponent (next: VNode)
+        let { next, bu, u, parent, vnode } = instance
+        let originNext = next
+        let vnodeHook: VNodeHook | null | undefined
+        if (next) {
+          next.el = vnode.el
+          updateComponentPreRender(instance, next, optimized)
+        } else {
+          next = vnode
+        }
+
+        // beforeUpdate hook
+        if (bu) {
+          invokeArrayFns(bu)
+        }
+        // onVnodeBeforeUpdate
+        if ((vnodeHook = next.props && next.props.onVnodeBeforeUpdate)) {
+          invokeVNodeHook(vnodeHook, parent, next, vnode)
+        }
+        const nextTree = renderComponentRoot(instance)
+        const prevTree = instance.subTree
+        instance.subTree = nextTree
+
+        patch(
+          prevTree,
+          nextTree,
+          // parent may have changed if it's in a teleport
+          hostParentNode(prevTree.el!)!,
+          // anchor may have changed if it's in a fragment
+          getNextHostNode(prevTree),
+          instance,
+          parentSuspense,
+          isSVG
+        )
+        
+        next.el = nextTree.el
+        if (originNext === null) {
+          // self-triggered update. In case of HOC, update parent component
+          // vnode el. HOC is indicated by parent instance's subTree pointing
+          // to child component's vnode
+          updateHOCHostEl(instance, nextTree.el)
+        }
+        // updated hook
+        if (u) {
+          queuePostRenderEffect(u, parentSuspense)
+        }
+        // onVnodeUpdated
+        if ((vnodeHook = next.props && next.props.onVnodeUpdated)) {
+          queuePostRenderEffect(() => {
+            invokeVNodeHook(vnodeHook!, parent, next!, vnode)
+          }, parentSuspense)
+        }
+      }
+    }, __DEV__ ? createDevEffectOptions(instance) : prodEffectOptions)
+  }
+```
+
+归纳总结  
+1. setupRenderEffect 作为 effect 函数调用者，表示响应式系统在组件 mount 的时候才将渲染流程函数作为 activeEffect
+2. 初次渲染、更新都是封装在 effect 函数中的
+3. 与 vue2 主动 callhook 不同，vue3 是直接执行生命周期函数，比如 `invokeArrayFns(bm)`
+
+### 1.4 vue2 diff vs vue3 diff
+
+todo
+
 ## 2 响应式原理
 
 ```javascript
@@ -299,6 +452,9 @@ count.value // -> 1
 ```
 
 vue3 响应式系统入口是 ref + reactive，我们在 template, computed, methods 等组件地方使用到相关数据时，系统是如何将数据绑定到当前系统的呢？又是如何通过 proxy 通知更新的呢？  
+
+### 2.1 reactive
+
 先看 proxy 入口代码  
 ```javascript
 export const mutableHandlers: ProxyHandler<object> = {
@@ -330,28 +486,94 @@ function createReactiveObject(
 }
 ```
 
-归纳总结：reactive 支持的数据类型 Array, Object, Set, WeakSet, Map, WeakMap
-
 来看核心的 get, set  
 ```javascript
+const get = /*#__PURE__*/ createGetter()
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target: Target, key: string | symbol, receiver: object) {
     const targetIsArray = isArray(target)
-
     if (!isReadonly && targetIsArray && hasOwn(arrayInstrumentations, key)) {
       return Reflect.get(arrayInstrumentations, key, receiver)
     }
-
     const res = Reflect.get(target, key, receiver)
-
     if (!isReadonly) {
       track(target, TrackOpTypes.GET, key)
+    }
+    if (isObject(res)) {
+      return isReadonly ? readonly(res) : reactive(res)
     }
 
     return res
   }
 }
+const set = /*#__PURE__*/ createSetter()
 
+function createSetter(shallow = false) {
+  return function set(
+    target: object,
+    key: string | symbol,
+    value: unknown,
+    receiver: object
+  ): boolean {
+    const hadKey =
+      isArray(target) && isIntegerKey(key)
+        ? Number(key) < target.length
+        : hasOwn(target, key)
+    const result = Reflect.set(target, key, value, receiver)
+    // don't trigger if target is something up in the prototype chain of original
+    if (target === toRaw(receiver)) {
+      if (!hadKey) {
+        trigger(target, TriggerOpTypes.ADD, key, value)
+      } else if (hasChanged(value, oldValue)) {
+        trigger(target, TriggerOpTypes.SET, key, value, oldValue)
+      }
+    }
+    return result
+  }
+}
+```
+
+归纳总结：  
+1. reactive 支持的数据类型 Array, Object, Set, WeakSet, Map, WeakMap
+2. reactive 在内部是通过 track 收集依赖，trigger 触发更新，并没有涉及到具体的组件
+3. 在访问属性时，才去 track
+
+### 2.2 ref
+
+这里看看 ref 对象定义
+
+```javascript
+class RefImpl<T> {
+  private _value: T
+
+  public readonly __v_isRef = true
+
+  constructor(private _rawValue: T, public readonly _shallow = false) {
+    this._value = _shallow ? _rawValue : convert(_rawValue)
+  }
+
+  get value() {
+    track(toRaw(this), TrackOpTypes.GET, 'value')
+    return this._value
+  }
+
+  set value(newVal) {
+    if (hasChanged(toRaw(newVal), this._rawValue)) {
+      this._rawValue = newVal
+      this._value = this._shallow ? newVal : convert(newVal)
+      trigger(toRaw(this), TriggerOpTypes.SET, 'value', newVal)
+    }
+  }
+}
+```
+
+归纳总结  
+1. 也是通过 track 收集依赖，trigger 触发更新
+2. 在访问属性时，才去 track
+
+### 2.3 track
+ 
+```javascript
 // track 源码
 export function track(target: object, type: TrackOpTypes, key: unknown) {
   if (!shouldTrack || activeEffect === undefined) {
@@ -368,16 +590,134 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
   if (!dep.has(activeEffect)) {
     dep.add(activeEffect)
     activeEffect.deps.push(dep)
-    if (__DEV__ && activeEffect.options.onTrack) {
-      activeEffect.options.onTrack({
-        effect: activeEffect,
-        target,
-        type,
-        key
-      })
-    }
   }
 }
 ```
+
+track 源码解读  
+1. 通过唯一对象 targetMap 来保存所有的 depsMap 对象
+2. 每个属性关联一个 dep 对象
+3. 每个 dep 对象关联了一个 activeEffect，这里可以看出 activeEffect 是唯一的
+
+track 源码问题  
+1. activeEffect是什么东西
+
+### 2.4 trigger
+
+```javascript
+export function trigger(
+  target: object,
+  type: TriggerOpTypes,
+  key?: unknown,
+  newValue?: unknown,
+  oldValue?: unknown,
+  oldTarget?: Map<unknown, unknown> | Set<unknown>
+) {
+  const depsMap = targetMap.get(target)
+  const effects = new Set<ReactiveEffect>()
+  const add = (effectsToAdd: Set<ReactiveEffect> | undefined) => {
+    if (effectsToAdd) {
+      effectsToAdd.forEach(effect => {
+        if (effect !== activeEffect || effect.allowRecurse) {
+          effects.add(effect)
+        }
+      })
+    }
+  }
+  // schedule runs for SET | ADD | DELETE
+  // 将 dep 对象上的 activeEffect 添加到 effects 对象上
+  if (key !== void 0) {
+    add(depsMap.get(key))
+  }
+  // also run for iteration key on ADD | DELETE | Map.SET
+  switch (type) {
+    case TriggerOpTypes.SET:
+      if (isMap(target)) {
+        add(depsMap.get(ITERATE_KEY))
+      }
+      break
+  }
+
+  const run = (effect: ReactiveEffect) => {
+    if (effect.options.scheduler) {
+      effect.options.scheduler(effect)
+    } else {
+      effect()
+    }
+  }
+
+  effects.forEach(run)
+}
+```
+
+归纳总结：  
+1. trigger 是通过获取对象属性的 dep 对象上绑定的 activeEffect 来触发更新
+
+### 2.5 activeEffect
+
+上面我们看到，通过 track 收集 activeEffect 对象，也只是通过 `dep.add(activeEffect)` 添加到了 dep 对象上  
+在 trigger 中通过 `effect.options.scheduler(effect)` 或 `effect()` 来执行 activeEffect  
+那么，activeEffect 是什么，又是如何通知组件更新的呢？
+
+```javascript
+let activeEffect: ReactiveEffect | undefined
+export function effect<T = any>(
+  fn: () => T,
+  options: ReactiveEffectOptions = EMPTY_OBJ
+): ReactiveEffect<T> {
+  if (isEffect(fn)) {
+    fn = fn.raw
+  }
+  const effect = createReactiveEffect(fn, options)
+  if (!options.lazy) {
+    effect()
+  }
+  return effect
+}
+function createReactiveEffect<T = any>(
+  fn: () => T,
+  options: ReactiveEffectOptions
+): ReactiveEffect<T> {
+  const effect = function reactiveEffect(): unknown {
+    if (!effect.active) {
+      return options.scheduler ? undefined : fn()
+    }
+    if (!effectStack.includes(effect)) {
+      cleanup(effect)
+      try {
+        enableTracking()
+        effectStack.push(effect)
+        activeEffect = effect
+        return fn()
+      } finally {
+        effectStack.pop()
+        resetTracking()
+        activeEffect = effectStack[effectStack.length - 1]
+      }
+    }
+  } as ReactiveEffect
+  effect.id = uid++
+  effect.allowRecurse = !!options.allowRecurse
+  effect._isEffect = true
+  effect.active = true
+  effect.raw = fn
+  effect.deps = []
+  effect.options = options
+  return effect
+}
+```
+
+归纳总结  
+1. activeEffect 也就是当前活跃的 effect，全局唯一，是在 effect 函数执行时更新
+2. 唯一入口 export function effect，也就是说，只要执行了 effect 函数，然后通过 reactive or ref 就可以使用响应式系统了
+
+思考：通常 reactive 和 ref 是在 setup 函数中使用，而 setup 是在组件 beforeCreate 之前吗？什么时候添加的组件 effect 的呢？
+
+## 3 独立使用响应式系统
+
+vue3 的响应式系统，也是一套发布-订阅系统 + 观察者模式  
+1. 通过 proxy 实现对数据的监听
+2. 通过 track 订阅，收集相关依赖函数
+3. 通过 trigger 发布，执行对应函数
 
 ## 参考文章

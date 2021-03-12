@@ -21,7 +21,7 @@ var proxy = new Proxy(target, handler = {
 
 其中 handler 支持的属性格式如下  
 > 如果 handler 不做任何处理，则访问原对象  
-1. get(target, propKey, receiver) 拦截对象属性的读取，返回值由自定义的 handler 函数决定
+1. get(target, propKey, receiver) 拦截对象属性的读取，包括数组下标访问，返回值由自定义的 handler 函数决定
 2. set(target, propKey, value, receiver) 拦截对象属性的设置，返回布尔值
 3. has(target propKey) 拦截 `propKey in proxy` 的操作，返回布尔值
 4. deleteProperty(target, propKey) 拦截 `delete proxy[propKey]` 的操作，返回布尔值
@@ -36,5 +36,28 @@ var proxy = new Proxy(target, handler = {
 13. construct(target, args) 拦截 proxy 作为构造函数调用
 
 问题：如果判别一个对象是 Set or Map or Object？可以使用 instanceof
+
+## 2 Reflect
+
+Reflect 是 es6 为操作对象提供的 api，不同于 Object 的是  
+1. Reflect 支持更多的 api
+2. Reflect 对错误更友好
+3. 与 proxy 方法一一对应，proxy 可以修改默认行为，但是可以通过 Reflect 拿到原始行为
+
+Reflect 支持如下静态方法  
+1. Reflect.apply(target, thisArg, args) 执行普通函数
+2. Reflect.construct(target, args) 执行构造函数，等同于 new target
+3. Reflect.get(target, name, receiver) 获取对象属性值；如果对象属性为函数，并且是 getter，那么会将 receiver 作为函数内部的 this 对象
+4. Reflect.set(target, name, value, receiver) 设置对象属性值；如果对象属性为函数，则 value 作为函数的参数；如果是函数的 getter，那么会将 receiver 作为函数内部的 this 对象，并且会触发原对象的 Proxy.defineProperty 拦截
+5. Reflect.defineProperty(target, name, desc)
+6. Reflect.deleteProperty(target, name)
+7. Reflect.has(target, name)
+8. Reflect.ownKeys(target)
+9. Reflect.isExtensible(target)
+10. Reflect.preventExtensions(target)
+11. Reflect.getOwnPropertyDescriptor(target, name)
+12. Reflect.getPrototypeOf(target)
+13. Reflect.setPrototypeOf(target, prototype)
+
 
 ## 参考资料
