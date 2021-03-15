@@ -10,19 +10,16 @@ time: 2020.5.12
 
 基本环境：nodejs  
 包管理器：npm  
-构建工具：webpack，parcel  
+构建工具：webpack，rollup, parcel，vite  
 es转义：babel  
-
-框架：vue, react
-
-移动端：flutter
-
+框架：vue, react  
+移动端：flutter  
 桌面：electron
 
 npm 作为最流行的包管理器，在 `npm init -y` 之后，会生成一个 package.json 文件，保存相关包依赖。webpack 等构建工具，也都是依据 package.json 来查找相应包。  
 自己使用了这么久的 npm ，对其完整知识点还没有有过一次总结，也没有归纳相应的问题，特此总结。
 
-## 基础知识总结
+## 1 基础知识总结
 
 1. 初始化：`npm init -y`，初始化为一个 npm 项目，生成 package.json 文件
 2. 忽略部分文件：`.npmignore`，在需要发布为 npm 包时，可以忽略发布部分文件
@@ -38,4 +35,27 @@ npm 作为最流行的包管理器，在 `npm init -y` 之后，会生成一个 
 12. `npm link`：用于本地开发链接多个仓库
 13. 移除远程包：`npm unpublish` 和 `npm deprecate` 指定 package@version 
 14. npm 常用钩子：`preinstall`, `postinstall` 可以在我们执行 `npm install` 的过程前后执行对应的 script 命令
+
+## 2 npm link
+
+通常我们全局安装的包在 `/usr/local/lib/node_modules` 目录下，全局安装的命令在 `/usr/local/bin` 下，可以使用 `npm prefix -g` 来查看我们全局安装的路径
+
+1. npm link：在当前需要共享的项目下执行 npm link，会将 package.json 中的 name 作为软链包命名，链接到全局包路径下，也就是 `/usr/local/lib/node_modules`
+2. npm link name：在全局包路径下去找包，然后将其安装到当前业务项目中，name 采用的是软链包中 package.json 中的 name，不用自己拼前缀
+3. 简写 `npm link ../hello`，表示在当前项目中，先进入上级的 hello 项目中，执行 npm link，然后回到当前项目，执行 npm link hello
+
+疑问：npm link 有效期多久？link 和 install 会互相覆盖吗？
+
+## 3 dependencies 分类作用
+
+1. dependencies: 生产环境实际需要用到的依赖，也就是项目运行最小依赖，缺了项目就跑不起来
+2. devDependencies：开发时用到，主要涉及到构建工具、工具的配置、插件等
+3. peerDependencies：指定项目中包的版本，可以不安装当前包，如果安装了，就要符合 peerDependencies 中指定的版本。啥场景？
+4. optionalDependencies：告诉 npm，如果一些包安装失败了也继续
+5. bundledDependencies：打包结果需要包含 bundledDependencies 中指定的包。哈场景？
+
+## 参考文章
+
+[dependencies](https://segmentfault.com/a/1190000009927946)  
+[npm link](https://docs.npmjs.com/cli/v7/commands/npm-link)
 
