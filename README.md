@@ -96,14 +96,12 @@
   - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 亮点技能 - ui 自动化测试
   - [关于前端监控的几点思考](browser/关于前端监控的几点思考.md)
 - builder
-  - [npm基础](builder/npm专题.md)
+  - ✔ [npm基础](builder/npm专题.md)
   - [ast的思考](builder/ast的思考.md)
   - ✔ [webpack基础](builder/webpack专题.md)
-  - webpack 运行原理
-  - webpack loader
-  - [webpack-plugin](webpack-plugin.md)
-  - rollup基础
-  - fis基础
+  - [webpack 源码分析](builder/webpack源码分析.md)
+  - [webpack-plugin](builder/webpack-plugin.md)
+  - [vite](builder/vite.md)
   - ✔ [babel plugin](builder/babel.md)
 - 框架
   - [mvvm](other/mvvm.md) 都在用 mvvm ，到底什么 mvvm 是什么？
