@@ -1,10 +1,11 @@
 # webpack
 
-time: 2018.8.23
+time: 2018.8.23  
+update: 2021-03-22 11:43:29
 
 [1.webpack 基础](#1-webpack-基础)  
  &nbsp; &nbsp; [1.1 webpack 简介](#11-webpack-简介)  
- &nbsp; &nbsp; [1.2 webpack 常用概念介绍](#12-webpack-常用概念介绍)  
+ &nbsp; &nbsp; [1.2 常用配置](#12-常用配置)  
  &nbsp; &nbsp; [1.3 常用Loader](#13-常用Loader)  
  &nbsp; &nbsp; [1.4 常用plugins](#14-常用plugins)  
  &nbsp; &nbsp; [1.5 监听、编译代码](#15-监听、编译代码)  
@@ -14,6 +15,9 @@ time: 2018.8.23
  &nbsp; &nbsp; [1.9 客户端缓存](#19-客户端缓存)  
  &nbsp; &nbsp; [1.10 设置mode](#110-设置mode)  
 [2.webpack 深入](#2-webpack-深入)  
+ &nbsp; &nbsp; [2.1 cli api](#2.1-cli-api)  
+ &nbsp; &nbsp; [2.2 模块方法](#2.2-模块方法)  
+ &nbsp; &nbsp; [2.3 模块变量](#2.3-模块变量)  
 [3.常见问题](#3-常见问题)  
 &nbsp; &nbsp; [3.1 -4048](#3.1--4048)  
 
@@ -21,10 +25,8 @@ time: 2018.8.23
 
 ### 1.1 webpack 简介
 
-一句话：webpack就是一个打包器，将写的模块、组件打包成一个或多个文件。
-
-文件打包：最终引入浏览器的是 html, css, js 文件，跟传统的一样，只是webpack打包生成的文件经过了压缩、混淆处理，根据 input 打包成不同的文件。平时写的时候，都是一个一个的组件写法，但是最终都会被打包成一个或多个文件。
-
+一句话：webpack就是一个打包器，将写的模块、组件打包成一个或多个文件。  
+文件打包：最终引入浏览器的是 html, css, js 文件，跟传统的一样，只是webpack打包生成的文件经过了压缩、混淆处理，根据 input 打包成不同的文件。平时写的时候，都是一个一个的组件写法，但是最终都会被打包成一个或多个文件。  
 文件处理：我们写的大多不是浏览器能直接识别的代码，而是要经过一系列预处理的，比如 es6, amd, cmd, less, sass 等，webpack 提供文件处理接口，我们可以加载 loader ，通过 loader 对不同文件类型进行处理，处理成浏览器能识别的代码，当然，这里处理的结果也是 `模块 -> 模块` ，处理之后再用 webpack 打包。这也是 webpack 经常要搭配 `babel` 处理 `es6` ，要搭配 `less-loader` 处理 `.less` 文件了。
 
 特点：采用异步 I/O ，多层次缓存文件，构建与编译速度极快
@@ -36,8 +38,7 @@ time: 2018.8.23
 
 > 因为 webpack 就是一个模块打包器，学习它的知识点，就是学习它的打包规则，包括统一入口、文件怎么处理、文件怎么输出。其他 webpack-dev-server 等都是附带的，衍生出来的，跟它本质工作没有多少关系
 
-### 1.2 webpack 常用概念介绍
-
+常用概念介绍  
 1. npx： nodejs 8.2 之后版本支持 `npx` 命令，用于调用webpack的二进制文件。具体怎么用？
 2. 文件转译(编译): webpack自身只支持 `import` 和 `export` 的转译，如果要支持其他语法，比如es6/7/8/9的，需要使用 `bable` 或 `buble` 的loader
 3. package.json 内的 script 命令：npm 命令；使用npx与npm不同，npx只是一种cli命令，功能相对于npm来说弱很多
@@ -47,6 +48,92 @@ time: 2018.8.23
 7. 开发时错误定位: 使用 `source map`，一个大家遵守约定的文件，通常用第三方库或插件来实现错误定位，比如 chrome-dev-tool
 8. tree-shaking：删除代码中从来没有用到的代码。(前提：使用es6的import、export，和第三方压缩精简工具，比如uglifyjs)
 9. chunk: 一个 chunk 就是生成一个 js 文件。由多个模块组合成一个chunk，构建出来的项目包含多个chunk，可以用于 chunk 异步加载，减少初始化时间。怎么定义哪些模块包含呢？使用 CommonsChunkPlugin 插件时，指定 name 和 entry 中的名称一致则可确定哪些模块需要导出一个 chunk
+10. runtime: `__webpack-require__` 等 webpack 用于模块加载处理的代码
+11. manifest: 打包结果包含了原有代码结构信息的文件，打包结果是啥？是模块标识符 + 模块组合成的对象？
+
+### 1.2 常用配置
+
+```javascript
+const path = require('path');
+module.exports = {
+  mode: 'production',
+  entry: './src/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'), // 所有输出文件的目标文件夹，必须是绝对路径
+    filename: 'bundle.js', // 如果是多个入口的呢？必须要 `[name].js | [chunkHash].js` 吗？
+    publicPath: '/assets/', // 相对路径，输出公共解析路径资源，和 path 啥区别？
+    library: 'Echarts', // 啥作用？
+    libraryTarget: 'umd', // 指定用来干啥
+    pathinfo: true, // 是否在生成代码时，添加引入模块、导出、请求等相关的路径信息，默认值是true吗？
+    chunkFilename: '[chunkhash].js', // 指定长效缓存？
+    jsonpFunction: 'func', // 定义的 jsonp 函数名，怎么使用？
+    sourceMapFilename: 'sourcemaps/[file].map' // sourcemap 文件名
+  },
+  module: {
+    // 配置模块解析规则
+    rules: [
+      {
+        test: /\.jsx$/,
+        include, // 绝对路径数组
+        exclude,
+        issuer: { test, include, exclude }, // 这个是啥玩意？
+        loader: "babel-loader", // 单一 loader
+        options: {},
+        // 多个 loader，执行顺序是啥？
+        use: [
+          "htmllint-loader",
+          {
+            loader: "html-loader",
+            options: {}
+          }
+        ]
+      }
+    ],
+    // 配置不需要解析的模块
+    noParse: [
+      /spacial-libary\.js$/,
+    ]
+  },
+  // 配置模块路径解析时的扩展及限制
+  resolve: {
+    modules: ['node_modules'], // 指定全局模块查找目录，比如 import Vue from 'vue' 查找 vue 模块，需要在 node_modules 中查找
+    extensions: ['.js', '.json', '.jsx', '.css'], // 设置默认扩展名，可以让引入相关组件时不写文件类型，判断是按什么顺序呢？
+    alias: {
+      '@': path.resolve(__dirname, "src")
+    }
+  },
+  // 性能提示
+  performance: {
+    hints: false, // error, warning, false 都可以
+    maxAssetSize: 200000, // 单位字节
+    maxEntrypointSize: 400000
+  },
+  devtool: 'source-map', // 定义 source-map 表现，可选值 sourcemap, inline-source-map, eval-source-map, eval, hidden-source-map 一版选择哪个较好呢？
+  context: __dirname, // entry 和 loader 都是基于此路径来的
+  target: 'web', // 支持 web, webworker, node, async-node, node-webkit, electron-main, electron-renderer，webpack5 增加了对 webworker、electron 的支持
+  externals: ['vue'],
+  // 这个是控制打包 bundle 显示结果信息吗？
+  stats: {
+    assets: true,
+    colors: true,
+    errors: true,
+    errorDetails: true,
+    hash: true
+  },
+  devServer: {
+    proxy: {},
+    contentBase: __dirname,
+    compress: true,
+    historyApiFallback: true,
+    hot: true
+  },
+  plugins: [],
+  profile: true, // 显示构建时间详细信息
+  bail: true, // 在第一个错误发生时就抛出错误，构建失败
+  cache: false, // 是否用缓存
+  watch: true // 监听，动态更改，当文件更改时，主动触发编译
+}
+```
 
 ### 1.3 常用Loader
 
@@ -200,13 +287,13 @@ new webpack.optimize.CommonsChunkPlugin({
 
 使用这些api，可以实现统计配置、缓存设置、debug设置等辅助功能
 
-### 2.2 包含统计信息的文件
+输出包含统计信息的文件
 
 `webpack --profile --json > compilation-stats.json`
 
 这个json统计信息文件，包含了构建时间、chunks、module、错误信息等
 
-### 2.3 模块方法
+### 2.2 模块方法
 
 在平常编写模块、组件的时候，可以使用一下模块方法或属性
 
@@ -234,7 +321,7 @@ var componentA = context.resolve('componentA');
 > require.resolve获取到的模块会引入到bundle中，用于直接模块操作
 > 而require.resolveWeak不会，用于逻辑判断
 
-### 2.4 模块变量
+### 2.3 模块变量
 
 这些变量，会在 webpack 编译的时候，替换为真正的功能，这里作为语法糖类似的存在
 
