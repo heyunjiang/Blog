@@ -282,3 +282,14 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 6. `eval-source-map`：映射到源代码；初步构建速度慢，更新构建快，应用于 `开发环境` 的最佳实践
 7. `cheap-eval-source-map`：类似于 eval-source-map，但是仅映射到行数，并且显示的是转换后的代码；构建速度一版，应用于 `开发环境`
 8. 其他不适用于生产或开发环境，应用于第三方工具
+
+## 6 缓存原理
+
+1. 使用 CommonsChunkPlugin 插件，明确将第三方依赖库 react, vue 等拆分出来，作为客户端缓存文件，达到优化目的
+2. 使用 HashedModuleIdsPlugin 插件，保证第三方库生成的 bundle hash 值不变
+
+webpack 是如何实现拆分及保证 hash 值不变的呢？
+
+## 参考文章
+
+[webpack5 中文](https://www.webpackjs.com/guides/caching/)

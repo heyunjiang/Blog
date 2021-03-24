@@ -19,7 +19,8 @@ update: 2021-03-22 11:43:29
  &nbsp; &nbsp; [2.2 模块方法](#2.2-模块方法)  
  &nbsp; &nbsp; [2.3 模块变量](#2.3-模块变量)  
 [3.常见问题](#3-常见问题)  
-&nbsp; &nbsp; [3.1 -4048](#3.1--4048)  
+&nbsp; &nbsp; [3.1 -4048](#3.1--4048)   
+[4.webpack 性能优化](#4-webpack-性能优化)  
 
 ## 1 webpack 基础
 
@@ -135,6 +136,10 @@ module.exports = {
 }
 ```
 
+总结归纳  
+1. filename：单个入口则使用 `bundle.js`，如果有这三种情况：多个入口、代码拆分、插件使用，导致创建多个 bundle，则使用 `[name].[hash].bundle.js` 来代替
+2. chunkhash：在设置 filename 为 `[name].[chunkhash].bundle.js` 时，在每次构建结果对应的 hash 值可能会变，可能不会变
+
 ### 1.3 常用Loader
 
 webpack 要求 loader 命名规则：`x-loader`
@@ -240,27 +245,46 @@ export default hot(module)(Error)
 
 ### 1.8 代码分离及懒加载
 
-1. 多入口+ `CommonsChunkPlugin` ： 当存在多个bundle的时候，使用 ~~CommonsChunkPlugin~~ `SplitChunksPlugin` 提取公共部分
-2. 动态导入(懒加载)： `import()` 、 `require.ensure`
+1. 多入口提取公共部分：当存在多个bundle的时候，使用 `SplitChunksPlugin` (旧 CommonsChunkPlugin) 提取公共部分，让每个输出结果 bundle 都共享该公共文件
+2. 动态导入(懒加载)： `import()` 、 `require.ensure`，使用 webpackChunkName 注释实现公共 chunk 分离
 
 ```javascript
+// 1 动态导入模块添加 webpackChunkName 注释
 import(/* webpackChunkName: "print" */ './print').then(module => {
   var print = module.default;
   print();
 });
+
+// 2 配置 chunkFilename
+output: {
+  filename: '[name].bundle.js',
+  chunkFilename: '[name].bundle.js',
+  path: path.resolve(__dirname, 'dist')
+}
+
+// 3 打包结果
+// index.bundle.js
+// print.bundle.js
 ```
 
 ### 1.9 客户端缓存
 
-构建场景：确保webpack编译生成的文件能够被客户端缓存，在文件内容发生变化后，能够请求到新的文件
-
-构建目标：通过webpack构建待缓存文件，分类：固定不变的类库构建、自身src代码构建
-
+构建场景：确保webpack编译生成的文件能够被客户端缓存，在文件内容发生变化后，能够请求到新的文件  
+构建目标：通过webpack构建待缓存文件，分类：固定不变的类库构建、自身src代码构建  
 hash值变化策略：每次webpack构建命令执行，固定不变的类库的hash值保持不变，构建的自身src代码，当引入或删除组件的时候改变hash值
 
-关键配置代码
-
+关键配置代码  
 ```javascript
+// 1 配置入口
+entry: {
+  main: 'index.js',
+  vendor: [
+    'lodash',
+    'vue'
+  ]
+}
+
+// 2 配置插件
 new webpack.HashedModuleIdsPlugin(),
 new webpack.optimize.CommonsChunkPlugin({
   name: 'vendor'
@@ -269,9 +293,8 @@ new webpack.optimize.CommonsChunkPlugin({
   name: 'manifest'
 })
 ```
-
-使用 `HashedModuleIdsPlugin`，用于解决在entry中已经命名的chunk在使用 `CommonsChunkPlugin`打包后hash值变化的问题  
-前后2次使用 `CommonsChunkPlugin` 的顺序要保证一致，因为webpack是根据解析顺序来控制hash值生成的
+1. 使用 CommonsChunkPlugin 插件，明确将第三方依赖库 react, vue 等拆分出来，作为客户端缓存文件，达到优化目的；前后2次使用 `CommonsChunkPlugin` 的顺序要保证一致，因为webpack是根据解析顺序来控制hash值生成的
+2. 使用 HashedModuleIdsPlugin 插件，保证第三方库生成的 bundle hash 值不变
 
 ### 1.10 设置mode
 
@@ -354,6 +377,12 @@ var componentA = context.resolve('componentA');
 
 可以尝试重复npm install命令，也有可能原因是npm不稳定 
 
+## 4 webpack 性能优化
+
+这里是说使用 webpack 时，能做哪些性能优化相关的操作。通常性能优化分为构建时 + 运行时。
+
+构建时  
+1. 
 
 ## 参考文章
 
