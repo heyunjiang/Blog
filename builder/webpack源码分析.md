@@ -16,12 +16,14 @@ author: heyunjiang
 
 1. ✔ 配置的 extenal 没有包含在结果 bundle 中，那构建结果是什么样子？使用当前包的项目是怎么使用相关组件的呢？
 2. ✔ 打包结果代码是如何组织运行起来的？代码拆分之后怎么合理运行，也就是 webpack 打包结果是如何有效运行？
-3. 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？
+3. 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp
 4. 热更新原理是啥？
 5. sourcemap 原理
-6. output 中 path 和 publicPath 有什么区别？
+6. output 中 path 和 publicPath 有什么区别？libary 又是啥意思？
 7. chunkFileName 指定的长效缓存是啥？
 8. webpack 的 runtime 和 manifest 是啥？
+9. ✔ loader 对文件的处理，是在依赖模块遍历过程中处理的，还是进入指定目录统一处理之后再遍历？是遍历到了再用 loader 去处理
+10. module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？
 
 最近要解决的问题  
 1. 构建加速：公共组件构建速度慢，通过 dll 缓存优化
@@ -238,8 +240,8 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 
 通过第二点的打包结果分析，已经大致能分析出 webpack 核心打包原理  
 1. 打包命令 `webpack`
-2. 准备工作：配置读取，环境变量准备
-3. 编译：根据入口文件，查找相关依赖，每个文件执行对应 loader；不同生命周期执行 plugin
+2. 准备工作：配置读取，环境变量准备，加载 plugin，实例化 compiler 对象
+3. 编译：根据入口文件，查找相关依赖，每个文件执行对应 loader；在遍历依赖文件的依赖，执行递归处理；不同生命周期执行 plugin
 4. 打包：将依赖输出打包到同一个 chunk 中
 5. 输出结果文件，commonjs、umd 等
 
@@ -251,11 +253,6 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 2. hmr 模块下载更新，通知应用程序
 3. 应用程序收到请求，并要求 hmr 应用更新
 4. hmr 应用更新
-
-对应代码片段  
-```javascript
-
-```
 
 ### 4.2 编译器中
 
@@ -269,7 +266,7 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 
 ### 4.4 在 hmr 模块中
 
-也就是 hmr runtime
+也就是 hmr runtime，衔接浏览器应用程序和 webpack 的。
 
 ## 5 sourcemap 原理
 

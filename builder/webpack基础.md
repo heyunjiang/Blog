@@ -379,10 +379,51 @@ var componentA = context.resolve('componentA');
 
 ## 4 webpack 性能优化
 
-这里是说使用 webpack 时，能做哪些性能优化相关的操作。通常性能优化分为构建时 + 运行时。
+这里是说使用 webpack 时，能做哪些性能优化相关的操作。通常性能优化分为构建时 + 运行时。  
+使用 `webpack-bundle-analyzer` 插件来实现时长分析
+ 
+### 4.1 缩小模块查找范围
 
-构建时  
-1. 
+1. 通过设置 `resolve.modules` 来控制全局 module 范围-nodejs模块查找策略，是在 node_modules 查找文件，并且顺目录往上层查找，通过 resolve.modules 限制查找目录范围
+2. 配置 module.rule 校验的 `include` 限制文件范围
+3. 通过 `resolve.mainFields` 来控制查找模块的入口地址，通常浏览器环境支持 browser > module > main，nodejs 环境支持 module > main
+4. 通过 `resolve.alias` 来修改模块的查找路口，比如 vue 有多个版本，我们可以指定为 `dist/vue.min.js` 或 `dist/vue.js` 来修改入口
+5. 通过 `module.noParse` 来限制一些模块，让其不走 webpack 的解析，而是直接加载使用
+
+### 4.2 使用 dll
+
+dll，动态链接库，提供给其他模块使用的函数和数据。
+
+1. 第一步使用 `DllPlugin` 插件构建 dll 文件，执行 `webpack --config webpack_dll.config.js`
+2. 构建项目，使用 `DllReferencePlugin` 插件，执行 `webpack`
+
+### 4.3 启动多线程处理文件
+
+1. loader 转换文件，使用 `HappyPack`
+2. 压缩文件，使用 `ParallelUglifyPlugin`
+
+### 4.4 自动刷新与热更新
+
+原理：  
+1. 网页代码中注入 runtime 模块
+2. webpack 监测文件更改，通过 entry 去定时(poll 配置周期时长)扫描依赖文件，判断规则是搜集文件最新修改时间，然后同上次扫描结果做对比，如果不同，则根据缓存时间 aggregateTimeout 延迟等待，到期告诉监听者重新编译
+3. webpack 通知网页 runtime 有更新
+4. runtime 下载更新，应用并全局或局部刷新
+
+优化手段：  
+1. 默认会在每个 chunk 中注入 runtime 模块，可以去除重复的，不过页面是嵌套在 iframe 中，并不好看
+2. 修改 poll, aggregateTimeout 时间，让 webpack 扫描更新周期更长可以优化构建
+
+### 4.5 加载时优化
+
+上面4个说的是构建性能优化，这里归纳一下加载时优化
+
+1. 区分环境，去除自身和第三方库的开发提示代码
+2. 压缩代码：压缩 js, es6, css
+3. 静态资源文件放置 cdn：除 html 外，其他资源都可以放置在 cdn 上，在 webpack 上可以通过 publicPath + WebPlugin 实现 html 引入 cdn 资源功能
+4. tree-shaking 与按需加载：优化 es6 模块，在使用第三方库时，也可以使用 tree-shaking 来优化不需要用到的 es6 模块
+5. 提取公共代码：如果多页应用，使用 CommonsChunkPlugin 或 splitChunk 来提取公共模块
+6. 异步加载：使用 import 实现异步加载模块，可以搭配 chunkFileName 来优化拆分的 chunk 命名
 
 ## 参考文章
 
