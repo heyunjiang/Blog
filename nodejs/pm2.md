@@ -29,8 +29,8 @@ app.listen(3000)
 5. 删除服务记录：pm2 delete id,name,all
 6. 获取服务详情：pm2 describe id,name
 7. 热重启：pm2 reload id,name,all 与 restart 区别是服务无中断
-8. 监控：pm2 monit
-9. 日志：pm2 logs，支持 --json,format
+8. 监控：pm2 monit；展示所有进程，占据的内存信息
+9. 日志：pm2 logs，支持 --json,format；展示应用启停相关历史日志
 10. 日志清空：pm2 flush
 11. 更新日志：pm2 reloadLogs
 12. 更新pm2：pm2 update
@@ -43,8 +43,14 @@ app.listen(3000)
 
 ## 3 问题
 
+0. pm2 如何启动服务
 1. reload 是如何实现热重启的？
 2. 集群模式是如何运转?
+3. -i 0 是啥意思？same as -i max
+
+核心代码  
+1. pm2.start
+2. pm2.reload
 
 ## 参考文章
 

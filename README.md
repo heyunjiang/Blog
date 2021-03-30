@@ -85,6 +85,7 @@
   - ✔ [npm发包](nodejs/npm发包.md)
   - ✔ [koaAPI](nodejs/koaAPI.md) koa 实现了 http 服务器方面功能，包括 response, request, context 3大api
   - [koa 进阶](nodejs/koa进阶.md) 学习 koa 如何使用
+  - [pm2](nodejs/pm2.md) 使用 pm2 管理 nodejs 服务，实现集群模式、监控、日志、热重启等
 - 浏览器
   - ✔ [深入浏览器-dom](browser/深入浏览器-dom.md)
   - ✔ [深入浏览器-bom](browser/深入浏览器-bom.md)
