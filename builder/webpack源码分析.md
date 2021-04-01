@@ -12,6 +12,9 @@ author: heyunjiang
 6. 缓存原理
 7. 懒加载原理
 
+思考  
+1. 如果我面试别人，问哪些 webpack 问题，才算是有价值、有深度的呢？
+
 ## 1 疑问
 
 1. ✔ 配置的 extenal 没有包含在结果 bundle 中，那构建结果是什么样子？使用当前包的项目是怎么使用相关组件的呢？
@@ -20,7 +23,7 @@ author: heyunjiang
 4. 热更新原理是啥？
 5. sourcemap 原理
 6. output 中 path 和 publicPath 有什么区别？libary 又是啥意思？
-7. chunkFileName 指定的长效缓存是啥？
+7. chunkFileName 指定的长效缓存是啥？chunkFileName 只是用于 import 异步加载的 chunk 命名设置
 8. webpack 的 runtime 和 manifest 是啥？
 9. ✔ loader 对文件的处理，是在依赖模块遍历过程中处理的，还是进入指定目录统一处理之后再遍历？是遍历到了再用 loader 去处理
 10. module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？
@@ -240,10 +243,135 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 
 通过第二点的打包结果分析，已经大致能分析出 webpack 核心打包原理  
 1. 打包命令 `webpack`
-2. 准备工作：配置读取，环境变量准备，加载 plugin，实例化 compiler 对象
+2. 准备工作：配置读取，环境变量准备，实例化 compiler 对象，加载 plugin
 3. 编译：根据入口文件，查找相关依赖，每个文件执行对应 loader；在遍历依赖文件的依赖，执行递归处理；不同生命周期执行 plugin
 4. 打包：将依赖输出打包到同一个 chunk 中
 5. 输出结果文件，commonjs、umd 等
+
+### 3.1 入口执行 webpack 命令
+
+通过 webpack package.json bin 入口，可以看到 webpack 是通过调用 webpack-cli 去执行 `webpack` 命令；webpack-cli 定义了 WebpackCLI class，实例化然后调用 run 方法。  
+run 方法内部，定义了系列命令，包含 build, help, version 等。使用 `commander` 解析用户命令行交互，然后执行 `loadCommandByName` 方法。
+
+```javascript
+// loadCommandByName
+const loadCommandByName = async (commandName, allowToInstall = false) => {
+    const isBuildCommandUsed = isCommand(commandName, buildCommandOptions);
+    const isWatchCommandUsed = isCommand(commandName, watchCommandOptions);
+
+    if (isBuildCommandUsed || isWatchCommandUsed) {
+        const options = this.getBuiltInOptions();
+
+        await this.makeCommand(
+            isBuildCommandUsed ? buildCommandOptions : watchCommandOptions,
+            isWatchCommandUsed ? options.filter((option) => option.name !== 'watch') : options,
+            async (entries, options) => {
+                if (entries.length > 0) {
+                    options.entry = [...entries, ...(options.entry || [])];
+                }
+
+                await this.buildCommand(options, isWatchCommandUsed);
+            },
+        );
+    } else {
+        ...
+    }
+};
+```
+
+总结归纳：入口 loadCommandByName 执行 webpack 等命令，会有如下步骤  
+1. getBuiltInOptions 获取 options
+2. makeCommand 检查依赖
+3. buildCommand 生成 compiler 对象，从入口 entry 解析文件
+
+### 3.2 实例化 compiler 对象
+
+在 buildCommand 内部主要是实例化 compiler 对象 `this.createCompiler(options, callback)`
+
+```javascript
+// createCompiler
+this.webpack = require(process.env.WEBPACK_PACKAGE || 'webpack');
+compiler = this.webpack(config.options, callback)
+```
+
+webpack-cli 内部也是调用的 webpack 来实例化 compiler 对象。(webpack-cli 感觉是一个命令行交互工具，读取配置，传给 webpack 来使用)  
+webpack 入口文件 lib/index.js 输出了 webpack 函数，内部调用 webpack.js，来看看 webpack.js 执行哪些操作
+
+```javascript
+// webpack.js
+module.exports = (options, callback) => {
+  const create = () => {
+    validateSchema(webpackOptionsSchema, options);
+    let compiler;
+    let watch = false;
+    let watchOptions;
+    compiler = createCompiler(options);
+    watch = options.watch;
+    watchOptions = options.watchOptions || {};
+    return { compiler, watch, watchOptions };
+  };
+  try {
+    const { compiler, watch, watchOptions } = create();
+    if (watch) {
+      compiler.watch(watchOptions, callback);
+    } else {
+      compiler.run((err, stats) => {
+        compiler.close(err2 => {
+          callback(err || err2, stats);
+        });
+      });
+    }
+    return compiler;
+  } catch (err) {
+    process.nextTick(() => callback(err));
+    return null;
+  }
+}
+```
+```javascript
+// createCompiler
+const createCompiler = rawOptions => {
+	const options = getNormalizedWebpackOptions(rawOptions);
+	applyWebpackOptionsBaseDefaults(options);
+	const compiler = new Compiler(options.context);
+	compiler.options = options;
+	new NodeEnvironmentPlugin({
+		infrastructureLogging: options.infrastructureLogging
+	}).apply(compiler);
+	if (Array.isArray(options.plugins)) {
+		for (const plugin of options.plugins) {
+			if (typeof plugin === "function") {
+				plugin.call(compiler, compiler);
+			} else {
+				plugin.apply(compiler);
+			}
+		}
+	}
+	applyWebpackOptionsDefaults(options);
+	compiler.hooks.environment.call();
+	compiler.hooks.afterEnvironment.call();
+	new WebpackOptionsApply().process(options, compiler);
+	compiler.hooks.initialize.call();
+	return compiler;
+};
+```
+
+归纳分析  
+1. 生成 compiler 对象：通过调用 createCompiler 函数，调用 new Compiler，生成 compiler 实例对象
+2. compiler.run()：开始编译
+3. 加载 plugin：将 plugin 加载到 compiler 对象上
+4. 调用钩子函数：环境准备、初始化结束
+
+```javascript
+// Compiler
+// Compilation 看到 constructor 卡住了，代码太长了，需要再次阅读文档，可能需要打断点调试了
+```
+
+```javascript
+
+```
+
+## 4 webpack 源码架构分析
 
 ## 4 hmr 原理
 
@@ -286,6 +414,12 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 2. 使用 HashedModuleIdsPlugin 插件，保证第三方库生成的 bundle hash 值不变
 
 webpack 是如何实现拆分及保证 hash 值不变的呢？
+
+## 纯前端技术问题
+
+这里总结一下阅读 webpack 源码时，看到的模式技术点  
+1. Object.freeze 有什么作用
+2. commonjs require('./') 返回的是啥？
 
 ## 参考文章
 
