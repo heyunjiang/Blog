@@ -12,14 +12,14 @@ author: heyunjiang
 6. 缓存原理
 7. 懒加载原理
 
-思考  
-1. 如果我面试别人，问哪些 webpack 问题，才算是有价值、有深度的呢？
+思考: 如果我面试别人，问哪些 webpack 问题，才算是有价值、有深度的呢？  
+1. 独立 npm 包构建时如果不把 elementui 打进去，或者说干脆不引用 elementui，子项目能成功使用这个 npm 包吗？为什么？
 
 ## 1 疑问
 
 1. ✔ 配置的 extenal 没有包含在结果 bundle 中，那构建结果是什么样子？使用当前包的项目是怎么使用相关组件的呢？
 2. ✔ 打包结果代码是如何组织运行起来的？代码拆分之后怎么合理运行，也就是 webpack 打包结果是如何有效运行？
-3. 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp
+3. 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp。异步组件会打包成独立的 chunk，可以通过 chunkFileName 来规范命名
 4. 热更新原理是啥？
 5. sourcemap 原理
 6. output 中 path 和 publicPath 有什么区别？libary 又是啥意思？

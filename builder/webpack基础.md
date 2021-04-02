@@ -397,6 +397,9 @@ dll，动态链接库，提供给其他模块使用的函数和数据。
 1. 第一步使用 `DllPlugin` 插件构建 dll 文件，执行 `webpack --config webpack_dll.config.js`
 2. 构建项目，使用 `DllReferencePlugin` 插件，执行 `webpack`
 
+思考：dll 的优化，是类似于 externals 的，都是把相关库独立出去，减少自身项目的构建时间。  
+dll 限制：不能用于库的打包，因为使用库的应用不能 import 相关 dll 文件，只能 import main 字段指向的入口文件
+
 ### 4.3 启动多线程处理文件
 
 1. loader 转换文件，使用 `HappyPack`
@@ -424,6 +427,33 @@ dll，动态链接库，提供给其他模块使用的函数和数据。
 4. tree-shaking 与按需加载：优化 es6 模块，在使用第三方库时，也可以使用 tree-shaking 来优化不需要用到的 es6 模块
 5. 提取公共代码：如果多页应用，使用 CommonsChunkPlugin 或 splitChunk 来提取公共模块
 6. 异步加载：使用 import 实现异步加载模块，可以搭配 chunkFileName 来优化拆分的 chunk 命名
+
+### 4.6 实战
+
+项目描述：npm package 构建，使用了 vue, echarts 等常规库，构建通用组件  
+externals: ['vue']  
+初次构建结果 - lib.common.js  
+size: 3483k gzip: 751k time: 18489ms
+
+版本1: 使用 HardSourceWebpackPlugin  
+构建结果  
+size: 3483k gzip: 751k time: 5949ms
+
+版本2: 使用 extenal.echarts  
+构建结果  
+size: 356k gzip: 78k time: 4775ms
+
+版本3: 使用 extenal.echarts + HardSourceWebpackPlugin  
+构建结果  
+size: 356k gzip: 78k time: 3956ms
+
+版本4: 使用 dllPlugin  
+构建结果  
+size: 356k gzip: 78k time: 4864ms
+
+版本5: 使用 dllPlugin + HardSourceWebpackPlugin  
+构建结果  
+size: 356k gzip: 78k time: 4381ms
 
 ## 参考文章
 
