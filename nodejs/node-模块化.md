@@ -13,7 +13,7 @@ nodejs 默认使用 commonjs 模块，这里列举模块加载和使用方式
 5. exports.：导出资源使用 `exports.`，它是 module.exports 的简写
 6. 模块循环加载：会将被循环依赖的模块的未执行完全副本交给当前模块，让当前模块读取
 7. 默认后缀：如果未带依赖模块后缀，则按如下优先级查找：`.js .json .node`
-8. 入口文件：nodejs 按如下优先级加载入口文件: package.json 中的 main 字端、index.js、index.node
+8. 入口文件：nodejs 按如下优先级加载入口文件: package.json 中的 main 字端、index.js、index.node；package.json 中优先级：browser > module > main
 9. node_modules 加载优先级：nodejs 加载局部 npm 包时，是从当前路径下的 node_modules 开始查找，然后查找父级目录，直到根目录，package.json 只是一个记录，不是查找依赖
 10. NODE_PATH 环境变量：是一个以冒号分割的绝对路径列表，nodejs 可以通过加环境变量实现全局模块加载
 11. `模块包装器`：nodejs 模块的执行是被 nodejs 封装在限定的一个函数中，函数参数提供了 exports, module, require, __filename, __dirname
