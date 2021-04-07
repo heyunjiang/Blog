@@ -6,11 +6,15 @@ author: heyunjiang
 
 ## 1 调试方式
 
+通常我们项目开发，调试有如下三种方法
 1. console.log
 2. node debugger、node inspector、vscode
 3. 测试驱动开发（tdd | bdd）
 
-直接在 nodejs 代码中插入 debugger 是没有效果的，本文着重学习第二点
+直接在 nodejs 代码中插入 debugger 是没有效果的，本文着重学习第二点，而 debug 又有三种方式  
+1. 直接通过 cmd 工具调试 nodejs，调试命令需要自己输入，使用不是太方便
+2. 使用 chrome 调试：在 cmd 中 inspect 启动项目并打断点之后，在浏览器中输入 chrome://inspect 来启动浏览器调试
+3. 使用编辑器调试：vscode 中 `command shift D` 进入调试模块，并通过配置项目项目的 launch.json 配置启动项目，即可使用编辑器自带的 nodejs 调试工具
 
 ## 2 nodejs 调试
 
@@ -74,7 +78,7 @@ launch.json 环境变量
 // 对应目录的 package.json 配置
 "scripts": {
   "debug": "node inspect ./node_modules/@vue/cli-service/bin/vue-cli-service.js build",
-  "build": "vue-cli-service build", // 通过非 node 命令启动，不方便增加 inspect 参数，需要在 vue-cli-service bin 入口文件中，首行修改为 #!/usr/bin/env node inspect
+  "build": "vue-cli-service build", 
 },
 ```
 
@@ -87,10 +91,22 @@ launch.json 环境变量
 6. port: v8 监视器启动的 websocket 监听端口
 7. cwd: 指定目录
 
+注意：  
+1. 通过非 node 命令启动，不方便增加 inspect 参数，需要在 vue-cli-service bin 入口文件中，首行修改为 #!/usr/bin/env node inspect
+2. 通过 node 命令启动，需要指明 inspect
+3. 多个配置只有第一个会起效？
+4. 如果没有启动 inspect，将不会有输出 console.log
+
 ## 5 webpack 调试
 
 上面三种调试方法，都是需要指定调试的入口文件的。而我的 webpack 项目，是通过 npm 启动的，引用的 node_modules 下的 webpack 资源，这种情况应该怎么调试呢？  
-是否需要独立在 webpack 项目中启动调试模式
+是否需要独立在 webpack 项目中启动调试模式?不需要
+
+通常我们的项目是通过 npm 启动，比如 `webpack` 或 `vue-cli-service build`，当前命令内部调用当前 node_modules 目录下对应的资源，如果我们想 在 npm 模式以调试模式启动，有2种方法  
+1. 修改命令入口 `node inspect ./node_modules/@vue/cli-service/bin/vue-cli-service.js build`
+2. 修改资源文件启动配置项 `#!/usr/bin/env node inspect`
+
+2种方式都可以启动调试模式
 
 ## 6 调试原理
 
