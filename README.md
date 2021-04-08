@@ -67,7 +67,7 @@
   - [node-crypto](nodejs/node-crypto.md) OpenSSL 加解密实现
   - node-threads 工作线程，用于 cpu 密集计算，不适用于 i/o 密集
   - node-fs 文件系统
-  - [node-调试](nodejs/node-调试.md) debugger 能力
+  - ✔ [node-调试](nodejs/node-调试.md) debugger 能力
   - node-error 错误对象
   - node-全局对象
   - [node-http](nodejs/node-http.md) http, http2, https 系列总结
@@ -100,6 +100,7 @@
   - ✔ [npm基础](builder/npm专题.md)
   - [ast的思考](builder/ast的思考.md)
   - ✔ [webpack基础](builder/webpack专题.md)
+  - ✔ [vue-cli 源码分析](builder/vue-cli源码分析.md)
   - [webpack 源码分析](builder/webpack源码分析.md)
   - [webpack-plugin](builder/webpack-plugin.md)
   - [vite](builder/vite.md)

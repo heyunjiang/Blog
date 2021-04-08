@@ -29,7 +29,7 @@ author: heyunjiang
 10. module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？
 
 最近要解决的问题  
-1. 构建加速：公共组件构建速度慢，通过 dll 缓存优化
+1. ✔ 构建加速：公共组件构建速度慢，通过 dll 缓存优化
 2. 构建规范化
 
 > webpack 功能不多，快速搞定源码阅读，给定2周时间，3.31 之前完成
@@ -358,9 +358,10 @@ const createCompiler = rawOptions => {
 
 归纳分析  
 1. 生成 compiler 对象：通过调用 createCompiler 函数，调用 new Compiler，生成 compiler 实例对象
-2. compiler.run()：开始编译
+2. 生成配置对象 options：getNormalizedWebpackOptions
 3. 加载 plugin：将 plugin 加载到 compiler 对象上
 4. 调用钩子函数：环境准备、初始化结束
+5. compiler.run()：开始编译
 
 ```javascript
 // Compiler
@@ -418,9 +419,12 @@ webpack 是如何实现拆分及保证 hash 值不变的呢？
 ## 纯前端技术问题
 
 这里总结一下阅读 webpack 源码时，看到的模式技术点  
-1. Object.freeze 有什么作用
-2. commonjs require('./') 返回的是啥？
+1. Object.freeze 有什么作用：冻结对象，使对象属性不可增减，属性描述符也不可更改；但是如果属性的值是一个对象，则属性对象的属性是可以更改的，需要递归 freeze；(严格模式下修改冻结对象属性会报错中断)使用场景是什么呢？
+2. Object.seal：封闭对象，唯一不同于 freeze，如果属性值描述符 writable = true，那么该属性就可以修改；seal 会比 freeze 要求低一点
+3. Object.preventExtensions：阻止对象扩展，唯一不同于 seal，该对象属性是可以删除的
+4. commonjs require('./') 返回的是啥？
 
 ## 参考文章
 
-[webpack5 中文](https://www.webpackjs.com/guides/caching/)
+[webpack5 中文](https://www.webpackjs.com/guides/caching/)  
+[mdn freeze](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze)

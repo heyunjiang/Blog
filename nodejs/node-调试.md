@@ -110,8 +110,9 @@ launch.json 环境变量
 
 ## 6 调试原理
 
-1. nodejs 调试，是使用了 v8 检查器，v8 检查器提供核心能力，默认启动 websocket 并监听 9229 端口
-2. 基于 [chrome 开发者工具协议](https://chromedevtools.github.io/devtools-protocol/)，实现与 chrome、vscode 调试通信
+1. 核心模块：nodejs 调试，是使用了 v8 检查器，v8 检查器提供核心能力，默认启动 websocket 并监听 9229 端口
+2. 协议通信：基于 [chrome 开发者工具协议](https://chromedevtools.github.io/devtools-protocol/)，实现与 chrome、vscode 调试通信
+3. 中断处理：开发者入侵代码设置断点或通过工具设置之后，即可控制 js 代码执行是否中断
 
 ## 问题
 
