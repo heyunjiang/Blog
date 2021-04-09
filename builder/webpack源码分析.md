@@ -365,8 +365,97 @@ const createCompiler = rawOptions => {
 
 ```javascript
 // Compiler
-// Compilation 看到 constructor 卡住了，代码太长了，需要再次阅读文档，可能需要打断点调试了
+class Compiler extends Tapable {
+  constructor(context) {
+		super();
+		this.hooks = {...};
+
+		/** @type {string=} */
+		this.name = undefined;
+		/** @type {Compilation=} */
+		this.parentCompilation = undefined;
+		/** @type {string} */
+		this.outputPath = "";
+
+		this.outputFileSystem = null;
+		this.inputFileSystem = null;
+
+		/** @type {string|null} */
+		this.recordsInputPath = null;
+		/** @type {string|null} */
+		this.recordsOutputPath = null;
+		this.records = {};
+		this.removedFiles = new Set();
+		/** @type {Map<string, number>} */
+		this.fileTimestamps = new Map();
+		/** @type {Map<string, number>} */
+		this.contextTimestamps = new Map();
+		/** @type {ResolverFactory} */
+		this.resolverFactory = new ResolverFactory();
+
+		this.infrastructureLogger = undefined;
+
+		/** @type {WebpackOptions} */
+		this.options = /** @type {WebpackOptions} */ ({});
+
+		this.context = context;
+
+		this.requestShortener = new RequestShortener(context);
+
+		/** @type {boolean} */
+		this.running = false;
+
+		/** @type {boolean} */
+		this.watchMode = false;
+
+		/** @private @type {WeakMap<Source, { sizeOnlySource: SizeOnlySource, writtenTo: Map<string, number> }>} */
+		this._assetEmittingSourceCache = new WeakMap();
+		/** @private @type {Map<string, number>} */
+		this._assetEmittingWrittenFiles = new Map();
+	}
+  compile(callback) {
+		const params = this.newCompilationParams();
+		this.hooks.beforeCompile.callAsync(params, err => {
+			this.hooks.compile.call(params);
+			const compilation = this.newCompilation(params);
+			this.hooks.make.callAsync(compilation, err => {
+				compilation.finish(err => {
+					compilation.seal(err => {
+						this.hooks.afterCompile.callAsync(compilation, err => {
+							return callback(null, compilation);
+						});
+					});
+				});
+			});
+		});
+  }
+  newCompilation(params) {
+		const compilation = this.createCompilation();
+		compilation.fileTimestamps = this.fileTimestamps;
+		compilation.contextTimestamps = this.contextTimestamps;
+		compilation.name = this.name;
+		compilation.records = this.records;
+		compilation.compilationDependencies = params.compilationDependencies;
+		this.hooks.thisCompilation.call(compilation, params);
+		this.hooks.compilation.call(compilation, params);
+		return compilation;
+  }
+  createCompilation() {
+		return new Compilation(this);
+	}
+}
 ```
+
+compiler 对象的主要作用  
+1. 挂载 webpack 配置的 options 对象
+2. 执行 options 挂载的插件，为插件提供 compiler 对象
+3. 挂载 parentCompilation，啥作用？
+4. 实例化 compilation 对象
+
+### 3.3 实例化 compilation 对象
+
+通过 compiler 对象的分析，发现 compiler 只是实例化 compilation 对象，还没有进入资源的处理。  
+来看看实例化 compilation 对象，会发生什么
 
 ```javascript
 
