@@ -1,4 +1,4 @@
-# webpack 源码分析
+# webpack 源码分析-核心流程
 
 time: 2021-03-16 15:35:55
 author: heyunjiang
@@ -241,6 +241,8 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 
 ## 3 关键源码分析
 
+> 基于 webpack 4，因为是从 vue-cli-service 入口的
+
 通过第二点的打包结果分析，已经大致能分析出 webpack 核心打包原理  
 1. 打包命令 `webpack`
 2. 准备工作：配置读取，环境变量准备，实例化 compiler 对象，加载 plugin
@@ -347,9 +349,6 @@ const createCompiler = rawOptions => {
 			}
 		}
 	}
-	applyWebpackOptionsDefaults(options);
-	compiler.hooks.environment.call();
-	compiler.hooks.afterEnvironment.call();
 	new WebpackOptionsApply().process(options, compiler);
 	compiler.hooks.initialize.call();
 	return compiler;
@@ -361,57 +360,13 @@ const createCompiler = rawOptions => {
 2. 生成配置对象 options：getNormalizedWebpackOptions
 3. 加载 plugin：将 plugin 加载到 compiler 对象上
 4. 调用钩子函数：环境准备、初始化结束
-5. compiler.run()：开始编译
+5. compiler.run()：开始编译，执行 compliler.compile 方法
 
 ```javascript
 // Compiler
 class Compiler extends Tapable {
   constructor(context) {
-		super();
 		this.hooks = {...};
-
-		/** @type {string=} */
-		this.name = undefined;
-		/** @type {Compilation=} */
-		this.parentCompilation = undefined;
-		/** @type {string} */
-		this.outputPath = "";
-
-		this.outputFileSystem = null;
-		this.inputFileSystem = null;
-
-		/** @type {string|null} */
-		this.recordsInputPath = null;
-		/** @type {string|null} */
-		this.recordsOutputPath = null;
-		this.records = {};
-		this.removedFiles = new Set();
-		/** @type {Map<string, number>} */
-		this.fileTimestamps = new Map();
-		/** @type {Map<string, number>} */
-		this.contextTimestamps = new Map();
-		/** @type {ResolverFactory} */
-		this.resolverFactory = new ResolverFactory();
-
-		this.infrastructureLogger = undefined;
-
-		/** @type {WebpackOptions} */
-		this.options = /** @type {WebpackOptions} */ ({});
-
-		this.context = context;
-
-		this.requestShortener = new RequestShortener(context);
-
-		/** @type {boolean} */
-		this.running = false;
-
-		/** @type {boolean} */
-		this.watchMode = false;
-
-		/** @private @type {WeakMap<Source, { sizeOnlySource: SizeOnlySource, writtenTo: Map<string, number> }>} */
-		this._assetEmittingSourceCache = new WeakMap();
-		/** @private @type {Map<string, number>} */
-		this._assetEmittingWrittenFiles = new Map();
 	}
   compile(callback) {
 		const params = this.newCompilationParams();
@@ -446,22 +401,57 @@ class Compiler extends Tapable {
 }
 ```
 
+归纳分析: 在调用 compile 方法时，按顺序触发了4种钩子：beforeCompile, compile, make, afterCompile
+
 compiler 对象的主要作用  
 1. 挂载 webpack 配置的 options 对象
 2. 执行 options 挂载的插件，为插件提供 compiler 对象
 3. 挂载 parentCompilation，啥作用？
-4. 实例化 compilation 对象
+4. 实例化 compilation 对象，并开始编译
 
 ### 3.3 实例化 compilation 对象
 
-通过 compiler 对象的分析，发现 compiler 只是实例化 compilation 对象，还没有进入资源的处理。  
-来看看实例化 compilation 对象，会发生什么
+通过 compiler 对象的分析，发现 compiler 会实例化 compilation 对象，并调用 make 钩子。  
+make 钩子做了什么呢？又是在哪里定义的？通过断点 + 调用栈查看，发现是在 SingleEntryPlugin.js 中定义的，格式如下
+
+```javascript
+apply(compiler) {
+  compiler.hooks.compilation.tap(
+    "SingleEntryPlugin",
+    (compilation, { normalModuleFactory }) => {
+      compilation.dependencyFactories.set(
+        SingleEntryDependency,
+        normalModuleFactory
+      );
+    }
+  );
+
+  compiler.hooks.make.tapAsync(
+    "SingleEntryPlugin",
+    (compilation, callback) => {
+      const { entry, name, context } = this;
+
+      const dep = SingleEntryPlugin.createDependency(entry, name);
+      compilation.addEntry(context, dep, name, callback);
+    }
+  );
+}
+static createDependency(entry, name) {
+  const dep = new SingleEntryDependency(entry);
+  dep.loc = { name };
+  return dep;
+}
+```
+
+归纳分析  
+1. 
+2. make 内部是调用了 compilation.addEntry 方法
+
+> 由于使用的是基于 tapable 的各种回调方法，webpack 源码阅读很不方便，断点调试也不太容易找到，需要去查看调用栈，查看 compilation 的核心方法是哪些地方调用的
 
 ```javascript
 
 ```
-
-## 4 webpack 源码架构分析
 
 ## 4 hmr 原理
 
@@ -516,4 +506,5 @@ webpack 是如何实现拆分及保证 hash 值不变的呢？
 ## 参考文章
 
 [webpack5 中文](https://www.webpackjs.com/guides/caching/)  
-[mdn freeze](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze)
+[mdn freeze](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze)  
+[webpack 源码解读](https://juejin.cn/post/6844903987129352206)
