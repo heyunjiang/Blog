@@ -409,9 +409,11 @@ compiler 对象的主要作用
 3. 挂载 parentCompilation，啥作用？
 4. 实例化 compilation 对象，并开始编译
 
+> webpack 由于使用的是基于 tapable 的各种回调方法，源码阅读很不方便，断点调试也不太容易找到，需要去查看调用栈，查看 compilation 的核心方法是哪些地方调用的
+
 ### 3.3 实例化 compilation 对象
 
-通过 compiler 对象的分析，发现 compiler 会实例化 compilation 对象，并调用 make 钩子。  
+通过 compiler 对象的分析，发现 compiler 会实例化 compilation 对象，并调用 `make 钩子`。  
 make 钩子做了什么呢？又是在哪里定义的？通过断点 + 调用栈查看，发现是在 SingleEntryPlugin.js 中定义的，格式如下
 
 ```javascript
@@ -436,18 +438,494 @@ apply(compiler) {
     }
   );
 }
-static createDependency(entry, name) {
-  const dep = new SingleEntryDependency(entry);
-  dep.loc = { name };
-  return dep;
-}
 ```
 
 归纳分析  
-1. 
+1. 通过 compilation 钩子给 compilation 对象注入 dependencyFactories 对象
 2. make 内部是调用了 compilation.addEntry 方法
 
-> 由于使用的是基于 tapable 的各种回调方法，webpack 源码阅读很不方便，断点调试也不太容易找到，需要去查看调用栈，查看 compilation 的核心方法是哪些地方调用的
+分析 compilation addEntry 步骤
+
+```javascript
+// 1 addEntry 调用 addModuleTree entry 入口加入模块 chain 中
+addEntry(context, entry, name, callback) {
+  this.hooks.addEntry.call(entry, name);
+  this.addModuleTree(
+    {
+      context,
+      dependency: entry,
+      contextInfo: entryData.options.layer
+        ? { issuerLayer: entryData.options.layer }
+        : undefined
+    },
+    (err, module) => {
+      this.hooks.succeedEntry.call(entry, name, module);
+      return callback(null, module);
+    }
+  );
+}
+// 2 addModuleTree 参数 dependency 要求为对象，entry 会被封装为一个对象传入
+addModuleTree({ context, dependency, contextInfo }, callback) {
+  const Dep = /** @type {DepConstructor} */ (dependency.constructor);
+  // moduleFactory 为 NormalModuleFactory 实例，是在生成 compilation 对象之后，调用 compiler.hooks.compilation.call(compilation, params) 来添加的 compilation.dependencyFactories map 属性
+  const moduleFactory = this.dependencyFactories.get(Dep);
+  this.handleModuleCreation(
+    {
+      factory: moduleFactory,
+      dependencies: [dependency],
+      originModule: null,
+      contextInfo,
+      context
+    },
+    err => {
+      if (err && this.bail) {
+        callback(err);
+        this.buildQueue.stop();
+        this.rebuildQueue.stop();
+        this.processDependenciesQueue.stop();
+        this.factorizeQueue.stop();
+      } else {
+        callback();
+      }
+    }
+  );
+}
+// 3 handleModuleCreation
+handleModuleCreation( options, callback ) {
+  this.factorizeModule(options, () => {})
+}
+// 4 factorizeModule
+factorizeModule(options, callback) {
+  this.factorizeQueue.add(options, callback);
+}
+// 5 constructor 中定义执行 _factorizeModule
+this.factorizeQueue = new AsyncQueue({
+  name: "factorize",
+  parent: this.addModuleQueue,
+  processor: this._factorizeModule.bind(this)
+});
+// 6 _factorizeModule
+_factorizeModule(
+  options,
+  callback
+) {
+  factory.create(
+    {
+      contextInfo: {
+        issuer: originModule ? originModule.nameForCondition() : "",
+        issuerLayer: originModule ? originModule.layer : null,
+        compiler: this.compiler.name,
+        ...contextInfo
+      },
+      resolveOptions: originModule ? originModule.resolveOptions : undefined,
+      context: context
+        ? context
+        : originModule
+        ? originModule.context
+        : this.compiler.context,
+      dependencies: dependencies
+    },
+    (err, result) => {}
+  )
+}
+```
+
+分析 NormalModuleFactory.create 流程
+
+1. NormalModuleFactory hooks.factorize  
+```javascript
+const dependencyCache = new WeakMap();
+class NormalModuleFactory extends Tapable {
+  constructor(context, resolverFactory, options) {
+    this.parserCache = Object.create(null);
+		this.generatorCache = Object.create(null);
+		this.hooks.factorize.tapAsync(
+			{
+				name: "NormalModuleFactory",
+				stage: 100
+			},
+			(resolveData, callback) => {
+				this.hooks.resolve.callAsync(resolveData, (err, result) => {
+					this.hooks.afterResolve.callAsync(resolveData, (err, result) => {
+						const createData = resolveData.createData;
+						this.hooks.createModule.callAsync(
+							createData,
+							resolveData,
+							(err, createdModule) => {
+								if (!createdModule) {
+									createdModule = new NormalModule(createData);
+								}
+								createdModule = this.hooks.module.call(
+									createdModule,
+									createData,
+									resolveData
+								);
+								return callback(null, createdModule);
+							}
+						);
+					});
+				});
+			}
+		);
+```
+
+2. NormalModuleFactory hooks.resolver  
+```javascript
+// 核心解析逻辑 NormalModuleFactory.resolver callback 处理
+this.hooks.resolve.tapAsync(
+  {
+    name: "NormalModuleFactory",
+    stage: 100
+  },
+  (data, callback) => {
+    const {
+      contextInfo,
+      context,
+      dependencies,
+      request,
+      resolveOptions,
+      fileDependencies,
+      missingDependencies,
+      contextDependencies
+    } = data;
+    const dependencyType =
+      (dependencies.length > 0 && dependencies[0].category) || "";
+    const loaderResolver = this.getResolver("loader");
+
+    /** @type {ResourceData | undefined} */
+    let matchResourceData = undefined;
+    /** @type {string} */
+    let requestWithoutMatchResource = request;
+    const matchResourceMatch = MATCH_RESOURCE_REGEX.exec(request);
+    if (matchResourceMatch) {
+      let matchResource = matchResourceMatch[1];
+      if (matchResource.charCodeAt(0) === 46) {
+        // 46 === ".", 47 === "/"
+        const secondChar = matchResource.charCodeAt(1);
+        if (
+          secondChar === 47 ||
+          (secondChar === 46 && matchResource.charCodeAt(2) === 47)
+        ) {
+          // if matchResources startsWith ../ or ./
+          matchResource = join(this.fs, context, matchResource);
+        }
+      }
+      matchResourceData = {
+        resource: matchResource,
+        ...cacheParseResource(matchResource)
+      };
+      requestWithoutMatchResource = request.substr(
+        matchResourceMatch[0].length
+      );
+    }
+
+    const firstChar = requestWithoutMatchResource.charCodeAt(0);
+    const secondChar = requestWithoutMatchResource.charCodeAt(1);
+    const noPreAutoLoaders = firstChar === 45 && secondChar === 33; // startsWith "-!"
+    const noAutoLoaders = noPreAutoLoaders || firstChar === 33; // startsWith "!"
+    const noPrePostAutoLoaders = firstChar === 33 && secondChar === 33; // startsWith "!!";
+    const rawElements = requestWithoutMatchResource
+      .slice(
+        noPreAutoLoaders || noPrePostAutoLoaders ? 2 : noAutoLoaders ? 1 : 0
+      )
+      .split(/!+/);
+    const unresolvedResource = rawElements.pop();
+    const elements = rawElements.map(identToLoaderRequest);
+
+    const resolveContext = {
+      fileDependencies,
+      missingDependencies,
+      contextDependencies
+    };
+
+    /** @type {ResourceDataWithData} */
+    let resourceData;
+    /** @type {string | undefined} */
+    const scheme = getScheme(unresolvedResource);
+
+    let loaders;
+
+    const continueCallback = needCalls(2, err => {
+      if (err) return callback(err);
+
+      // translate option idents
+      try {
+        for (const item of loaders) {
+          if (typeof item.options === "string" && item.options[0] === "?") {
+            const ident = item.options.substr(1);
+            if (ident === "[[missing ident]]") {
+              throw new Error(
+                "No ident is provided by referenced loader. " +
+                  "When using a function for Rule.use in config you need to " +
+                  "provide an 'ident' property for referenced loader options."
+              );
+            }
+            item.options = this.ruleSet.references.get(ident);
+            if (item.options === undefined) {
+              throw new Error(
+                "Invalid ident is provided by referenced loader"
+              );
+            }
+            item.ident = ident;
+          }
+        }
+      } catch (e) {
+        return callback(e);
+      }
+
+      if (!resourceData) {
+        // ignored
+        return callback(null, dependencies[0].createIgnoredModule(context));
+      }
+
+      const userRequest =
+        (matchResourceData !== undefined
+          ? `${matchResourceData.resource}!=!`
+          : "") +
+        stringifyLoadersAndResource(loaders, resourceData.resource);
+
+      const resourceDataForRules = matchResourceData || resourceData;
+      const result = this.ruleSet.exec({
+        resource: resourceDataForRules.path,
+        realResource: resourceData.path,
+        resourceQuery: resourceDataForRules.query,
+        resourceFragment: resourceDataForRules.fragment,
+        mimetype: matchResourceData ? "" : resourceData.data.mimetype || "",
+        dependency: dependencyType,
+        descriptionData: matchResourceData
+          ? undefined
+          : resourceData.data.descriptionFileData,
+        issuer: contextInfo.issuer,
+        compiler: contextInfo.compiler,
+        issuerLayer: contextInfo.issuerLayer || ""
+      });
+      const settings = {};
+      const useLoadersPost = [];
+      const useLoaders = [];
+      const useLoadersPre = [];
+      for (const r of result) {
+        if (r.type === "use") {
+          if (!noAutoLoaders && !noPrePostAutoLoaders) {
+            useLoaders.push(r.value);
+          }
+        } else if (r.type === "use-post") {
+          if (!noPrePostAutoLoaders) {
+            useLoadersPost.push(r.value);
+          }
+        } else if (r.type === "use-pre") {
+          if (!noPreAutoLoaders && !noPrePostAutoLoaders) {
+            useLoadersPre.push(r.value);
+          }
+        } else if (
+          typeof r.value === "object" &&
+          r.value !== null &&
+          typeof settings[r.type] === "object" &&
+          settings[r.type] !== null
+        ) {
+          settings[r.type] = cachedCleverMerge(settings[r.type], r.value);
+        } else {
+          settings[r.type] = r.value;
+        }
+      }
+
+      let postLoaders, normalLoaders, preLoaders;
+
+      const continueCallback = needCalls(3, err => {
+        if (err) {
+          return callback(err);
+        }
+        const allLoaders = postLoaders;
+        if (matchResourceData === undefined) {
+          for (const loader of loaders) allLoaders.push(loader);
+          for (const loader of normalLoaders) allLoaders.push(loader);
+        } else {
+          for (const loader of normalLoaders) allLoaders.push(loader);
+          for (const loader of loaders) allLoaders.push(loader);
+        }
+        for (const loader of preLoaders) allLoaders.push(loader);
+        const type = settings.type;
+        const resolveOptions = settings.resolve;
+        const layer = settings.layer;
+        if (layer !== undefined && !layers) {
+          return callback(
+            new Error(
+              "'Rule.layer' is only allowed when 'experiments.layers' is enabled"
+            )
+          );
+        }
+        Object.assign(data.createData, {
+          layer:
+            layer === undefined ? contextInfo.issuerLayer || null : layer,
+          request: stringifyLoadersAndResource(
+            allLoaders,
+            resourceData.resource
+          ),
+          userRequest,
+          rawRequest: request,
+          loaders: allLoaders,
+          resource: resourceData.resource,
+          matchResource: matchResourceData
+            ? matchResourceData.resource
+            : undefined,
+          resourceResolveData: resourceData.data,
+          settings,
+          type,
+          parser: this.getParser(type, settings.parser),
+          parserOptions: settings.parser,
+          generator: this.getGenerator(type, settings.generator),
+          generatorOptions: settings.generator,
+          resolveOptions
+        });
+        callback();
+      });
+      this.resolveRequestArray(
+        contextInfo,
+        this.context,
+        useLoadersPost,
+        loaderResolver,
+        resolveContext,
+        (err, result) => {
+          postLoaders = result;
+          continueCallback(err);
+        }
+      );
+      this.resolveRequestArray(
+        contextInfo,
+        this.context,
+        useLoaders,
+        loaderResolver,
+        resolveContext,
+        (err, result) => {
+          normalLoaders = result;
+          continueCallback(err);
+        }
+      );
+      this.resolveRequestArray(
+        contextInfo,
+        this.context,
+        useLoadersPre,
+        loaderResolver,
+        resolveContext,
+        (err, result) => {
+          preLoaders = result;
+          continueCallback(err);
+        }
+      );
+    });
+
+    this.resolveRequestArray(
+      contextInfo,
+      context,
+      elements,
+      loaderResolver,
+      resolveContext,
+      (err, result) => {
+        if (err) return continueCallback(err);
+        loaders = result;
+        continueCallback();
+      }
+    );
+
+    // resource with scheme
+    if (scheme) {
+      resourceData = {
+        resource: unresolvedResource,
+        data: {},
+        path: undefined,
+        query: undefined,
+        fragment: undefined
+      };
+      this.hooks.resolveForScheme
+        .for(scheme)
+        .callAsync(resourceData, data, err => {
+          if (err) return continueCallback(err);
+          continueCallback();
+        });
+    }
+
+    // resource without scheme and without path
+    else if (/^($|\?)/.test(unresolvedResource)) {
+      resourceData = {
+        resource: unresolvedResource,
+        data: {},
+        ...cacheParseResource(unresolvedResource)
+      };
+      continueCallback();
+    }
+
+    // resource without scheme and with path
+    else {
+      const normalResolver = this.getResolver(
+        "normal",
+        dependencyType
+          ? cachedSetProperty(
+              resolveOptions || EMPTY_RESOLVE_OPTIONS,
+              "dependencyType",
+              dependencyType
+            )
+          : resolveOptions
+      );
+      this.resolveResource(
+        contextInfo,
+        context,
+        unresolvedResource,
+        normalResolver,
+        resolveContext,
+        (err, resolvedResource, resolvedResourceResolveData) => {
+          if (err) return continueCallback(err);
+          if (resolvedResource !== false) {
+            resourceData = {
+              resource: resolvedResource,
+              data: resolvedResourceResolveData,
+              ...cacheParseResource(resolvedResource)
+            };
+          }
+          continueCallback();
+        }
+      );
+    }
+  }
+);
+```  
+
+3. NormalModuleFactory. create  
+```javascript
+create(data, callback) {
+  const dependencies = data.dependencies;
+  const cacheEntry = dependencyCache.get(dependencies[0]);
+  if (cacheEntry) return callback(null, cacheEntry);
+  this.hooks.factorize.callAsync(resolveData, (err, module) => {
+    const factoryResult = {
+      module,
+      fileDependencies,
+      missingDependencies,
+      contextDependencies
+    };
+
+    if (
+      this.unsafeCache &&
+      resolveData.cacheable &&
+      module &&
+      module.restoreFromUnsafeCache &&
+      this.cachePredicate(module)
+    ) {
+      for (const d of dependencies) {
+        unsafeCacheDependencies.set(d, factoryResult);
+      }
+      if (!unsafeCacheData.has(module)) {
+        unsafeCacheData.set(module, module.getUnsafeCacheData());
+      }
+    }
+    callback(null, factoryResult);
+  });
+}
+```
+
+归纳总结  
+1. NormalModuleFactory 作用
+2. create 方法会去查找依赖模块是否有缓存，如果有则直接返回缓存，如果没有才调用 hooks.factory 进行解析
+3. hooks.resolver callback 主要是处理 loader 对资源文件的处理
+
 
 ```javascript
 
