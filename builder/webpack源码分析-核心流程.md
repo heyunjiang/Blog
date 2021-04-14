@@ -14,6 +14,8 @@ author: heyunjiang
 
 思考: 如果我面试别人，问哪些 webpack 问题，才算是有价值、有深度的呢？  
 1. 独立 npm 包构建时如果不把 elementui 打进去，或者说干脆不引用 elementui，子项目能成功使用这个 npm 包吗？为什么？
+2. webpack 构建的核心流程是什么？
+3. 你调试 webpack 时遇到了哪些问题？tapable 回调地狱，比如在 normalize entry 生成 module 对象流程，解决方案是查看调用栈及全局搜索关键字
 
 ## 1 疑问
 
@@ -241,12 +243,10 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 
 ## 3 关键源码分析
 
-> 基于 webpack 4，因为是从 vue-cli-service 入口的
-
 通过第二点的打包结果分析，已经大致能分析出 webpack 核心打包原理  
 1. 打包命令 `webpack`
 2. 准备工作：配置读取，环境变量准备，实例化 compiler 对象，加载 plugin
-3. 编译：根据入口文件，查找相关依赖，每个文件执行对应 loader；在遍历依赖文件的依赖，执行递归处理；不同生命周期执行 plugin
+3. 编译：根据入口文件，查找并生成相关依赖图，每个文件执行对应 loader；在遍历依赖文件的依赖，执行递归处理；整体流程会触发很多 hooks
 4. 打包：将依赖输出打包到同一个 chunk 中
 5. 输出结果文件，commonjs、umd 等
 
@@ -444,7 +444,7 @@ apply(compiler) {
 1. 通过 compilation 钩子给 compilation 对象注入 dependencyFactories 对象
 2. make 内部是调用了 compilation.addEntry 方法
 
-分析 compilation addEntry 步骤
+compilation addEntry
 
 ```javascript
 // 1 addEntry 调用 addModuleTree entry 入口加入模块 chain 中
@@ -478,15 +478,7 @@ addModuleTree({ context, dependency, contextInfo }, callback) {
       context
     },
     err => {
-      if (err && this.bail) {
-        callback(err);
-        this.buildQueue.stop();
-        this.rebuildQueue.stop();
-        this.processDependenciesQueue.stop();
-        this.factorizeQueue.stop();
-      } else {
-        callback();
-      }
+      callback();
     }
   );
 }
@@ -525,7 +517,10 @@ _factorizeModule(
         : this.compiler.context,
       dependencies: dependencies
     },
-    (err, result) => {}
+    (err, result) => {
+      const newModule = result.module;
+      callback(null, newModule);
+    }
   )
 }
 ```
@@ -922,10 +917,245 @@ create(data, callback) {
 ```
 
 归纳总结  
-1. NormalModuleFactory 作用
+1. NormalModuleFactory 作用是调用 loader 处理文件，生成文件对象 module
 2. create 方法会去查找依赖模块是否有缓存，如果有则直接返回缓存，如果没有才调用 hooks.factory 进行解析
-3. hooks.resolver callback 主要是处理 loader 对资源文件的处理
+3. hooks.resolver callback 主要是解析需要的相关 loader
 
+compilation addEntry 步骤:  
+1. addEntry：内部调用 addModuleTree，将 entry 作为 dependency 传入
+2. addModuleTree：将 dependency 加入 module tree 的入口
+3. handleModuleCreation：将 _factorizeModule 解析 module 加入异步队列，AsyncQueue 是如何执行？
+4. _factorizeModule：调用 factory.create 解析 module，找到需要的 loader，生成 module 对象
+5. 加入 moduleGraph 依赖图：执行 handleModuleCreation 回调，将 normalize 的 module 对象，加入 moduleGraph
+6. buildModule 开始模块处理
+
+### 3.4 构建模块
+
+handleModuleCreation 回调会处理 normalize 后的 module 对象 
+
+```javascript
+// 加入依赖图
+moduleGraph.setProfile(newModule, currentProfile);
+// addModule 是将 module 加入依赖模块缓存
+this.addModule(newModule, (err, module) => {
+  this.buildModule(module, err => {
+    this.processModuleDependencies(module, err => {
+        callback(null, module);
+      });
+    });
+  })
+})
+
+_buildModule(module, callback) {
+  module.needBuild(
+    {
+      fileSystemInfo: this.fileSystemInfo,
+      valueCacheVersions: this.valueCacheVersions
+    },
+    (err, needBuild) => {
+      this.hooks.buildModule.call(module);
+      this.builtModules.add(module);
+      module.build(
+        this.options,
+        this,
+        this.resolverFactory.get("normal", module.resolveOptions),
+        this.inputFileSystem,
+        err => {
+          this._modulesCache.store(module.identifier(), null, module, err => {
+            this.hooks.succeedModule.call(module);
+            return callback();
+          });
+        }
+      );
+    }
+  )
+}
+```
+
+关键步骤：  
+1. module.build
+2. processModuleDependencies
+
+我们通过 normalModuleFactory `new NormalModule` 来处理 dependency 生成 module 对象。  
+结果倒推：我们通过 module.build 之后生成 module 对象，并生成了内部相关依赖，那么它必然经过 loader 处理和 ast 分析。  
+来看看 module 对象定义
+
+```javascript
+class NormalModule extends Module {
+  build(options, compilation, resolver, fs, callback) {
+    this._source = null;
+    this._ast = null;
+    return this.doBuild(options, compilation, resolver, fs, err => {
+      // this.parser 就是 javascriptParser 对象，内部调用 require("acorn").Parser
+      let result = this.parser.parse(this._ast || this._source.source(), {
+        current: this,
+        module: this,
+        compilation: compilation,
+        options: options
+      });
+      handleParseResult(result);
+    })
+  }
+  doBuild(options, compilation, resolver, fs, callback) {
+		const loaderContext = this.createLoaderContext(
+			resolver,
+			options,
+			compilation,
+			fs
+    );
+    const processResult = (err, result) => {
+			const source = result[0];
+			const sourceMap = result.length >= 1 ? result[1] : null;
+      const extraInfo = result.length >= 2 ? result[2] : null;
+      
+			this._source = this.createSource(
+				options.context,
+				this.binary ? asBuffer(source) : asString(source),
+				sourceMap,
+				compilation.compiler.root
+			);
+			if (this._sourceSizes !== undefined) this._sourceSizes.clear();
+			this._ast =
+				typeof extraInfo === "object" &&
+				extraInfo !== null &&
+				extraInfo.webpackAST !== undefined
+					? extraInfo.webpackAST
+					: null;
+			return callback();
+		};
+    runLoaders(
+			{
+				resource: this.resource,
+				loaders: this.loaders,
+				context: loaderContext,
+				processResource: (loaderContext, resource, callback) => {
+					const scheme = getScheme(resource);
+					if (scheme) {
+						hooks.readResourceForScheme
+							.for(scheme)
+							.callAsync(resource, this, (err, result) => {
+								return callback(null, result);
+							});
+					} else {
+						loaderContext.addDependency(resource);
+						fs.readFile(resource, callback);
+					}
+				}
+			},
+			(err, result) => {
+				this.buildInfo.fileDependencies = new LazySet();
+				this.buildInfo.fileDependencies.addAll(result.fileDependencies);
+				this.buildInfo.contextDependencies = new LazySet();
+				this.buildInfo.contextDependencies.addAll(result.contextDependencies);
+				this.buildInfo.missingDependencies = new LazySet();
+				this.buildInfo.missingDependencies.addAll(result.missingDependencies);
+				if (
+					this.loaders.length > 0 &&
+					this.buildInfo.buildDependencies === undefined
+				) {
+					this.buildInfo.buildDependencies = new LazySet();
+				}
+				for (const loader of this.loaders) {
+					this.buildInfo.buildDependencies.add(loader.loader);
+				}
+				this.buildInfo.cacheable = result.cacheable;
+				processResult(err, result.result);
+			}
+    );
+  }
+}
+```
+
+build 结果分析  
+1. 使用 runLoaders 方法处理 loader，生成目标 _source 对象，包含了源代码字符串、sourcemap 等
+2. 使用 require("acorn").Parser 来解析生成 ast
+
+processModuleDependencies 根据 ast 分析之后生成的 buildInfo.fileDependencies
+```javascript
+_processModuleDependencies(module, callback) {
+  const dependencies = new Map();
+  const sortedDependencies = [];
+
+  let currentBlock = module;
+
+  let factoryCacheKey;
+  let factoryCacheValue;
+  let factoryCacheValue2;
+  let listCacheKey;
+  let listCacheValue;
+
+  const processDependency = dep => {
+    this.moduleGraph.setParents(dep, currentBlock, module);
+    const resourceIdent = dep.getResourceIdentifier();
+    if (resourceIdent) {
+      const category = dep.category;
+      const cacheKey =
+        category === esmDependencyCategory
+          ? resourceIdent
+          : `${category}${resourceIdent}`;
+      const constructor = dep.constructor;
+      let innerMap;
+      let factory;
+      if (factoryCacheKey === constructor) {
+        innerMap = factoryCacheValue;
+        if (listCacheKey === cacheKey) {
+          listCacheValue.push(dep);
+          return;
+        }
+      } else {
+        factory = this.dependencyFactories.get(dep.constructor);
+        innerMap = dependencies.get(factory);
+        if (innerMap === undefined) {
+          dependencies.set(factory, (innerMap = new Map()));
+        }
+        factoryCacheKey = constructor;
+        factoryCacheValue = innerMap;
+        factoryCacheValue2 = factory;
+      }
+      let list = innerMap.get(cacheKey);
+      if (list === undefined) {
+        innerMap.set(cacheKey, (list = []));
+        sortedDependencies.push({
+          factory: factoryCacheValue2,
+          dependencies: list,
+          originModule: module
+        });
+      }
+      list.push(dep);
+      listCacheKey = cacheKey;
+      listCacheValue = list;
+    }
+  };
+
+  const processDependenciesBlock = block => {
+    if (block.dependencies) {
+      currentBlock = block;
+      for (const dep of block.dependencies) processDependency(dep);
+    }
+    if (block.blocks) {
+      for (const b of block.blocks) processDependenciesBlock(b);
+    }
+  };
+
+  processDependenciesBlock(module);
+  this.processDependenciesQueue.increaseParallelism();
+
+  asyncLib.forEach(
+    sortedDependencies,
+    (item, callback) => {
+      this.handleModuleCreation(item, err => {
+        callback();
+      });
+    },
+    err => {
+      this.processDependenciesQueue.decreaseParallelism();
+      return callback(err);
+    }
+  );
+}
+```
+
+注意：2021-04-14 20:54:17 看到了 loader 处理文件，生成 ast 分析依赖，因时间问题，后续需要继续阅读源码，还有 loader 编写、执行、依赖图、输出 chunk 没有看
 
 ```javascript
 
