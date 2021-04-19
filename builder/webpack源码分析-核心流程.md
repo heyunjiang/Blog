@@ -29,6 +29,7 @@ author: heyunjiang
 8. webpack 的 runtime 和 manifest 是啥？
 9. ✔ loader 对文件的处理，是在依赖模块遍历过程中处理的，还是进入指定目录统一处理之后再遍历？是遍历到了再用 loader 去处理
 10. module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？
+11. compiler 和 compilation 的主要职责是什么？
 
 最近要解决的问题  
 1. ✔ 构建加速：公共组件构建速度慢，通过 dll 缓存优化
@@ -407,7 +408,7 @@ compiler 对象的主要作用
 1. 挂载 webpack 配置的 options 对象
 2. 执行 options 挂载的插件，为插件提供 compiler 对象
 3. 挂载 parentCompilation，啥作用？
-4. 实例化 compilation 对象，并开始编译
+4. 实例化 compilation 对象，并调用 compilation.addEntry 从 entry 入口开始编译
 
 > webpack 由于使用的是基于 tapable 的各种回调方法，源码阅读很不方便，断点调试也不太容易找到，需要去查看调用栈，查看 compilation 的核心方法是哪些地方调用的
 
@@ -928,6 +929,10 @@ compilation addEntry 步骤:
 4. _factorizeModule：调用 factory.create 解析 module，找到需要的 loader，生成 module 对象
 5. 加入 moduleGraph 依赖图：执行 handleModuleCreation 回调，将 normalize 的 module 对象，加入 moduleGraph
 6. buildModule 开始模块处理
+
+compilation 的主要作用  
+1. 生成依赖 moduleGraph：根据入口 entry 生成入口 module 对象，调用 module.build 生成模块资源文件，生成并解析 ast 生成相关依赖，递归解析构建
+2. 
 
 ### 3.4 构建模块
 

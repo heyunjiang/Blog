@@ -5,15 +5,13 @@ author: heyunjiang
 
 plugin 用以处理 loader 不能完成的事，在 webpack 打包的流程中，监听特定钩子实现自定义功能
 
-学习及开发方式：查看已有的 plugin 源码
-
 ## 原理
 
 webpack 要求如下  
 1. plugin 对象具有 `apply` 方法
 2. apply 方法唯一参数 `compiler` 对象
 3. compiler 钩子函数参数提供 `compilation` 对象和 `next` 方法
-4. 监听钩子方式：compiler.plugin('emit')
+4. 监听钩子方式：compiler.plugin('emit')，compiler.hooks.emit.tapAsync()
 5. compilation 对象提供如下属性：assets, chunks, chunk.files, fileTimestamps, modules, module.fileDependencies
 
 ## demo
