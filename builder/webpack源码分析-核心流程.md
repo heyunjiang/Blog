@@ -16,6 +16,7 @@ author: heyunjiang
 1. 独立 npm 包构建时如果不把 elementui 打进去，或者说干脆不引用 elementui，子项目能成功使用这个 npm 包吗？为什么？
 2. webpack 构建的核心流程是什么？
 3. 你调试 webpack 时遇到了哪些问题？tapable 回调地狱，比如在 normalize entry 生成 module 对象流程，解决方案是查看调用栈及全局搜索关键字
+4. loader 执行顺序，rules 和 use 执行都是倒序
 
 ## 1 疑问
 
@@ -28,7 +29,7 @@ author: heyunjiang
 7. chunkFileName 指定的长效缓存是啥？chunkFileName 只是用于 import 异步加载的 chunk 命名设置
 8. webpack 的 runtime 和 manifest 是啥？
 9. ✔ loader 对文件的处理，是在依赖模块遍历过程中处理的，还是进入指定目录统一处理之后再遍历？是遍历到了再用 loader 去处理
-10. module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？
+10. ✔ module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？倒序
 11. compiler 和 compilation 的主要职责是什么？
 
 最近要解决的问题  
@@ -246,12 +247,12 @@ var MCountCardvue_type_template_id_db1ec106_scoped_true_staticRenderFns = []
 
 通过第二点的打包结果分析，已经大致能分析出 webpack 核心打包原理  
 1. 打包命令 `webpack`
-2. 准备工作：配置读取，环境变量准备，实例化 compiler 对象，加载 plugin
+2. 准备工作：配置读取和处理，环境变量准备，实例化 compiler 对象，加载 plugin，调用 compiler.run 开启构建入口
 3. 编译：根据入口文件，查找并生成相关依赖图，每个文件执行对应 loader；在遍历依赖文件的依赖，执行递归处理；整体流程会触发很多 hooks
 4. 打包：将依赖输出打包到同一个 chunk 中
 5. 输出结果文件，commonjs、umd 等
 
-### 3.1 入口执行 webpack 命令
+### 3.1 命令 - 执行 webpack 命令
 
 通过 webpack package.json bin 入口，可以看到 webpack 是通过调用 webpack-cli 去执行 `webpack` 命令；webpack-cli 定义了 WebpackCLI class，实例化然后调用 run 方法。  
 run 方法内部，定义了系列命令，包含 build, help, version 等。使用 `commander` 解析用户命令行交互，然后执行 `loadCommandByName` 方法。
@@ -287,10 +288,9 @@ const loadCommandByName = async (commandName, allowToInstall = false) => {
 2. makeCommand 检查依赖
 3. buildCommand 生成 compiler 对象，从入口 entry 解析文件
 
-### 3.2 实例化 compiler 对象
+### 3.2 准备 - webpack 实例化 compiler、compilation 对象
 
-在 buildCommand 内部主要是实例化 compiler 对象 `this.createCompiler(options, callback)`
-
+一、在 buildCommand 内部主要是调用 webpack 执行入口  
 ```javascript
 // createCompiler
 this.webpack = require(process.env.WEBPACK_PACKAGE || 'webpack');
@@ -300,6 +300,7 @@ compiler = this.webpack(config.options, callback)
 webpack-cli 内部也是调用的 webpack 来实例化 compiler 对象。(webpack-cli 感觉是一个命令行交互工具，读取配置，传给 webpack 来使用)  
 webpack 入口文件 lib/index.js 输出了 webpack 函数，内部调用 webpack.js，来看看 webpack.js 执行哪些操作
 
+二、webpack.js 初始化
 ```javascript
 // webpack.js
 module.exports = (options, callback) => {
@@ -331,6 +332,13 @@ module.exports = (options, callback) => {
   }
 }
 ```
+
+归纳分析 `webpack 入口`  
+1. 校验 options 参数
+2. 调用 createCompiler 生成 compiler 对象
+3. compiler.run() 开始整个构建流程
+
+三、来看看 createCompiler 是如何生成 compiler 对象
 ```javascript
 // createCompiler
 const createCompiler = rawOptions => {
@@ -356,19 +364,23 @@ const createCompiler = rawOptions => {
 };
 ```
 
-归纳分析  
-1. 生成 compiler 对象：通过调用 createCompiler 函数，调用 new Compiler，生成 compiler 实例对象
-2. 生成配置对象 options：getNormalizedWebpackOptions
+归纳分析 `createCompiler` 函数执行  
+1. 生成 webpack 配置对象 options：getNormalizedWebpackOptions，并合并默认的 webpack 配置对象
+2. 调用 new Compiler，生成 compiler 实例对象，并把 options 挂载到 compiler 对象上
 3. 加载 plugin：将 plugin 加载到 compiler 对象上
-4. 调用钩子函数：环境准备、初始化结束
-5. compiler.run()：开始编译，执行 compliler.compile 方法
+4. 根据应用 options 配置，内部加载各种插件，后续的很多 compiler.hooks 都是在这个阶段定义的
+5. 调用钩子函数：环境准备、初始化结束
 
+四、compiler.run 内部调用 compile 方法生成 `compilation` 对象  
 ```javascript
 // Compiler
 class Compiler extends Tapable {
   constructor(context) {
 		this.hooks = {...};
-	}
+  }
+  run(callback) {
+    this.compile(onCompiled)
+  }
   compile(callback) {
 		const params = this.newCompilationParams();
 		this.hooks.beforeCompile.callAsync(params, err => {
@@ -402,21 +414,18 @@ class Compiler extends Tapable {
 }
 ```
 
-归纳分析: 在调用 compile 方法时，按顺序触发了4种钩子：beforeCompile, compile, make, afterCompile
-
-compiler 对象的主要作用  
-1. 挂载 webpack 配置的 options 对象
-2. 执行 options 挂载的插件，为插件提供 compiler 对象
-3. 挂载 parentCompilation，啥作用？
-4. 实例化 compilation 对象，并调用 compilation.addEntry 从 entry 入口开始编译
+归纳分析:   
+1. 在调用 compile 方法时，按顺序触发了4种钩子：beforeCompile, compile, make, afterCompile
+2. 生成 compilation 对象 new Compilation(this)
+3. 调用 make 钩子，开启构建入口
 
 > webpack 由于使用的是基于 tapable 的各种回调方法，源码阅读很不方便，断点调试也不太容易找到，需要去查看调用栈，查看 compilation 的核心方法是哪些地方调用的
 
-### 3.3 实例化 compilation 对象
+### 3.3 入口 - 根据 entry 开始构建
 
-通过 compiler 对象的分析，发现 compiler 会实例化 compilation 对象，并调用 `make 钩子`。  
-make 钩子做了什么呢？又是在哪里定义的？通过断点 + 调用栈查看，发现是在 SingleEntryPlugin.js 中定义的，格式如下
+compiler.compile 会实例化 compilation 对象，并调用 `make 钩子`。  
 
+一、make 钩子定义：通过断点 + 调用栈 + 全局搜索查看，发现是在 SingleEntryPlugin.js 中定义的，格式如下  
 ```javascript
 apply(compiler) {
   compiler.hooks.compilation.tap(
@@ -445,8 +454,7 @@ apply(compiler) {
 1. 通过 compilation 钩子给 compilation 对象注入 dependencyFactories 对象
 2. make 内部是调用了 compilation.addEntry 方法
 
-compilation addEntry
-
+二、compilation addEntry  
 ```javascript
 // 1 addEntry 调用 addModuleTree entry 入口加入模块 chain 中
 addEntry(context, entry, name, callback) {
@@ -526,8 +534,7 @@ _factorizeModule(
 }
 ```
 
-分析 NormalModuleFactory.create 流程
-
+三、module 初始化：分析 NormalModuleFactory.create 流程  
 1. NormalModuleFactory hooks.factorize  
 ```javascript
 const dependencyCache = new WeakMap();
@@ -918,7 +925,7 @@ create(data, callback) {
 ```
 
 归纳总结  
-1. NormalModuleFactory 作用是调用 loader 处理文件，生成文件对象 module
+1. NormalModuleFactory 作用是生成文件对象 module，根据配置找到 module 需要的 loaders
 2. create 方法会去查找依赖模块是否有缓存，如果有则直接返回缓存，如果没有才调用 hooks.factory 进行解析
 3. hooks.resolver callback 主要是解析需要的相关 loader
 
@@ -930,14 +937,9 @@ compilation addEntry 步骤:
 5. 加入 moduleGraph 依赖图：执行 handleModuleCreation 回调，将 normalize 的 module 对象，加入 moduleGraph
 6. buildModule 开始模块处理
 
-compilation 的主要作用  
-1. 生成依赖 moduleGraph：根据入口 entry 生成入口 module 对象，调用 module.build 生成模块资源文件，生成并解析 ast 生成相关依赖，递归解析构建
-2. 
+### 3.4 构建 - module.build
 
-### 3.4 构建模块
-
-handleModuleCreation 回调会处理 normalize 后的 module 对象 
-
+handleModuleCreation 回调：构建初始化后的 module 对象
 ```javascript
 // 加入依赖图
 moduleGraph.setProfile(newModule, currentProfile);
@@ -978,20 +980,49 @@ _buildModule(module, callback) {
 ```
 
 关键步骤：  
-1. module.build
-2. processModuleDependencies
+1. moduleGraph.setProfile(newModule, currentProfile);
+2. module.build
+3. processModuleDependencies
 
-我们通过 normalModuleFactory `new NormalModule` 来处理 dependency 生成 module 对象。  
-结果倒推：我们通过 module.build 之后生成 module 对象，并生成了内部相关依赖，那么它必然经过 loader 处理和 ast 分析。  
-来看看 module 对象定义
-
+我们通过 normalModuleFactory `new NormalModule` 生成 module 对象。  
+结果倒推：我们通过 module.build 之后构建 module 对象，并生成了 source 文件和内部相关依赖，那么它必然经过 loader 处理和 ast 分析。  
+来看看 module 对象定义的 build 方法：  
 ```javascript
 class NormalModule extends Module {
+  // 1 build
   build(options, compilation, resolver, fs, callback) {
     this._source = null;
     this._ast = null;
     return this.doBuild(options, compilation, resolver, fs, err => {
-      // this.parser 就是 javascriptParser 对象，内部调用 require("acorn").Parser
+      // 1.2 initBuildHash
+      const handleParseResult = result => {
+				this._initBuildHash(compilation);
+				this._lastSuccessfulBuildMeta = this.buildMeta;
+				return handleBuildDone();
+			};
+      // 1.3 生成快照
+			const handleBuildDone = () => {
+				const snapshotOptions = compilation.options.snapshot.module;
+				compilation.fileSystemInfo.createSnapshot(
+					startTime,
+					this.buildInfo.fileDependencies,
+					this.buildInfo.contextDependencies,
+					this.buildInfo.missingDependencies,
+					snapshotOptions,
+					(err, snapshot) => {
+						if (err) {
+							this.markModuleAsErrored(err);
+							return;
+						}
+						this.buildInfo.fileDependencies = undefined;
+						this.buildInfo.contextDependencies = undefined;
+						this.buildInfo.missingDependencies = undefined;
+						this.buildInfo.snapshot = snapshot;
+						return callback();
+					}
+				);
+			};
+      // 1.1 this.parser 就是 javascriptParser 对象，内部调用 require("acorn").Parser
       let result = this.parser.parse(this._ast || this._source.source(), {
         current: this,
         module: this,
@@ -1001,6 +1032,7 @@ class NormalModule extends Module {
       handleParseResult(result);
     })
   }
+  // 2 doBuild
   doBuild(options, compilation, resolver, fs, callback) {
 		const loaderContext = this.createLoaderContext(
 			resolver,
@@ -1071,11 +1103,29 @@ class NormalModule extends Module {
 }
 ```
 
-build 结果分析  
-1. 使用 runLoaders 方法处理 loader，生成目标 _source 对象，包含了源代码字符串、sourcemap 等
-2. 使用 require("acorn").Parser 来解析生成 ast
+module.build 结果分析  
+1. 生成 `_source` 对象：使用 runLoaders 方法处理 loader，生成目标 _source 对象，包含了源代码字符串、sourcemap 等
+2. 生成 ast：使用 require("acorn").Parser 来解析生成 ast 
+3. 生成 `module.dependencies` 对象：parser 内部解析 ast 并生成依赖添加到 module.dependencies
 
-processModuleDependencies 根据 ast 分析之后生成的 buildInfo.fileDependencies
+### 3.5 递归依赖 - module.dependencies
+
+在 module.build 生成 _source 和 dependencies 对象之后，就回到 compilation._buildModule 回调中
+
+一、加入缓存
+```javascript
+// _buildModule callback
+this._modulesCache.store(module.identifier(), null, module, err => {
+  this.hooks.succeedModule.call(module);
+  return callback();
+});
+// this.handleModuleCreation.buildModule callback
+this.processModuleDependencies(module, err => {
+  callback(null, module);
+});
+```
+
+二、解析依赖
 ```javascript
 _processModuleDependencies(module, callback) {
   const dependencies = new Map();
@@ -1160,7 +1210,37 @@ _processModuleDependencies(module, callback) {
 }
 ```
 
-注意：2021-04-14 20:54:17 看到了 loader 处理文件，生成 ast 分析依赖，因时间问题，后续需要继续阅读源码，还有 loader 编写、执行、依赖图、输出 chunk 没有看
+_processModuleDependencies 归纳分析  
+1. 解析 module.dependencies，生成解析好的 sortedDependencies 依赖数组，内部对 module.dependencies 项做资源 getResourceIdentifier 唯一标识
+2. 遍历 sortedDependencies 数组调用 handleModuleCreation，再次走一遍 3.3 入口，包括 factory 解析初始化 module，在调用 module.build 构建模块，行成递归
+
+递归解析完所有依赖，每个文件对应一个 module 对象，回到 compiler.compile hooks.make.callback
+
+```javascript
+// compilation._addEntryItem
+this.hooks.succeedEntry.call(entry, options, module);
+// compiler.compile
+this.hooks.make.callAsync(compilation, err => {
+  this.hooks.finishMake.callAsync(compilation, err => {
+    process.nextTick(() => {
+      compilation.finish(err => {
+        compilation.seal(err => {
+          this.hooks.afterCompile.callAsync(compilation, err => {
+            return callback(null, compilation);
+          });
+        });
+      });
+    });
+  });
+});
+```
+
+至此，所有文件均转换成了对应的 module 对象，保存在 `compilation.modules` Set 对象中，module 关系保存在 `compilation.moduleGraph` 关系中。  
+所有资源暂时还保存在内存中。
+
+### 3.6 生成 chunk
+
+在全部生成 module 对象之后，回到 `compilation.seal()`
 
 ```javascript
 
@@ -1200,6 +1280,10 @@ _processModuleDependencies(module, callback) {
 6. `eval-source-map`：映射到源代码；初步构建速度慢，更新构建快，应用于 `开发环境` 的最佳实践
 7. `cheap-eval-source-map`：类似于 eval-source-map，但是仅映射到行数，并且显示的是转换后的代码；构建速度一版，应用于 `开发环境`
 8. 其他不适用于生产或开发环境，应用于第三方工具
+
+输出结果  
+1. 压缩文件，内部包含了 `//# sourceMappingURL=` 格式，指定了对应 sourcemap 文件地址
+2. sourcemap 文件，包含了压缩文件与源代码之间的映射关系
 
 ## 6 缓存原理
 
