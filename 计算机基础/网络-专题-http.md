@@ -12,7 +12,10 @@
 [6 SPDY](#6-SPDY)  
 [7 http2相较与SPDY的区别](#7-http2相较与SPDY的区别)  
 [8 有了http2，不用再做哪些优化](#8-有了http2，不用再做哪些优化)  
-[9 ssl 握手](#9-ssl-握手)
+[9 ssl 握手](#9-ssl-握手)  
+[10 tcp首部、ip首部有啥作用](#10-tcp首部、ip首部有啥作用)  
+[11 慢启动](#11-慢启动)  
+[12 http 缓存](#12-http-缓存)
 
 ## 1 基础知识
 
@@ -21,11 +24,6 @@
 3. https是运行在ssl/tls上的安全协议
 4. spdy基于https，支持多路复用与header压缩，提高效率，拥有https的优点
 5. http2是spdy的升级版本，支持2进制解析，拥有spdy的优点
-
-http 协议内容
-
-> 问：为什么要详细学习协议？  
-> 答：在做nodejs 服务中间层的时候，需要控制 request 及 response 对象，需要详细了解 http；网络性能优化需要了解
 
 http 请求模型
 
@@ -57,9 +55,9 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 1. Host: 客户端域名
 2. Connecttion：连接方式，keep-alive 表示长连接
 3. Accept：希望接收到数据格式
-4. Origin：
+4. Origin：源域
 5. User-agent：客户端代理信息
-6. Content-Type：post 数据格式
+6. Content-Type：请求数据体数据格式
 7. Cookie
 8. cache-control：缓存时间控制，单位 s
 
@@ -71,8 +69,10 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 4. Connection：连接方式， keep-alive 表示长连接
 5. Last-modify：上次更新日期，通常用于静态资源文件
 6. Etag
-7. Cache-control：缓存时间控制，单位 s
+7. Cache-control：缓存时间控制，单位 s。no-cache 表示协商缓存，携带 Etag 发起验证请求；no-store 表示没有缓存；max-age 设置有效期；public 中间人可以缓存
 8. Set-cookie
+
+[cache 原理](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching)
 
 ## 2 http 基本优化要点
 
@@ -93,7 +93,7 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 
 ### 2.4 tcp3次握手
 
-每次传输数据时，都需要重新建立连接，增加了大量的延迟时间
+每次传输数据时，都需要重新建立连接，增加了大量的延迟时间。为什么需要三次握手？
 
 > 怎么解决？  
 > 保持长链接
@@ -194,7 +194,7 @@ http2 相较于 http1 只是在 http1 的基础上扩展了一些功能，还是
 1. tcp 首部包含了源端口、目的端口、序号、确认号、窗口值等
 2. ip 首部包含了版本号、首部长度、数据总长度、ip分片标示号、可经过的路由器数(ttl)、源 ip、目的 ip
 
-## 慢启动等
+## 11 慢启动
 
 关键词： `超时重传`、`tcp窗口`、`接收承受最大窗口`、`发送拥塞窗口`
 
@@ -208,3 +208,37 @@ http2 相较于 http1 只是在 http1 的基础上扩展了一些功能，还是
 8. 拥塞窗口又会线性增加，直至下一次出现三次重复确认应答或超时。
 
 [慢启动及原理传输](http://blog.csdn.net/book_zhouqingjun216/article/details/51812786)
+
+## 12 http 缓存
+
+time: 2021-04-21 14:33:48  
+参考文章 [mdn http cache](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching)
+
+缓存分类  
+1. 私有缓存：即用户浏览器缓存，通过 http get 下载的资源，提供给用户浏览器前进后退、离线查看、减少多余请求等
+2. 共享缓存：即 isp 或公司环境代理，保存在中间服务器上的缓存资源
+
+http cache-control 控制缓存  
+1. no-store：不要缓存
+2. no-cache：协商缓存，每次会发请求到服务器(发的什么请求，options 吗？)，携带缓存时间验证参数，未过期则返回 304，使用本地缓存
+3. public：共享缓存，可以被中间人缓存
+4. private：只能被浏览器缓存
+5. max-age=31536000：强缓存，距离请求开始的缓存时间秒数
+6. must-revalidate：缓存校验，每次使用时，都需要去校验是否有效
+
+缓存过期：我们设置的 max-age 时间到期后，缓存就属于过期缓存。过期处理：  
+1. 浏览器命中缓存，会发起请求携带 `if-none-match` 或 `if-modified-since` +  `Etag` (如果请求资源 response 返回了 Etag，后续 request 验证缓存过期会带上) 到服务器监测资源是否有更新
+2. 没有更新服务器返回 304
+3. 如果服务器验证 `if-none-match` 或 `if-modified-since` 已过期，则会返回最新资源，客户端再次根据 cache-control 来更新缓存，把之前旧的缓存删除
+
+除了 cache-control，也有通过 Expires, Date, Last-Modified 来计算缓存时间
+1. 如果没有 max-age，但是有 Expires + Date，则 Expires > Date 则表示缓存有效
+2. 如果没有 max-age + Expires，但是有 Last-Modified，则缓存计算规则为 (Date - Last-Modified) / 10
+
+问题：如果还在缓存有效期内，如何强更新呢？  
+答：设置 must-revalidate；点击浏览器刷新按钮；浏览器偏好设置里设置Advanced->Cache为强制验证缓存；vary 校验
+
+vary 校验缓存使用规则：请求服务器最新资源时，服务器除了返回 cache-control 外，还返回了 `vary: Etag` 字段；在通过 cache-control 添加了资源缓存后，后续资源请求需要携带缓存资源 vary 要求的 http header 字段及值，匹配上才可以使用缓存  
+思考：我们通过 vary 设置了缓存之后，后续可以通过提前发起请求获取 vary 要求的字段值，服务器控制使用需要命中缓存
+
+

@@ -12,17 +12,23 @@ author: heyunjiang
 6. 缓存原理
 7. 懒加载原理
 
-思考: 如果我面试别人，问哪些 webpack 问题，才算是有价值、有深度的呢？  
+思考1: 如果我面试别人，问哪些 webpack 问题，才算是有价值、有深度的呢？  
 1. 独立 npm 包构建时如果不把 elementui 打进去，或者说干脆不引用 elementui，子项目能成功使用这个 npm 包吗？为什么？
 2. webpack 构建的核心流程是什么？
 3. 你调试 webpack 时遇到了哪些问题？tapable 回调地狱，比如在 normalize entry 生成 module 对象流程，解决方案是查看调用栈及全局搜索关键字
 4. loader 执行顺序，rules 和 use 执行都是倒序
 
+思考2：本期缕了一下 webpack 构建的核心流程，心里有以下几个问题  
+1. 本期缕清楚了，隔半年之后还能说清楚吗？多面试几次回答一下，再来补充遗漏点
+2. webpack 整体架构需要再整理一份
+3. webpack 构建的亮点是什么？有哪些待优化的点？
+4. webpack5 模块联邦特性了解。其他项目暴露 chunk，当前项目主动拉取
+
 ## 1 疑问
 
 1. ✔ 配置的 extenal 没有包含在结果 bundle 中，那构建结果是什么样子？使用当前包的项目是怎么使用相关组件的呢？
 2. ✔ 打包结果代码是如何组织运行起来的？代码拆分之后怎么合理运行，也就是 webpack 打包结果是如何有效运行？
-3. 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp。异步组件会打包成独立的 chunk，可以通过 chunkFileName 来规范命名
+3. ✔ 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp。异步组件会打包成独立的 chunk，可以通过 chunkFileName 来规范命名
 4. 热更新原理是啥？
 5. sourcemap 原理
 6. output 中 path 和 publicPath 有什么区别？libary 又是啥意思？
@@ -35,8 +41,6 @@ author: heyunjiang
 最近要解决的问题  
 1. ✔ 构建加速：公共组件构建速度慢，通过 dll 缓存优化
 2. 构建规范化
-
-> webpack 功能不多，快速搞定源码阅读，给定2周时间，3.31 之前完成
 
 ## 2 打包结果分析
 
