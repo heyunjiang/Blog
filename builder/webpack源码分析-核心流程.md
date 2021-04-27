@@ -24,6 +24,8 @@ author: heyunjiang
 3. webpack 构建的亮点是什么？有哪些待优化的点？
 4. webpack5 模块联邦特性了解。其他项目暴露 chunk，当前项目主动拉取
 
+思考3: 本期把 webpack 流程理清楚了，后续的深入学习，还是建立在实际编写 loader, plugin，以及深度使用 webpack 后再来总结
+
 ## 1 疑问
 
 1. ✔ 配置的 extenal 没有包含在结果 bundle 中，那构建结果是什么样子？使用当前包的项目是怎么使用相关组件的呢？
@@ -1244,7 +1246,18 @@ this.hooks.make.callAsync(compilation, err => {
 
 ### 3.6 生成 chunk
 
-在全部生成 module 对象之后，回到 `compilation.seal()`
+在全部生成 module 对象之后，此刻 compilation 对象数据如下  
+1. modules: 已生成
+2. modulesGraph: 已生成
+3. chunks: Set[]
+4. chunkGraphs: []
+5. assets: {}
+6. assetsInfo: Map {}
+
+现在回到 `compilation.seal()`，看看接下来处理 module 流程  
+```javascript
+
+```
 
 ```javascript
 
