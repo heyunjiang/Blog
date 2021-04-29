@@ -4,13 +4,13 @@ time: 2019.6.5
 update: 2020.3.16  
 author: heyunjiang
 
-这里穿插着使用文档和 vue-router 源码阅读，都是带着问题读源码，读源码也要讲究方法，不是为了读源码而读源码
-
 ## 1 问题
 
 1. 动态路由是什么？和静态路由的优劣比较如何？
 2. 路由懒加载怎样才是标准写法？
 3. 路由守卫是什么？分哪几种类型？什么时候才起作用？
+4. 路由插件提供了哪些能力？
+5. 路由如何动态注册，原理是啥？
 
 ## 2 路由基本知识
 
@@ -24,7 +24,7 @@ author: heyunjiang
 6. 路由组合：`<router-view name="a">`，除了嵌套，也可以组合成兄弟元素。需要在配置中 component -> components
 7. 路由导航组件：`<router-link>` 总共就这2个全局组件
 8. 路由是作为 vue 插件实现
-9. 路由内部是通过监听浏览器历史状态的变化来更新路由，hash 和 history 模式，采用 popState 和 hashChange 事件支持
+9. 路由内部是通过监听浏览器历史状态的变化来更新路由，hash、history、abstract 模式，采用 popState 和 hashChange 事件支持
 
 ## 3 路由配置
 
@@ -86,13 +86,16 @@ routes: [
 2. 路由守卫：beforeEnter
 3. 组件内部守卫：beforeRouteEnter, beforeRouteUpdate, beforeRouteLeave
 
-> 在使用路由守卫时，通常要使用 next 方法，如果禁止跳转，则使用 next(false)
+next 方法  
+1. 禁止跳转使用 next(false)
+2. 继续 next()
+3. 修改路由 next({to: xxx})
 
-路由守卫只在路由组件内起效
+路由守卫只在路由组件内起效，在非路由组件上不起效
 
 ## 6 动态增加路由
 
-`router.addRoutes(routes)`
+`router.addRoute(parentName: string, route: RouteConfig)`
 
 ## 7 路由懒加载
 
@@ -129,6 +132,55 @@ const router = new VueRouter({
 2. url 路径展示不同
 3. pushState 实现方式差异：hash 内部采用 `window.location['replace', 'assign]` 来更新历史信息，history 采用 html5 的 `pushState | replaceState` 来直接实现
 4. history 模式可以不更新 URL 来改变浏览器历史记录信息，而 hash 不能
+
+## 10 关键源码解读
+
+### 10.1 this.$router 及全局组件 router-view、router-link
+
+vue-router 作为 vue 插件
+
+```javascript
+export function install (Vue) {
+  const registerInstance = (vm, callVal) => {
+    let i = vm.$options._parentVnode
+    if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {
+      i(vm, callVal)
+    }
+  }
+
+  Vue.mixin({
+    beforeCreate () {
+      if (isDef(this.$options.router)) {
+        this._routerRoot = this
+        this._router = this.$options.router
+        this._router.init(this)
+        Vue.util.defineReactive(this, '_route', this._router.history.current)
+      } else {
+        this._routerRoot = (this.$parent && this.$parent._routerRoot) || this
+      }
+      registerInstance(this, this)
+    },
+    destroyed () {
+      registerInstance(this)
+    }
+  })
+
+  Object.defineProperty(Vue.prototype, '$router', {
+    get () { return this._routerRoot._router }
+  })
+
+  Object.defineProperty(Vue.prototype, '$route', {
+    get () { return this._routerRoot._route }
+  })
+
+  Vue.component('RouterView', View)
+  Vue.component('RouterLink', Link)
+}
+```
+
+源码解析  
+1. 根组件通过读取 $options.router 绑定 this._router 属性，子组件通过访问 this.$parent._routerRoot，同 vuex 一样，大家指向的都是同一个 $options.router 对象
+2. vue-router 提供了2个全局组件：RouterView, RouterLink
 
 ## 参考文章
 
