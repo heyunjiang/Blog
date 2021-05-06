@@ -93,8 +93,8 @@ export default {
 3. `render 函数`，我们也可以直接写 render 函数，内部返回 createElement('div', [createElement('span', 'hello'), this.$slots.default]) 来生成内容
 4. `jsx`: 是因为有一个 babel 插件 @vue/babel-preset-jsx，在 babel 转换的时候，将 jsx 转换成普通 render 的 createElement 方法
 
+createElement 及函数参数  
 ```javascript
-// createElement 函数参数
 createElement({
   // string | object | function，必填
   'div',
