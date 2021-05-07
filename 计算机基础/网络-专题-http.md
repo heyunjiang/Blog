@@ -218,15 +218,30 @@ time: 2021-04-21 14:33:48
 1. 私有缓存：即用户浏览器缓存，通过 http get 下载的资源，提供给用户浏览器前进后退、离线查看、减少多余请求等
 2. 共享缓存：即 isp 或公司环境代理，保存在中间服务器上的缓存资源
 
-http cache-control 控制缓存  
+### 12.1 http cache-control 控制缓存
+
 1. no-store：不要缓存
 2. no-cache：协商缓存，每次会发请求到服务器(发的什么请求，options 吗？)，携带缓存时间验证参数，未过期则返回 304，使用本地缓存
 3. public：共享缓存，可以被中间人缓存
 4. private：只能被浏览器缓存
-5. max-age=31536000：强缓存，距离请求开始的缓存时间秒数
+5. max-age=31536000：强缓存，距离请求开始的缓存时间秒数，存储在 memory or disk
 6. must-revalidate：缓存校验，每次使用时，都需要去校验是否有效
 
-缓存过期：我们设置的 max-age 时间到期后，缓存就属于过期缓存。过期处理：  
+cache-control: no-cache 位于  
+1. response: 表示资源走协商缓存
+2. request: 表示资源不会默认走本地缓存，都会向服务器发起请求(这个不对，因为在有的 js 请求也带上了 no-cache，但是还是从 memory 中读的数据)。如果服务器强行返回 304，则还是会取缓存？待验证
+
+chrome 勾选 disable-cache 就会在 http request header 加上 `cache-control: no-cache` 字段，并且强行向服务器发起请求，不会主动走缓存(说明勾选 disable-cache 不是只修改了 http request header)
+
+问题：  
+1. 304 是从哪里读取的缓存？memory or disk?
+2. 存储在 memory or disk，是有何根据？
+
+[从浏览器的Disable cache谈起](https://juejin.cn/post/6844904145057480718)
+
+### 12.2 缓存过期
+
+我们设置的 max-age 时间到期后，缓存就属于过期缓存。过期处理：  
 1. 浏览器命中缓存，会发起请求携带 `if-none-match` 或 `if-modified-since` +  `Etag` (如果请求资源 response 返回了 Etag，后续 request 验证缓存过期会带上) 到服务器监测资源是否有更新
 2. 没有更新服务器返回 304
 3. 如果服务器验证 `if-none-match` 或 `if-modified-since` 已过期，则会返回最新资源，客户端再次根据 cache-control 来更新缓存，把之前旧的缓存删除
