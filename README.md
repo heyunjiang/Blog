@@ -151,6 +151,7 @@
   - zRender 源码分析
 - 性能优化
   - [系统性能衡量及优化](性能优化/系统性能衡量及优化.md) 系统性能如何衡量、如何优化、chrome-dev-tool
+  - [web vitals](性能优化/web-vitals.md) chrome 90 版本推出 web vitals 可视化衡量
 - pwa
   - ✔ [webWorkers](PWA/webWorkers.md) 亮点技能 - pwa
   - ✔ [pwa构建](PWA/pwa构建.md) -- [体验](https://heyunjiang.github.io/)

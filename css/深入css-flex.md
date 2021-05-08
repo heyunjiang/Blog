@@ -91,6 +91,8 @@ author: heyunjiang
 既然有 `align-self` 控制单个项目在垂直交叉轴上对齐方式，那有控制单个项目在水平主轴上对齐方式的吗？  
 答：设置 flex-direction: column 即可控制元素水平方向的布局了
 
+1. space-around 是如何控制左右空白距离的
+
 ## 参考文章
 
 [grid 布局](https://mp.weixin.qq.com/s/1Xm69dW-A4wgcknhohzLoA)  
