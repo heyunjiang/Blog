@@ -64,12 +64,15 @@ export default {
 
 此刻定义的模板，会替代子组件本身的模板(未验证)，并且当前模板作用域是子组件的作用域，同 slot 不同，slot 是父组件作用域
 
-另外，也可以使用 script + text/x-template 来替代 `<template>` 的写法
+另外，也可以使用 script + text/x-template 来替代 `<template>` 的写法，别名：inDomTemplate
 
-```html
+```javascript
 <script type="text/x-template" id="hello-world-template">
   <p>Hello hello hello</p>
 </script>
+export default {
+  template: '#hello-world-template'
+}
 ```
 
 ## 5 函数式组件与 v-once
