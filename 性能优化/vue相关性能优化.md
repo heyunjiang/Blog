@@ -24,6 +24,10 @@ author: heyunjiang
 
 ### 3.2 keep-alive 优化
 
+[vue深入 - keepAlive组件原理](vue/vue源码解读/源码解读-keepAlive.md) 源码解读-keepAlive，来看看它的缓存实现原理
+
+通过 include, exclude, max 合理控制需要缓存的组件
+
 ### 3.3 动态组件和异步组件
 
 ### 3.4 善用 transition 动画组件
