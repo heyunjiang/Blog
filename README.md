@@ -135,7 +135,8 @@
       - ✔ [vue深入 - vue代码架构组织分析](vue/vue源码解读/vue代码架构组织分析.md) vue 代码架构组织分析
       - ✔ [vue深入 - 响应式系统](vue/vue源码解读/响应式系统.md) vue 响应式系统
       - ✔ [vue深入 - 数据驱动](vue/vue源码解读/数据驱动.md) vue 数据驱动 vnode
-      - ✔ [vue深入 - 组件化](vue/vue高能/函数式组件.md) vue 组件化原理，函数式组件和普通组件的对比
+      - ✔ [vue深入 - 组件化](vue/vue源码解读/函数式组件.md) vue 组件化原理，函数式组件和普通组件的对比
+      - ✔ [vue深入 - keepAlive组件原理](vue/vue源码解读/源码解读-keepAlive.md) 源码解读-keepAlive，来看看它的缓存实现原理
       - [vue深入 - compiler](vue/vue源码解读/compiler.md) vue compiler 编译原理 ast
     - ✔ [vue vs react](react/react-vs-vue.md) vue 基本知识点
     - ✔ [vue2 边角知识](vue/vue2-边角.md)
