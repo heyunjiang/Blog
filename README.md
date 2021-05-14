@@ -58,7 +58,6 @@
   - ✔ [深入js-内存管理与垃圾回收](es/深入js-内存管理与垃圾回收.md)
   - [深入js-this](es/深入js-this.md)  说明了 this 指向问题
   - [深入js-一些功能模拟实现](es/深入js-一些功能模拟实现.md)
-  - [js-奇技淫巧](es/js-奇技淫巧.md)  比如 0.1+0.2 问题、退出循环等问题
   - ✔ [typescript浅尝](es/typescript浅尝.md) ts 基础总结
 - nodejs
   - [node-模块化](nodejs/node-模块化.md) 模块加载缓存、包装器
