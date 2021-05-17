@@ -23,8 +23,28 @@ author: heyunjiang
 
 ## 2 基础知识
 
+### 源码目录解析
+
 ## 3 electron-forge
 
 用于创建、打包、发布 electron 应用的工具
 
+## 4 electron 构建
+
+目标：自定义构建 electron，包括 chromium 定制  
+初版目标：根据 electron 构建流程，输出构建好的 electron  
+二版目标：切换 chromium 软链，输出包含定制化的 electron
+
+### 4.1 electron 自动 build-tools
+
+electron 自动构建工具，集成了相关工具操作：  
+1. `depot_tools`: 获取 chromium 及相关包
+2. `gclient`: git 工具，相较于 git 命令有啥优势？
+3. `gn`: ninja 项目生成工具，使用 ninja 来构建项目
+
+> 安装 python3 `brew install python3`，python 2 和 3 差异较大，不兼容，需要升级到 3
+
 ## 参考文章
+
+[mac 环境变量设置](https://juejin.cn/post/6844903885727858701)  
+[electron 自动构建工具 build-tools](https://github.com/electron/build-tools)
