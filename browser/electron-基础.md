@@ -41,10 +41,12 @@ electron 自动构建工具，集成了相关工具操作：
 1. `depot_tools`: 获取 chromium 及相关包
 2. `gclient`: git 工具，相较于 git 命令有啥优势？
 3. `gn`: ninja 项目生成工具，使用 ninja 来构建项目
+4. `ninja`: chromium 构建工具
 
 > 安装 python3 `brew install python3`，python 2 和 3 差异较大，不兼容，需要升级到 3
 
 ## 参考文章
 
 [mac 环境变量设置](https://juejin.cn/post/6844903885727858701)  
-[electron 自动构建工具 build-tools](https://github.com/electron/build-tools)
+[electron 自动构建工具 build-tools](https://github.com/electron/build-tools)  
+[depot_tools](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
