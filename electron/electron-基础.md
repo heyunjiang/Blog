@@ -39,14 +39,24 @@ author: heyunjiang
 
 electron 自动构建工具，集成了相关工具操作：  
 1. `depot_tools`: 获取 chromium 及相关包
-2. `gclient`: git 工具，相较于 git 命令有啥优势？
+2. `gclient`: chromium 获取代码的工具
 3. `gn`: ninja 项目生成工具，使用 ninja 来构建项目
 4. `ninja`: chromium 构建工具
 
 > 安装 python3 `brew install python3`，python 2 和 3 差异较大，不兼容，需要升级到 3
+
+### 4.2 自定义构建 electron
+
+1. `export GIT_CACHE_PATH="${HOME}/.git_cache"`
+2. `export NODE_TLS_REJECT_UNAUTHORIZED=0`
+3. depot_tools/gsutil.py import ssl
+4. Application/python3/Install Certificates.command 双击安装证书
 
 ## 参考文章
 
 [mac 环境变量设置](https://juejin.cn/post/6844903885727858701)  
 [electron 自动构建工具 build-tools](https://github.com/electron/build-tools)  
 [depot_tools](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
+[v8 编译指墙](https://www.cwiki.cn/archives/mac%E4%B8%8Bv8android%E7%BC%96%E8%AF%91%E6%8C%87%E5%A2%99)
+[v8 build](https://v8.dev/docs/build)
+[python3 安装ssl](https://stackoverflow.com/questions/52805115/certificate-verify-failed-unable-to-get-local-issuer-certificate)
