@@ -14,7 +14,19 @@ author: heyunjiang
 2. 初始化项目结构，生成 yoyo 项目目录，内部包含了 .gclient 文件，作为 gclient 入口，并：`mkdir yoyo & cd yoyo`, `e init yoyo`
 3. 拉取代码：`e sync -v --no-history`；会首先在 `~/.electron_build_tools/third_party/` 中安装 depot_tools，然后执行 `gclient` 命令
 4. 等待代码拉取：这个过程会挺久
-5. 构建打包: `e build`。最开始会加载 xcode
+5. 构建打包: `e build`。最开始会加载 xcode，在 xcode 安装好之后，记得手动启动一下，加载额外 components
+6. 启动：`e start`
+
+将打包后的资源 `src/out/Testing/Electron.app` 直接发布为 npm 包即可
+
+至此，完整走了一遍 electron 构建流程，接下来可以做自定义  
+1. electron 自定义：克隆 electron 仓库，自定义修改相关代码
+2. chromium 自定义：克隆 chromium 仓库，修改 electron DEPS 文件，让其指向你自己的 chromium 仓库
+3. chromium thirdparty 自定义：修改 chromium DEPS 文件，让其指向你自己的第三方依赖，注意兼容性
+
+注意事项：  
+1. 每个版本的 electron 都对 chromium 版本做了依赖，修改相关 chromium 代码时要注意版本对应上
+2. 安装相关软件：python2.7, python3.9, xcode 12.4.0, macOS Catalina 10.15.7, depot_tools@latest, @electron/build-tools@latest
 
 ## 2 踩坑集合
 
@@ -40,6 +52,8 @@ ninja: build stopped: subcommand failed
 ```
 
 初次尝试：卸载 xcode，重新 install
+
+解决方案：手动启动 xcode，会加载相关 components
 
 ### 2.3 unable to verify the first certificate
 
