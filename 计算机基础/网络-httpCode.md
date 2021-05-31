@@ -1,5 +1,7 @@
 # 常见 http 状态码、解释及解决方案
 
+参考文章：[mdn http code](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/401)
+
 200：一切正常  
 
 缓存相关

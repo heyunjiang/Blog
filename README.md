@@ -95,6 +95,10 @@
   - ✔ [浏览器安全](browser/深入浏览器-安全.md) 常见 xss 攻击及防御，csrf 攻防
   - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 亮点技能 - ui 自动化测试
   - [关于前端监控的几点思考](browser/关于前端监控的几点思考.md)
+- electron
+  - [electron-自定义构建](electron/electron-自定义构建.md)
+  - ✔ [c++ - 基础](electron/c++-基础.md)
+  - [python - 基础](electron/python-基础.md)
 - builder
   - ✔ [npm基础](builder/npm专题.md)
   - [ast的思考](builder/ast的思考.md)

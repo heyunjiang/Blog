@@ -10,6 +10,7 @@ author: heyunjiang
 2. 找个目录 git clone depot_tools，并添加相应环境变量
 3. 全局安装 `@electron/build-tools`
 
+开始构建
 1. 下载官方 electron 构建工具：npm i -g @electron/build-tools
 2. 初始化项目结构，生成 yoyo 项目目录，内部包含了 .gclient 文件，作为 gclient 入口，并：`mkdir yoyo & cd yoyo`, `e init yoyo`
 3. 拉取代码：`e sync -v --no-history`；会首先在 `~/.electron_build_tools/third_party/` 中安装 depot_tools，然后执行 `gclient` 命令
@@ -94,6 +95,13 @@ download_from_google_storage --no_resume --no_auth --bucket chromium-telemetry -
 
 具体下载失败原因可能跟 chromium 服务器配置相关
 
+## 3 自定义构建
+
 ## 2 参考文章
 
-[v8 编译指墙](https://www.cwiki.cn/archives/mac%E4%B8%8Bv8android%E7%BC%96%E8%AF%91%E6%8C%87%E5%A2%99#134-%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98)
+[mac 环境变量设置](https://juejin.cn/post/6844903885727858701)  
+[electron 自动构建工具 build-tools](https://github.com/electron/build-tools)  
+[depot_tools](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
+[v8 编译指墙](https://www.cwiki.cn/archives/mac%E4%B8%8Bv8android%E7%BC%96%E8%AF%91%E6%8C%87%E5%A2%99)
+[v8 build](https://v8.dev/docs/build)
+[python3 安装ssl](https://stackoverflow.com/questions/52805115/certificate-verify-failed-unable-to-get-local-issuer-certificate)
