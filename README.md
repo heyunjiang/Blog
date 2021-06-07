@@ -111,6 +111,7 @@
   - ✔ [webpack-loader](builder/webpack-loader.md) loader 开发方式及原理
   - [vite](builder/vite.md)
   - ✔ [babel plugin](builder/babel.md)
+  - ✔ [sourcemap原理](builder/sourcemap原理.md) mappings 单元行列映射
 - 框架
   - [mvvm](other/mvvm.md) 都在用 mvvm ，到底什么 mvvm 是什么？
   - [源码解读-antd](react/源码解读-antd.md)

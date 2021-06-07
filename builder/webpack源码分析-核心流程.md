@@ -1302,6 +1302,8 @@ this.hooks.make.callAsync(compilation, err => {
 1. 压缩文件，内部包含了 `//# sourceMappingURL=` 格式，指定了对应 sourcemap 文件地址
 2. sourcemap 文件，包含了压缩文件与源代码之间的映射关系
 
+[sourcemap 原理](./sourcemap原理.md)
+
 ## 6 缓存原理
 
 1. 使用 CommonsChunkPlugin 插件，明确将第三方依赖库 react, vue 等拆分出来，作为客户端缓存文件，达到优化目的
