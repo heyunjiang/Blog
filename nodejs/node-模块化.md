@@ -25,15 +25,15 @@ nodejs 默认使用 commonjs 模块，这里列举模块加载和使用方式
 17. require.resolve() 查看模块的位置，不会加载该模块，返回解析后的文件名
 18. require.resolve.paths 查看模块的解析过程查找路径数组，同样不会加载模块
 
+nodejs 模块包装器  
 ```javascript
-// nodejs 模块包装器
 (function(exports, module, require, __filename, __dirname) {
   // 模块代码执行区域
 })
 ```
 
+module 对象格式  
 ```javascript
-// module 对象格式
 {
   id: '.',
   path: '/absolute/path/to',
@@ -50,8 +50,8 @@ nodejs 默认使用 commonjs 模块，这里列举模块加载和使用方式
 }
 ```
 
+require 的模拟实现方式(webpack 就是这么模拟实现的)  
 ```javascript
-// require 的模拟实现方式
 function require(/* ... */) {
   const module = { exports: {} };
   ((module, exports) => {

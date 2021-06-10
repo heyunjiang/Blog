@@ -32,10 +32,10 @@ author: heyunjiang
 2. ✔ 打包结果代码是如何组织运行起来的？代码拆分之后怎么合理运行，也就是 webpack 打包结果是如何有效运行？
 3. ✔ 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp。异步组件会打包成独立的 chunk，可以通过 chunkFileName 来规范命名
 4. 热更新原理是啥？
-5. sourcemap 原理
+5. ✔ sourcemap 原理
 6. output 中 path 和 publicPath 有什么区别？libary 又是啥意思？
-7. chunkFileName 指定的长效缓存是啥？chunkFileName 只是用于 import 异步加载的 chunk 命名设置
-8. webpack 的 runtime 和 manifest 是啥？
+7. ✔ chunkFileName 指定的长效缓存是啥？chunkFileName 只是用于 import 异步加载的 chunk 命名设置
+8. ✔ webpack 的 runtime 和 manifest 是啥？
 9. ✔ loader 对文件的处理，是在依赖模块遍历过程中处理的，还是进入指定目录统一处理之后再遍历？是遍历到了再用 loader 去处理
 10. ✔ module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？倒序
 11. compiler 和 compilation 的主要职责是什么？
@@ -47,8 +47,8 @@ author: heyunjiang
 ## 2 打包结果分析
 
 打包结果可以是 commonjs, umd 的，这里都列举一个结果外壳  
+webpack commonjs 加载模块
 ```javascript
-// commonjs
 module.exports =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -156,8 +156,8 @@ module.exports = String(test) === '[object z]';
 });
 ```
 
+webpack umd 加载模块
 ```javascript
-// umd
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("Echarts"), require("vue"));
@@ -1324,3 +1324,8 @@ webpack 是如何实现拆分及保证 hash 值不变的呢？
 [webpack5 中文](https://www.webpackjs.com/guides/caching/)  
 [mdn freeze](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze)  
 [webpack 源码解读](https://juejin.cn/post/6844903987129352206)
+
+随笔思想：人生关键经验  
+1. 有明确诉求：明确自己是谁，在做什么，为什么做，有哪些诉求目标，当前又有什么问题，应该怎么去解决。比如我现在刚买了房，每个月高额房贷，结婚、装修都需要钱，当前我就需要获取更多的钱，来保证生活品质，让自己过的幸福
+2. 保持节奏感：保持节奏感可以让自己充分高效使用有限精力。学习 + 工作同步进行，运动时不浪费一点精力，在突破时又全力投入，不慌不忙
+3. 有机遇就抓住，没有机遇就做好精通当前：生活、工作有机会就果断抓住，没有机会则过好当下。比如在做普通项目，没有复杂项目机会，就深耕当前技术栈难点；有复杂项目机会，则果断加入，为职业发展做铺垫推进
