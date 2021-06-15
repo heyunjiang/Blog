@@ -12,7 +12,7 @@ author: heyunjiang
 
 ## 1 module federation
 
-## 2
+## 2 内置模块支持更广
 
 ## 参考文章
 
