@@ -12,9 +12,18 @@ author: heyunjiang
 
 ## 1 module federation
 
+分享内容大纲  
+1. 微前端实现方案一种
+2. 内部模块加载实现原理
+3. 模块打包输出原理
+4. 共享模块实现原理，对比 externals
+5. 使用场景
+
 ## 2 内置模块支持更广
 
 ## 参考文章
 
 [EMP 原理](https://github.com/efoxTeam/emp/wiki/%E3%80%8Amodule-Federation%E5%8E%9F%E7%90%86%E5%AD%A6%E4%B9%A0%E3%80%8B)
-[资源模块](https://webpack.docschina.org/guides/asset-modules/)
+[资源模块](https://webpack.docschina.org/guides/asset-modules/)  
+[moduleFeration demo](https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes)  
+[mf 在线体验](https://stackblitz.com/github/webpack/webpack.js.org/tree/master/examples/module-federation?file=app2%2Fwebpack.config.js&terminal=start&terminal=)
