@@ -65,3 +65,5 @@ loader 负责对文字源 string 处理，用法准则如下
 
 在执行 normalModuleFactory.create 解析模块时，如果模块名匹配到相关 rule，则会将 rule 中对应的 loader 加入到 loaders 数组中；
 然后 normalModule.doBuild 调用 runLoaders 来为模块执行对应的 loader，生成 source 和 ast，再根据 ast 去生成对应的依赖
+
+问题：loader 最终输出的是 javascript 代码，在处理 css 时，最终的 js 代码是啥样子？看看 css-loader
