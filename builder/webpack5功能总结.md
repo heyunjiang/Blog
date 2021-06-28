@@ -32,6 +32,8 @@ resolve: {
 4. 共享模块实现原理，对比 externals
 5. 使用场景
 
+npm 也可以分享
+
 ## 2 支持模块类型
 
 webpack 模块化，包含了 es module, commonjs module, amd module, assets module, webassembly module  
@@ -145,6 +147,17 @@ module.exports = {
 
 日常思考 - webpack 深入  
 1. 编写 webpack cli 脚手架 https://webpack.docschina.org/api/cli/#init
+
+## 临时想法
+
+认知不足  
+1. 未来发展焦虑：目前工作无人指导，项目无挑战，担心未来缺乏竞争力
+2. 个人缺少沟通，不了解团队信息。领导无沟通，自己也觉得沟通没有必要
+3. 缺少热爱那股劲，比如篮球、工作、生活，自己有点咸鱼了
+
+个人强化发展  
+1. 做核心技术
+2. 关注 vue conf, 早早聊 等前端大会，了解行业发展趋势
 
 ## 参考文章
 

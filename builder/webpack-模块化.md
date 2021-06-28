@@ -35,6 +35,7 @@ webpack 支持的模块，不需要使用 loader
 1. webpack 是如何实现 es module 和 commonjs module 共存的？最终跑在浏览器中是什么代码，与各模块化有什么差异？
 2. commonjs module 中的特性，比如模块缓存、__dirname 等，在 webpack 中如何处理？
 3. es module 使用 import 可以动态加载模块，webpack 如何处理？
+4. import 'hello' 和 import hello from 'hello' 有什么区别？
 
 ## 2 模块化实现原理
 
