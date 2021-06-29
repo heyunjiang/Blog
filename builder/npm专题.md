@@ -74,6 +74,8 @@ node_modules 下的包入口有多种方式
 7. `^1.2.3`: major大于0时，大于等于major；major等于0，则不能超过minor；minor也为0，则版本不可变更
 8. `1.2.x`: 1.2.0, 1.2.1 都行，就是不能 1.3.1
 
+总结：～ 表示不能超过中间的 minor 版本，^ 在版本大于1时，不能超过主要 major 版本
+
 ## 2 npm link
 
 通常我们全局安装的包在 `/usr/local/lib/node_modules` 目录下，全局安装的命令在 `/usr/local/bin` 下，可以使用 `npm prefix -g` 来查看我们全局安装的路径
@@ -88,7 +90,8 @@ node_modules 下的包入口有多种方式
 
 1. dependencies: 生产环境实际需要用到的依赖，也就是项目运行最小依赖，缺了项目就跑不起来；别人在使用你的包时，也会安装对应模块，
 2. devDependencies：开发时用到，主要涉及到构建工具、工具的配置、插件等；别人在使用你的包时，也不会 install devDependencies 中的模块
-3. peerDependencies：指定项目中包的版本，可以不安装当前包，如果安装了，就要符合 peerDependencies 中指定的版本。啥场景？兼容性限制
+3. peerDependencies：指定项目中包的版本，可以不安装当前包，如果安装了，就要符合 peerDependencies 中指定的版本，否则会给出警告。npm 版本1，2会默认安装，3-6不会安装，7会默认安装。
+啥场景？兼容性限制，通过指定 package.json 中的字段 engines,os,cpu 等可以限制包
 4. optionalDependencies：告诉 npm，如果一些包安装失败了也继续
 5. bundledDependencies：打包结果需要包含 bundledDependencies 中指定的包。哈场景？
 
