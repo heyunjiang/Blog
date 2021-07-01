@@ -33,7 +33,7 @@ author: heyunjiang
 3. ✔ 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp。异步组件会打包成独立的 chunk，可以通过 chunkFileName 来规范命名
 4. 热更新原理是啥？
 5. ✔ sourcemap 原理
-6. output 中 path 和 publicPath 有什么区别？libary 又是啥意思？
+6. ✔ output 中 path 和 publicPath 有什么区别？libary 又是啥意思？
 7. ✔ chunkFileName 指定的长效缓存是啥？chunkFileName 只是用于 import 异步加载的 chunk 命名设置
 8. ✔ webpack 的 runtime 和 manifest 是啥？
 9. ✔ loader 对文件的处理，是在依赖模块遍历过程中处理的，还是进入指定目录统一处理之后再遍历？是遍历到了再用 loader 去处理
