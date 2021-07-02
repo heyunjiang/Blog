@@ -16,7 +16,9 @@ author: heyunjiang
 1. shared module 没有打成独立的包，怎么去实现共享的呢？
 2. 远程加载 remote js 文件，通常是跨域的，需要配置服务器跨域设置。qiankun也有这个问题吗？
 3. 为什么非得使用 import() 来启动包含 moduleFederation 的项目？
-4. vue 项目远程加载组件，能加载组件实例吗？因为子应用需要控制自身的 router 和全局状态
+4. vue 项目远程加载组件，能加载组件实例吗？看看 createElement 生成 vnode 时能实现不
+5. vue2 能加载 vue3 实例不？因为直接加载组件配置文件肯定是不行的，他们依赖的 vue 版本不同
+6. vue 组件配置能加 vuex, router 配置吗？
 
 注意事项：  
 1. remote 需要控制好 output.pablicPath，不然 host 可能加载不到资源
