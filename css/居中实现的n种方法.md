@@ -11,7 +11,8 @@ author: heyunjiang
 2. text-align: center 实现水平居中
 3. height + line-height 实现垂直居中
 4. margin auto 设置水平 + 垂直居中
-5. absolute 实现水平 + 垂直居中
+5. absolute + margin auto 实现水平 + 垂直居中
+6. absolute + transform 实现水平 + 垂直居中
 
 ## 1 flex 实现水平 + 垂直居中
 
@@ -46,6 +47,17 @@ div 垂直居中
   right: 0;
   bottom: 0;
   margin: auto;
+}
+```
+
+## 3 absolute + transform 实现水平 + 垂直居中
+
+```css
+.absolute-transform-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transition: translate(-50%, -50%);
 }
 ```
 

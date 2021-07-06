@@ -29,7 +29,9 @@
   - ✔ [深入css-fixed、absolute、float](css/深入css-fixed、absolute、float.md)
   - ✔ [深入css-block、inline、inline-block](css/深入css-block、inline、inline-block.md)
   - ✔ [深入css-选择器及权重](css/深入css-选择器及权重.md)
+  - ✔ [深入css-vertical-align](css/深入css-vertical-align.md)
   - ✔ [居中实现的n种方法](css/居中实现的n种方法.md)
+  - ✔ [响应式图片](css/响应式图片.md)
   - [常见知识归纳](css/常见知识归纳.md) 包含了 css 一些常用知识点：盒子模型、选择器、字体使用、rem等
   - [预处理器-less](css/预处理器-less.md)
   - css 工具-postcss
