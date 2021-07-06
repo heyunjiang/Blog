@@ -14,10 +14,10 @@ author: heyunjiang
 
 个人问题归纳  
 1. shared module 没有打成独立的包，怎么去实现共享的呢？
-2. 远程加载 remote js 文件，通常是跨域的，需要配置服务器跨域设置。qiankun也有这个问题吗？
+2. 远程加载 remote js 文件，通常是跨域的，需要配置服务器跨域设置。qiankun也有这个问题吗？如果是走的同一网关，就不需要配置
 3. 为什么非得使用 import() 来启动包含 moduleFederation 的项目？
 4. vue 项目远程加载组件，能加载组件实例吗？看看 createElement 生成 vnode 时能实现不
-5. vue2 能加载 vue3 实例不？因为直接加载组件配置文件肯定是不行的，他们依赖的 vue 版本不同
+5. vue2 能加载 vue3 实例不？因为直接加载组件配置文件肯定是不行的，他们依赖的 vue 版本不同，实例可以 import 之后，手动执行 $mount 方法
 6. vue 组件配置能加 vuex, router 配置吗？
 
 注意事项：  
@@ -65,6 +65,18 @@ author: heyunjiang
 目标归纳：把项目中的某些组件资源打成独立的 js 文件，或者整个项目作为资源使用，打包成独立 js 文件。
 
 ### 3.1 remote 工作原理
+
+## 4 微前端实现思考
+
+1. 子应用暴露组件配置，父应用直接加载组件配置，作为 vm.components 来实现。思考点：webpack mf 是如何加载到组件文件的，这个也是 mf 工作原理
+2. 子应用暴露组件配置，但是配置包含了 store, router。思考点：子应用能独立存在 store, router 吗？为什么？
+3. 子应用暴露 vue 实例。思考点：vue 渲染时，如果 vm.components 下的组件是实例，而不是实例配置，能发生什么？
+不行，vue createComponent 支持配置文件对象、Vue.extend 之后的构造函数对象、function，不支持实例化后的 vm 对象。除非拿到对象之后主动 $mount 到对应节点
+4. 子应用暴露 vue3 配置，react 配置，能实现吗？看看 emp demo 实现
+
+思考学习总结  
+1. 子应用能独立存在 store，因为 store 是挂载在实例上面，最先会在当前实例查找 store，找不到才去 parent.$options.store 查找
+2. 子应用能独立存在 router，因为 router 也是挂载在实例上面，所有子组件都是访问的该实例的 $options.router 对象。对于全局组件 link、view 来说，也是通过访问该实例的 $options.router 上的路由配置，加载对应的组件
 
 ## 参考文章
 
