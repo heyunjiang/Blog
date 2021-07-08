@@ -8,7 +8,7 @@ author: heyunjiang
 最近在做 webpack 源码分析，发现一些代码点不好阅读，需要调试来看调用栈；有一个待优化项目，用的是 vue-cli-service 来构建，使用 webpack4 功能，我切换到 webpack5，看看有什么亮点
 
 1. module federation
-2. Assets modules
+2. Assets module
 3. output.clean 清理 dist
 4. 多入口共享公共依赖：dependOn + shared + SplitChunksPlugin
 5. 使用 webWorker 时，不需要再使用 worker-loader
@@ -34,7 +34,7 @@ resolve: {
 
 npm 也可以分享
 
-## 2 支持模块类型
+## 2 Assets module
 
 webpack 模块化，包含了 es module, commonjs module, amd module, assets module, webassembly module  
 归纳如下要点  

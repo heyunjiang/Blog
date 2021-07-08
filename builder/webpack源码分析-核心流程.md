@@ -12,8 +12,10 @@ author: heyunjiang
 6. 缓存原理
 7. 懒加载原理
 
+## 思考
+
 思考1: 如果我面试别人，问哪些 webpack 问题，才算是有价值、有深度的呢？  
-1. 独立 npm 包构建时如果不把 elementui 打进去，或者说干脆不引用 elementui，子项目能成功使用这个 npm 包吗？为什么？
+1. 独立 npm 包构建时如果不把 elementui 打进去，或者说干脆不引用 elementui，其他项目能成功使用这个 npm 包吗？为什么？
 2. webpack 构建的核心流程是什么？
 3. 你调试 webpack 时遇到了哪些问题？tapable 回调地狱，比如在 normalize entry 生成 module 对象流程，解决方案是查看调用栈及全局搜索关键字
 4. loader 执行顺序，rules 和 use 执行都是倒序
@@ -25,6 +27,15 @@ author: heyunjiang
 4. webpack5 模块联邦特性了解。其他项目暴露 chunk，当前项目主动拉取
 
 思考3: 本期把 webpack 流程理清楚了，后续的深入学习，还是建立在实际编写 loader, plugin，以及深度使用 webpack 后再来总结
+
+思考4: 前面分析学习过 webpack，隔了三个月后，自己再次来回顾，对 compiler, compilation 的理解又模糊了，说不上来 compiler 是要做什么  
+time: 2021-07-07 11:22:53  
+自己一直没有总结 webpack 是为什么而存在，我为什么要学习 webpack，它能给前端带来什么？现在 em module 已经被浏览器支持，还有必要学习 webpack 吗？  
+webpack 从我开始学习前端时，就已经存在。现在来看，它给我带来了以下几点好处  
+1. 已有价值高：已有项目的开发、维护，基本使用的 webpack，未来2年还会广泛存在
+2. 将资源文件或特定技术转换为浏览器支持的模块：生态实现了对 less, ts, vue 等 loader 处理，实现了对 es module, commonjs module 的统一处理
+3. 合并、压缩模块，实现 tree-shaking
+4. 生态支持：各种基于 webpack 的脚手架，已有 npm 包很多还是属于 commonjs 和 es module 混用
 
 ## 1 疑问
 
