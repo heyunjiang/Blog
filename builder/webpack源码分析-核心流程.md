@@ -438,7 +438,7 @@ class Compiler extends Tapable {
 
 > webpack 由于使用的是基于 tapable 的各种回调方法，源码阅读很不方便，断点调试也不太容易找到，需要去查看调用栈，查看 compilation 的核心方法是哪些地方调用的
 
-### 3.3 入口 - 根据 entry 开始构建
+### 3.3 入口 - 根据 entry 开始构建，生成 module，查找需要的 loaders
 
 compiler.compile 会实例化 compilation 对象，并调用 `make 钩子`。  
 
@@ -1267,12 +1267,125 @@ this.hooks.make.callAsync(compilation, err => {
 
 现在回到 `compilation.seal()`，看看接下来处理 module 流程  
 ```javascript
+seal(callback) {
+  const chunkGraph = new ChunkGraph(this.moduleGraph);
+  this.chunkGraph = chunkGraph;
 
+  for (const module of this.modules) {
+    ChunkGraph.setChunkGraphForModule(module, chunkGraph);
+  }
+
+  this.hooks.seal.call();
+  const chunkGraphInit = new Map();
+  // for 循环添加 module 到 chunk，省略
+  buildChunkGraph(this, chunkGraphInit);
+  this.hooks.optimizeTree.callAsync(this.chunks, this.modules, err => {
+    this.hooks.afterOptimizeTree.call(this.chunks, this.modules);
+    this.hooks.optimizeChunkModules.callAsync(
+      this.chunks,
+      this.modules,
+      err => {
+        this.hooks.moduleIds.call(this.modules);
+        this.hooks.optimizeModuleIds.call(this.modules);
+        this.hooks.chunkIds.call(this.chunks);
+        this.hooks.optimizeChunkIds.call(this.chunks);
+        this.assignRuntimeIds();
+        this.sortItemsWithChunkIds();
+        this.createModuleHashes();
+        this.codeGeneration(err => {
+          this.clearAssets();
+          this.createModuleAssets();
+          this.createChunkAssets(err => {
+            cont();
+          });
+          });
+        });
+      }
+    );
+  });
+}
 ```
+
+归纳总结：  
+1. 在 seal 内部，包含了许多的优化操作，没有来得及细看
+2. 主要是生成了 chunk, chunkGraph, assets 等资源
 
 ```javascript
 
 ```
+
+### 3.7 输出资源 assets
+
+在 webpack.compiler 工作的整个生命周期，主要是做了2件事情  
+1. compile: 编译资源。输入 entry 入口文件，输出 compilation 对象，其包含了处理好的 assets，此刻还保存在内存中
+2. emitAssets: 输出编译好的资源。输入 compilation.assets，输出真实文件系统，然后写入 cache 缓存(持久化？)
+
+在 compiler.run 中定义了 onCompiled.emitAssets 调用
+```javascript
+class Compiler extends Tapable {
+  run(callback) {
+    const onCompiled = (err, compilation) => {
+			process.nextTick(() => {
+				logger = compilation.getLogger("webpack.Compiler");
+				logger.time("emitAssets");
+				this.emitAssets(compilation, err => {
+					logger.timeEnd("emitAssets");
+					logger.time("emitRecords");
+					this.emitRecords(err => {
+						logger.timeEnd("emitRecords");
+						const stats = new Stats(compilation);
+						this.hooks.done.callAsync(stats, err => {
+							this.cache.storeBuildDependencies(
+								compilation.buildDependencies,
+								err => {
+									return finalCallback(null, stats);
+								}
+							);
+						});
+					});
+				});
+			});
+		};
+    this.compile(onCompiled)
+  }
+}
+```
+
+总结归纳：  
+1. emitAssets 只是把 compilation.assets 从内存中输出为真实文件
+2. compilation 是什么时候做的资源文件压缩合并的呢？
+
+### 3.8 总结归纳
+
+1. 通过调用 webpack 方法，生成 compiler 对象，然后 compiler.run 启动 webpack 流程
+2. compiler 作用：作为主要引擎，管理 webpack 生命周期，处理用户插件；执行完成整个流程，包括依赖查找、文件 loader 处理、生成 assets 并输出文件
+3. compilation 作用：管理资源文件，包括 modules, modulesGraph, chunks, chunkGraphs, assets, assetsInfo 等
+
+compiler 的整个流程如下  
+1. compiler.hooks.beforeCompile
+2. compiler.newCompilation
+3. `compiler.hooks.make`
+4. compilation.finish
+5. compilation.seal
+6. compiler.hooks.afterCompile
+7. compiler.hooks.emit
+8. compiler.emitAssets.writeOut
+9. compiler.hooks.afterEmit
+10. compiler.hooks.assetEmitted 可以处理每个 asset 数据
+11. compiler.hooks.done
+12. compiler.hooks.afterDone
+
+compilation 的整个流程如下  
+1. compilation.addEntry
+2. compilation.factorizeModule 使用 NormalModuleFactory 生成 module 对象，查找 module 相关 loaders
+3. compilation.buildModule 使用 loader 解析模块，使用 acorn.js 解析生成 ast，构造 module.dependencies
+4. compilation.processModuleDependencies 解析依赖模块，继续走 compilation.factorizeModule 生成更多的 module
+5. compilation.seal
+6. buildChunkGraph
+7. compilation.codeGeneration
+8. compilation.clearAssets and compilation.createModuleAssets
+9. compilation.createChunkAssets
+10. compilation.unseal
 
 ## 4 hmr 原理
 
@@ -1334,7 +1447,8 @@ webpack 是如何实现拆分及保证 hash 值不变的呢？
 
 [webpack5 中文](https://www.webpackjs.com/guides/caching/)  
 [mdn freeze](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze)  
-[webpack 源码解读](https://juejin.cn/post/6844903987129352206)
+[webpack 源码解读](https://juejin.cn/post/6844903987129352206)  
+[webpack api](https://webpack.docschina.org/api/compiler-hooks/)
 
 随笔思想：人生关键经验  
 1. 有明确诉求：明确自己是谁，在做什么，为什么做，有哪些诉求目标，当前又有什么问题，应该怎么去解决。比如我现在刚买了房，每个月高额房贷，结婚、装修都需要钱，当前我就需要获取更多的钱，来保证生活品质，让自己过的幸福
