@@ -37,6 +37,9 @@ webpack 从我开始学习前端时，就已经存在。现在来看，它给我
 3. 合并、压缩模块，实现 tree-shaking
 4. 生态支持：各种基于 webpack 的脚手架，已有 npm 包很多还是属于 commonjs 和 es module 混用
 
+思考5: 为什么别人能想到一些亮点事情  
+答：自己知识积累还不够，在具备一定知识深度广度后，就可以思考更多有价值的东西。
+
 ## 1 疑问
 
 1. ✔ 配置的 extenal 没有包含在结果 bundle 中，那构建结果是什么样子？使用当前包的项目是怎么使用相关组件的呢？
@@ -44,12 +47,15 @@ webpack 从我开始学习前端时，就已经存在。现在来看，它给我
 3. ✔ 异步组件如何加载处理？也就是说，runtime 是如何懒加载模块的？webpackJsonp。异步组件会打包成独立的 chunk，可以通过 chunkFileName 来规范命名
 4. 热更新原理是啥？
 5. ✔ sourcemap 原理
-6. ✔ output 中 path 和 publicPath 有什么区别？libary 又是啥意思？
+6. ✔ output 中 path 和 publicPath 有什么区别？libary 又是啥意思？target 是啥？
+path 指定资源文件输出目录，publicPath 是指资源文件前缀，是写在生产代码中，可以是相对路径，也可以是绝对路径；
+library 指对应入口 chunk 打包成 lib 的属性描述对象，包含 name, type，type 通常为 var、module、window、self、commonjs、umd；
+target 表示资源最终运行环境，比如 nodejs 环境，webpack 在打包时就不会处理 require('fs')
 7. ✔ chunkFileName 指定的长效缓存是啥？chunkFileName 只是用于 import 异步加载的 chunk 命名设置
-8. ✔ webpack 的 runtime 和 manifest 是啥？
+8. ✔ webpack 的 runtime 和 manifest 是啥？runtime 是模块加载器，主要为辅助代码；manifest 是模块管理器，包含模块代码及其映射
 9. ✔ loader 对文件的处理，是在依赖模块遍历过程中处理的，还是进入指定目录统一处理之后再遍历？是遍历到了再用 loader 去处理
 10. ✔ module.rules 解析顺序是啥？通过 use 使用的多个 loader 执行顺序是啥？倒序
-11. compiler 和 compilation 的主要职责是什么？
+11. ✔ compiler 和 compilation 的主要职责是什么？compiler 负责大体流程管理, compilation 负责资源流程处理
 
 最近要解决的问题  
 1. ✔ 构建加速：公共组件构建速度慢，通过 dll 缓存优化
@@ -1255,7 +1261,7 @@ this.hooks.make.callAsync(compilation, err => {
 至此，所有文件均转换成了对应的 module 对象，保存在 `compilation.modules` Set 对象中，module 关系保存在 `compilation.moduleGraph` 关系中。  
 所有资源暂时还保存在内存中。
 
-### 3.6 生成 chunk
+### 3.6 生成代码 assets - compilation.seal
 
 在全部生成 module 对象之后，此刻 compilation 对象数据如下  
 1. modules: 已生成
@@ -1293,11 +1299,10 @@ seal(callback) {
         this.sortItemsWithChunkIds();
         this.createModuleHashes();
         this.codeGeneration(err => {
-          this.clearAssets();
-          this.createModuleAssets();
-          this.createChunkAssets(err => {
-            cont();
-          });
+          this._runCodeGenerationJobs(codeGenerationJobs, err => {
+            this.clearAssets();
+            this.createModuleAssets();
+            this.createChunkAssets();
           });
         });
       }
@@ -1306,21 +1311,20 @@ seal(callback) {
 }
 ```
 
-归纳总结：  
-1. 在 seal 内部，包含了许多的优化操作，没有来得及细看
-2. 主要是生成了 chunk, chunkGraph, assets 等资源
+compilation.seal 归纳总结：  
+1. seal 主要是输入 module, moduleGraph，最后输出 chunk, chunkGraph, chunkAssets
+2. 内部主要流程包含了：  
+构建 chunkGraph, 
+优化 optimizeModules、optimizeChunks、optimizeTree、optimizeChunkModules，
+生成id moduleIds、chunkIds，
+生成哈希 createModuleHashes，
+生成代码 codeGeneration、processRuntimeRequirements、_runCodeGenerationJobs，
+生成Assets clearAssets、createModuleAssets、createChunkAssets、assets
 
-```javascript
+### 3.7 输出资源 assets - compiler.emitAssets
 
-```
-
-### 3.7 输出资源 assets
-
-在 webpack.compiler 工作的整个生命周期，主要是做了2件事情  
-1. compile: 编译资源。输入 entry 入口文件，输出 compilation 对象，其包含了处理好的 assets，此刻还保存在内存中
-2. emitAssets: 输出编译好的资源。输入 compilation.assets，输出真实文件系统，然后写入 cache 缓存(持久化？)
-
-在 compiler.run 中定义了 onCompiled.emitAssets 调用
+在 compilation.seal 生成 assets 之后，此刻资源还是保存在内存中，需要输出为实际文件  
+在 compiler.run 中定义了 onCompiled.emitAssets 调用 compiler.emitAssets  
 ```javascript
 class Compiler extends Tapable {
   run(callback) {
@@ -1353,22 +1357,21 @@ class Compiler extends Tapable {
 
 总结归纳：  
 1. emitAssets 只是把 compilation.assets 从内存中输出为真实文件
-2. compilation 是什么时候做的资源文件压缩合并的呢？
 
-### 3.8 总结归纳
+## 4 webpack 流程总结归纳
 
 1. 通过调用 webpack 方法，生成 compiler 对象，然后 compiler.run 启动 webpack 流程
-2. compiler 作用：作为主要引擎，管理 webpack 生命周期，处理用户插件；执行完成整个流程，包括依赖查找、文件 loader 处理、生成 assets 并输出文件
-3. compilation 作用：管理资源文件，包括 modules, modulesGraph, chunks, chunkGraphs, assets, assetsInfo 等
+2. compiler 作用：作为主要引擎，侧重点在流程把控。包括处理用户插件，管理 webpack 生命周期，核心有 make, seal, emit 三个周期方法
+3. compilation 作用：管理生成资源文件，作为实际 module 处理者。包括入口解析、module 生成与构建、依赖遍历、seal 生成及优化资源
 
 compiler 的整个流程如下  
 1. compiler.hooks.beforeCompile
 2. compiler.newCompilation
 3. `compiler.hooks.make`
 4. compilation.finish
-5. compilation.seal
+5. `compilation.seal`
 6. compiler.hooks.afterCompile
-7. compiler.hooks.emit
+7. `compiler.hooks.emit`
 8. compiler.emitAssets.writeOut
 9. compiler.hooks.afterEmit
 10. compiler.hooks.assetEmitted 可以处理每个 asset 数据
@@ -1381,36 +1384,38 @@ compilation 的整个流程如下
 3. compilation.buildModule 使用 loader 解析模块，使用 acorn.js 解析生成 ast，构造 module.dependencies
 4. compilation.processModuleDependencies 解析依赖模块，继续走 compilation.factorizeModule 生成更多的 module
 5. compilation.seal
-6. buildChunkGraph
-7. compilation.codeGeneration
-8. compilation.clearAssets and compilation.createModuleAssets
-9. compilation.createChunkAssets
-10. compilation.unseal
+6. new ChunkGraph && buildChunkGraph
+7. 优化 compilation.optimizeModules、compilation.optimizeChunks、compilation.optimizeTree、compilation.optimizeChunkModules
+7. 生成id moduleIds、chunkIds
+8. 生成哈希 compilation.createModuleHashes
+9. 生成代码 codeGeneration、processRuntimeRequirements、_runCodeGenerationJobs
+10. 生成Assets compilation.clearAssets、compilation.createModuleAssets、compilation.createChunkAssets、compilation.assets
+11. compilation.unseal
 
-## 4 hmr 原理
+## 5 hmr 原理
 
-### 4.1 应用程序中
+### 5.1 应用程序中
 
 1. 应用程序要求 hmr 模块检查更新
 2. hmr 模块下载更新，通知应用程序
 3. 应用程序收到请求，并要求 hmr 应用更新
 4. hmr 应用更新
 
-### 4.2 编译器中
+### 5.2 编译器中
 
 编译器 compiler 是将源代码编译为目标 chunk + manifest，在需要更新时，编译器将编译结果，通过 update 事件发送出去，包含以下内容
 1. 更新后的 manifest json 数据 (是独立文件吗？)
 2. 一个或多个更新后的 chunk js 代码 (是独立文件吗？)
 
-### 4.3 在模块中
+### 5.3 在模块中
 
 模块可以实现 hmr 接口，来实现定制化的功能，不过这个是可选的，一版用不着
 
-### 4.4 在 hmr 模块中
+### 5.4 在 hmr 模块中
 
 也就是 hmr runtime，衔接浏览器应用程序和 webpack 的。
 
-## 5 sourcemap 原理
+## 6 sourcemap 原理
 
 应用在 devtool 选项中，可用值如下
 1. `none`：无 sourcemap，构建速度很快
@@ -1428,7 +1433,7 @@ compilation 的整个流程如下
 
 [sourcemap 原理](./sourcemap原理.md)
 
-## 6 缓存原理
+## 7 缓存原理
 
 1. 使用 CommonsChunkPlugin 插件，明确将第三方依赖库 react, vue 等拆分出来，作为客户端缓存文件，达到优化目的
 2. 使用 HashedModuleIdsPlugin 插件，保证第三方库生成的 bundle hash 值不变

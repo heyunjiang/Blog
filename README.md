@@ -110,7 +110,7 @@
   - ✔ [webpack基础](builder/webpack专题.md)
   - ✔ [webpack-模块化](builder/webpack-模块化.md)
   - ✔ [vue-cli 源码分析](builder/vue-cli源码分析.md)
-  - [webpack 源码分析-核心流程](builder/webpack-源码分析-核心流程.md)
+  - ✔ [webpack 源码分析-核心流程](builder/webpack-源码分析-核心流程.md)
   - [webpack 源码分析-插件](builder/webpack-源码分析-插件.md) 插件工作原理
   - [webpack 源码分析-tapable](builder/webpack-源码分析-tapable.md)
   - ✔ [webpack-plugin](builder/webpack-plugin.md) plugin 开发方式

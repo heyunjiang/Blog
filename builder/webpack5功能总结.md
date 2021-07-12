@@ -3,17 +3,28 @@
 time: 2021-04-02 10:45:57  
 author: heyunjiang
 
-## 背景
+分享大纲：2021-07-12 16:24:33  
+1. webpack 调试方法
+2. webpack 核心构建流程，compiler 及 compilation 归纳
+3. webpack5 最新技术点，核心亮点是啥？
+4. moduleFederation 实现的微前端
+10. webpack 未来方向
 
-最近在做 webpack 源码分析，发现一些代码点不好阅读，需要调试来看调用栈；有一个待优化项目，用的是 vue-cli-service 来构建，使用 webpack4 功能，我切换到 webpack5，看看有什么亮点
+## 更新技术点归纳
 
-1. module federation
-2. Assets module
-3. output.clean 清理 dist
-4. 多入口共享公共依赖：dependOn + shared + SplitChunksPlugin
-5. 使用 webWorker 时，不需要再使用 worker-loader
-6. node 配置项注入的全局 node 变量变更，webpack5 只支持 global, __filename, __dirname，不再支持 path, fs 等，需要使用 resolve.fallback 来控制，比如
+最近在做 webpack 源码分析，发现一些代码点不好阅读，需要调试来看调用栈；有一个待优化项目，用的是 vue-cli-service 来构建，使用 webpack4 功能，我切换到 webpack5，看看有什么亮点  
+1. module federation 实现微前端
+2. Assets module 代替 url-loader 等
+3. library.type 支持 module 模式，是如何支持的？
+4. 持久性缓存提高构建性能？本地构建
+5. 长期缓存优化，包含更好的算法和默认 hash，特指生产环境
+6. 减小包大小：优化后的 tree-shaking 和 codeGeneration
 
+其他小点
+1. output.clean 清理 dist
+2. 多入口共享公共依赖：dependOn + shared + SplitChunksPlugin
+3. 使用 webWorker 时，不需要再使用 worker-loader
+4. node 配置项注入的全局 node 变量变更，webpack5 只支持 global, __filename, __dirname，不再支持 path, fs 等，需要使用 resolve.fallback 来控制，比如
 ```javascript
 // webpack5 node 全局变量支持
 resolve: {
@@ -22,6 +33,7 @@ resolve: {
   }
 }
 ```
+5. v4 内部代码结构优化
 
 ## 1 module federation
 
@@ -60,7 +72,7 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const mode = 'production'
+const mode = 'development'
 
 module.exports = {
   mode,
@@ -145,9 +157,6 @@ module.exports = {
 
 ```
 
-日常思考 - webpack 深入  
-1. 编写 webpack cli 脚手架 https://webpack.docschina.org/api/cli/#init
-
 ## 临时想法
 
 认知不足  
@@ -165,4 +174,5 @@ module.exports = {
 [资源模块](https://webpack.docschina.org/guides/asset-modules/)  
 [moduleFeration demo](https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes)  
 [mf 在线体验](https://stackblitz.com/github/webpack/webpack.js.org/tree/master/examples/module-federation?file=app2%2Fwebpack.config.js&terminal=start&terminal=)
-[webpack5 2021 roadmap](https://webpack.docschina.org/blog/2020-12-08-roadmap-2021/)
+[webpack5 2021 roadmap](https://webpack.docschina.org/blog/2020-12-08-roadmap-2021/)  
+[webpack4 升级指南](https://webpack.docschina.org/migrate/5/)
