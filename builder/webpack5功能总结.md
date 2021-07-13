@@ -21,9 +21,9 @@ author: heyunjiang
 6. 减小包大小：优化后的 tree-shaking 和 codeGeneration
 
 其他小点
-1. output.clean 清理 dist
+1. output.clean 清理 dist，内置了 CleanPlugin
 2. 多入口共享公共依赖：dependOn + shared + SplitChunksPlugin
-3. 使用 webWorker 时，不需要再使用 worker-loader
+3. 使用 webWorker 时，不需要再使用 worker-loader，内置了 WorkerPlugin
 4. node 配置项注入的全局 node 变量变更，webpack5 只支持 global, __filename, __dirname，不再支持 path, fs 等，需要使用 resolve.fallback 来控制，比如
 ```javascript
 // webpack5 node 全局变量支持
@@ -58,6 +58,16 @@ webpack 模块化，包含了 es module, commonjs module, amd module, assets mod
 2. asset/inline 输出文件 data uri，同 asset/resource 不同的是，inline 是将资源转换成了类似 base64 的 uri，替代之前的 url-loader
 3. asset/source 输出文件源代码 string，替代之前的 raw-loader
 4. asset 小于 8kb 时使用 inline，大于时使用 resource。当然可以修改 Rule.parser.dataUrlCondition.maxSize 阈值
+
+## 3 持久性缓存提高构建性能
+
+```javascript
+cache: {
+  type: 'filesystem'
+}
+```
+
+在 development 模式下，设置 cache.type 为 `filesystem`，表示构建缓存是作为文件存储，特点是下次构建可能就会很快，有的可以2s构建完毕，大大提高本地开发时构建速度
 
 ## 推荐配置
 
@@ -167,6 +177,12 @@ module.exports = {
 个人强化发展  
 1. 做核心技术
 2. 关注 vue conf, 早早聊 等前端大会，了解行业发展趋势
+
+未来发展方向思考：  
+寻求工作生活一体化，从生活出发，带来自己想要的快乐，自己为之奋斗，寻求更大的快乐  
+1. 随时能得到的小快乐：与优秀的人沟通、得到 star 等认可
+2. 未来能有的大快乐：更多的钱
+3. 怎么与生活息息相关
 
 ## 参考文章
 
