@@ -51,7 +51,15 @@ npm 也可以分享
 webpack 模块化，包含了 es module, commonjs module, amd module, assets module, webassembly module  
 归纳如下要点  
 1. 代码中可以同时使用 import 和 require 写法
-2. 字体、图标、图片等文件，不需要再使用 file-loader 或 url-loader 处理了，webpack 内部提供了对其的处理。咋处理的？
+2. 字体、图标、图片等文件，不需要再使用 file-loader 或 url-loader 处理了，webpack 内部提供了对其的处理。咋处理的？内部 plugin
+
+strict ESM  
+1. package.json type: 'module'
+2. .mjs 结尾
+
+strict es module 有如下特点  
+1. 影响解析逻辑，内部按照 es module 解析，即不可使用 commonjs module 语法
+2. 导入模块时，必须包含文件名及文件拓展名
 
 内置资源模块增加如下类型  
 1. asset/resource 输出文件，并导出 url，替代之前的 file-loader
