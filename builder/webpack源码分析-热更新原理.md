@@ -147,8 +147,109 @@ if (module.hot) {
 1. 浏览器应用程序收到的是 hot-update.js 文件，是如何应用更新的？module.hot.accept 回调函数应该怎么才能执行
 2. 我们的打包结果 chunkName 为什么那么长？
 3. 为什么chunk 入口组件不会被热更新？非入口却可以？可以看看应用程序 runtime hot 文件
+4. 从我们代码变更保存时，webpack 做了什么？
 
-### 2.3 应用程序中的 hot runtime 文件
+### 2.3 webpack 监听代码变更
+
+目前只是知道了 vue-loader 在处理 .vue 模块时，给每个模块实现了 hmr 接口，并且在 module.hot.accept 回调函数中调用了 `require.resolve('vue-hot-reload-api').rerender`，可惜在 webpack5 中没有执行。  
+但是通过控制台观察到 webpack 给了 hot-update.json, hot-update.js 文件给应用程序。
+
+现在开始从头分析：编辑器代码保存时，webpack 做了什么操作？  
+猜想流程：webpack watch 到对应模块代码变更，会对该模块做独立构建，生成独立的 module.hot-update.js 文件  
+如果启动了 hmr，则发起 ws 消息传递 hash 随机数，等待应用程序来取更新后的模块信息  
+并且替换掉之前构建好的 chunk 中的模块内容，包装浏览器刷新能获取到最新的代码
+
+测试一：关闭 devServer.hot ，看看是否有新构建模块  
+答：会新构建，并且走 liveReload 模式，也就是浏览器刷新模式，这个是 webpack-dev-server 中配置的
+
+从 webpack-dev-server 入口看起，看看是如何实例化 webpack 的  
+走 compiler.watch 模式，并且在 compiler.hooks.done 之后，会去监察 compilation.fileDependencies 等文件依赖，在变化之后做了什么
+
+webpack.watching.watch 方法
+```javascript
+watch(files, dirs, missing) {
+  this.pausedWatcher = null;
+  this.watcher = this.compiler.watchFileSystem.watch(
+    files,
+    dirs,
+    missing,
+    this.lastWatcherStartTime,
+    this.watchOptions,
+    (
+      err,
+      fileTimeInfoEntries,
+      contextTimeInfoEntries,
+      changedFiles,
+      removedFiles
+    ) => {
+      this._invalidate(
+        fileTimeInfoEntries,
+        contextTimeInfoEntries,
+        changedFiles,
+        removedFiles
+      );
+      this._onChange();
+    },
+    (fileName, changeTime) => {
+      if (!this._invalidReported) {
+        this._invalidReported = true;
+        this.compiler.hooks.invalid.call(fileName, changeTime);
+      }
+      this._onInvalid();
+    }
+  );
+}
+```
+
+在文件变化的时候，会通过 watching._invalidate，依次走到 watching._go，将更改的文件名保存在 compiler.modifiedFiles 上。  
+再去看看 compiler, compilation 是如何处理变更文件的  
+全局搜索了 webpack 项目，发现没有地方用到 compiler.modifiedFiles 属性，难道是要 webpack-dev-server 自己处理吗？  
+再回到 webpack-dev-server server 中来看，它是如何监听文件变化的
+
+> webpack-dev-middleware 是一个封装器，执行之后作为 express 或 koa 的中间件，将 compiler 产生的文件提供给对应服务器。  
+> 直接使用它时，在文件变更之后，需要手动刷新浏览器
+
+在 webpack-dev-server 中添加了如下钩子  
+```javascript
+const { compile, invalid, done } = compiler.hooks;
+
+compile.tap('webpack-dev-server', invalidPlugin);
+invalid.tap('webpack-dev-server', invalidPlugin);
+done.tap('webpack-dev-server', (stats) => {
+  this._sendStats(this.sockets, this.getStats(stats));
+  this._stats = stats;
+});
+```
+
+总结: 在 compiler.hooks.done 完成 emitAssets 之后，会根据 compilation 生成 stats 信息，并使用 getStats 获取 stats.toJson 发送给 ws client
+
+### 2.4 webpack-dev-server 服务架构
+
+在 webpack-dev-server 内部，启动了 http 服务器，还启动了 sockjs 服务器。sockjs 和 websocket 有什么不同？sockjs 是模拟实现 websocket
+
+http 服务器相关实现
+```javascript
+setupApp() {
+  this.app = new express();
+}
+createServer() {
+  this.listeningApp = http.createServer(this.app);
+}
+```
+
+### 2.5 应用程序中的 hot runtime 文件
+
+前面了解到了 webpack-dev-server 是通过监听 compiler.hooks.done 来及时获取构建结果。  
+现在的问题是  
+1. 客户端接受到 ws 更新信息，是如何处理的
+2. 服务器是如何生成 hot-update 文件的
+
+在 devServer 配置中，inline 表示在 bundle 中插入 hmr runtime 脚本，来看看相关代码
+```javascript
+
+```
+
+来看看 hot runtime 相关代码
 
 通过 `http://localhost:8081/webpack-dev-server` 查看 dev 环境的构建代码
 
@@ -156,4 +257,5 @@ if (module.hot) {
 
 [webpack hmr 概念介绍](https://webpack.docschina.org/concepts/hot-module-replacement/)  
 [vue-loader hmr](https://vue-loader.vuejs.org/zh/guide/hot-reload.html#%E7%8A%B6%E6%80%81%E4%BF%9D%E7%95%99%E8%A7%84%E5%88%99)  
-[vscode launch.json 配置](https://www.barretlee.com/blog/2019/03/18/debugging-in-vscode-tutorial/)
+[vscode launch.json 配置](https://www.barretlee.com/blog/2019/03/18/debugging-in-vscode-tutorial/)  
+[sockjs, websocket, stompjs](https://segmentfault.com/a/1190000017204277)
