@@ -201,7 +201,7 @@ watch(files, dirs, missing) {
 }
 ```
 
-在文件变化的时候，会通过 watching._invalidate，依次走到 watching._go，将更改的文件名保存在 compiler.modifiedFiles 上。  
+在文件变化的时候，会通过 watching._invalidate，依次走到 watching._go，将更改的文件名保存在 `compiler.modifiedFiles` 上。  
 再去看看 compiler, compilation 是如何处理变更文件的  
 全局搜索了 webpack 项目，发现没有地方用到 compiler.modifiedFiles 属性，难道是要 webpack-dev-server 自己处理吗？  
 再回到 webpack-dev-server server 中来看，它是如何监听文件变化的
@@ -221,11 +221,11 @@ done.tap('webpack-dev-server', (stats) => {
 });
 ```
 
-总结: 在 compiler.hooks.done 完成 emitAssets 之后，会根据 compilation 生成 stats 信息，并使用 getStats 获取 stats.toJson 发送给 ws client
+总结: 在 `compiler.hooks.done` 完成 emitAssets 之后，会根据 compilation 生成 stats 信息，并使用 getStats 获取 stats.toJson 发送给 ws client
 
 ### 2.4 webpack-dev-server 服务架构
 
-在 webpack-dev-server 内部，启动了 http 服务器，还启动了 sockjs 服务器。sockjs 和 websocket 有什么不同？sockjs 是模拟实现 websocket
+在 webpack-dev-server 内部，启动了 `http 服务器`，还启动了 `sockjs 服务器`。sockjs 和 websocket 有什么不同？sockjs 是模拟实现 websocket
 
 http 服务器相关实现
 ```javascript
@@ -237,17 +237,102 @@ createServer() {
 }
 ```
 
-### 2.5 应用程序中的 hot runtime 文件
+### 2.5 webpack-dev-server 修改 compiler.options 配置文件，添加 entry client、hot server 入口和 HotModuleReplacementPlugin 插件
 
 前面了解到了 webpack-dev-server 是通过监听 compiler.hooks.done 来及时获取构建结果。  
 现在的问题是  
-1. 客户端接受到 ws 更新信息，是如何处理的
-2. 服务器是如何生成 hot-update 文件的
+1. 客户端接收到 ws 更新信息，是如何处理的
+2. 服务器是如何生成 hot-update 文件的，是读的 compilation 的哪些数据
 
-在 devServer 配置中，inline 表示在 bundle 中插入 hmr runtime 脚本，来看看相关代码
+在 devServer 配置中，inline 表示在 bundle 中插入 hmr runtime 脚本，来看看相关代码  
+在 updateCompiler 方法中，如果有 hot or hotOnly 配置，则会默认加上
+
+1. webpack-dev-server Server 调用 updateCompiler 修改 compiler 配置添加 hmr HotModuleReplacementPlugin
 ```javascript
-
+class Server {
+  constructor(compiler, options = {}, _log) {
+    this.compiler = compiler;
+    this.options = options;
+    this.log = _log || createLogger(options);
+    normalizeOptions(this.compiler, this.options);
+    updateCompiler(this.compiler, this.options);
+  }
+}
 ```
+
+2. updateCompiler 函数 addEntries 及定义 `__webpack_dev_server_client__` 全局属性
+```javascript
+function updateCompiler(compiler, options) {
+  addEntries(webpackConfig, options);
+  compilers.forEach((compiler) => {
+    const config = compiler.options;
+    compiler.hooks.entryOption.call(config.context, config.entry);
+
+    const providePlugin = new webpack.ProvidePlugin({
+      __webpack_dev_server_client__: getSocketClientPath(options),
+    });
+    providePlugin.apply(compiler);
+  });
+
+  if (options.hot || options.hotOnly) {
+    compilersWithoutHMR.forEach((compiler) => {
+      const plugin = findHMRPlugin(compiler.options);
+      if (plugin) {
+        plugin.apply(compiler);
+      }
+    });
+  }
+}
+```
+
+3. addEntries(webpackConfig, options) 修改 webpack config 配置
+```javascript
+function addEntries(config, options, server) {
+  // 1 定义 clientEntry, 通常是 webpack-dev-server/client/index.js?http://localhost:3000
+  const clientEntry = `${require.resolve(
+    '../../client/'
+  )}?${domain}${sockHost}${sockPath}${sockPort}`;
+
+  // 2 定义 hotEntry, 通常是 webpack/hot/dev-server.js
+  let hotEntry;
+  if (options.hotOnly) {
+    hotEntry = require.resolve('webpack/hot/only-dev-server');
+  } else if (options.hot) {
+    hotEntry = require.resolve('webpack/hot/dev-server');
+  }
+
+  // 3 修改 webpack.config.entry，增加 clientEntry 和 hotEntry
+  const additionalEntries = [clientEntry];
+  if (hotEntry && checkInject(options.injectHot, config, true)) {
+    additionalEntries.push(hotEntry);
+  }
+  config.entry = prependEntry(config.entry || './src', additionalEntries);
+
+  // 4 添加 HotModuleReplacementPlugin 插件
+  if (options.hot || options.hotOnly) {
+    config.plugins = config.plugins || [];
+    if (
+      !config.plugins.find(
+        (plugin) => plugin.constructor.name === 'HotModuleReplacementPlugin'
+      )
+    ) {
+      config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    }
+  }
+}
+```
+
+归纳总结  
+1. 在 webpack-dev-server 启动 webpack watch 之前，会修改 compiler 对象，加上 hmr 相关插件和相关 entry 入口
+2. 只要设置了 hot || hotonly，就会默认带上 hmr 相关插件
+3. 定义的 `__webpack_dev_server_client__` 指向 webpack-dev-server/client/clients/SockJsClient.js 文件
+
+定义的多入口和 HotModuleReplacementPlugin 做了什么？  
+1. 多入口，代表 compilation 会调用多次 addEntry 方法，看看最后输出什么？
+
+### 2.6 应用程序中的 hot runtime 文件
+
+> 前面我们看到了 webpack-dev-server 是修改了 entry 入口和 添加了 HotModuleReplacementPlugin 插件
 
 来看看 hot runtime 相关代码
 
