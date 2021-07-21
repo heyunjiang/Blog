@@ -323,20 +323,26 @@ function addEntries(config, options, server) {
 ```
 
 归纳总结  
-1. 在 webpack-dev-server 启动 webpack watch 之前，会修改 compiler 对象，加上 hmr 相关插件和相关 entry 入口
+1. 在 webpack-dev-server 启动 webpack watch 之前，会修改 compiler 对象，加上 hmr 相关插件和相关 entry 入口：
+`webpack-dev-server/client/index.js?http://localhost:3000`、`webpack/hot/dev-server.js`
 2. 只要设置了 hot || hotonly，就会默认带上 hmr 相关插件
 3. 定义的 `__webpack_dev_server_client__` 指向 webpack-dev-server/client/clients/SockJsClient.js 文件
 
 定义的多入口和 HotModuleReplacementPlugin 做了什么？  
-1. 多入口，代表 compilation 会调用多次 addEntry 方法，看看最后输出什么？
+1. 多入口，代表 compilation 会调用多次 addEntry 方法，看看最后输出什么？如果传入一个字符串或字符串数组，chunk 会被命名为 main，也就是数组多入口会被打包到同一个js文件中
+2. 动态 import() 加载的模块会当作新入口当初 chunk 吗？
+
+引入面试题  
+1. entry 入口单字符串、字符串数组、多 key object 对应输出结果有什么不同？
 
 ### 2.6 应用程序中的 hot runtime 文件
 
 > 前面我们看到了 webpack-dev-server 是修改了 entry 入口和 添加了 HotModuleReplacementPlugin 插件
 
-来看看 hot runtime 相关代码
+来看看打包进去的 client/index.js 和 dev-server.js 做了什么。(注意：webpack-dev-server 服务端已经启动了一个 http 服务器和一个 sockjs 服务器)
 
-通过 `http://localhost:8081/webpack-dev-server` 查看 dev 环境的构建代码
+
+> 通过 `http://localhost:8081/webpack-dev-server` 查看 dev 环境的构建代码
 
 ## 参考文章
 

@@ -11,6 +11,7 @@ author: heyunjiang
 3. 路由守卫是什么？分哪几种类型？什么时候才起作用？
 4. 路由插件提供了哪些能力？
 5. 路由如何动态注册，原理是啥？
+6. 路由跳转时，同时传 name 和 path，谁的优先级高？name，在 vue-router matcher 源码中有先判断 name。我们在配置路由时，name 一定要全局唯一
 
 ## 2 路由基本知识
 
@@ -93,6 +94,11 @@ next 方法
 
 路由守卫只在路由组件内起效，在非路由组件上不起效
 
+问题：  
+1. 全局守卫和内部守卫谁先执行？全局 beforeEach -> 路由配置 beforeEnter -> 组件内部 beforeRouteEnter
+2. beforeEach, beforeResolve 2者有什么区别？区别在于 beforeResolve 是在所有内部守卫解析之后及异步路由组件解析之后调用，而 beforeEach 是内部守卫解析之前调用？
+3. afterEach 需要调用 next 吗？不需要，也不能
+
 ## 6 动态增加路由
 
 `router.addRoute(parentName: string, route: RouteConfig)`
@@ -120,8 +126,7 @@ const router = new VueRouter({
 静态路由：实现配置好，在应用初始化创建 router 对象时传入的配置，后续根据 url 变化渲染加载不同的组件，将组件内部的 `<router-view>` 与 路由配置的 children 匹配  
 动态路由：在 react 中，动态路由的概念是没有配置，route 本身作为一个组件，将 route 组件 prop 的 `path` 属性与浏览器 url 的 path 作匹配，成功才显示内容；路由嵌套也是在 route 加载的 component 组件内部再加载一个 route ；vue 还不知道。
 
-总结区别
-
+总结区别  
 1. 配置：静态路由有配置，动态路由没有配置
 2. 组件化：动态路由本身就是一个组件，静态路由不是
 3. 编写时：静态路由依靠 router-view, 而动态路由则需要在可能渲染到的地方都写上
