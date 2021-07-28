@@ -156,14 +156,25 @@ if (module.hot) {
 
 现在开始从头分析：编辑器代码保存时，webpack 做了什么操作？  
 猜想流程：webpack watch 到对应模块代码变更，会对该模块做独立构建，生成独立的 module.hot-update.js 文件  
-如果启动了 hmr，则发起 ws 消息传递 hash 随机数，等待应用程序来取更新后的模块信息  
+如果启动了 hmr，webpack-dev-server 则发起 ws 消息传递 hash 随机数，等待应用程序来取更新后的模块信息  
 并且替换掉之前构建好的 chunk 中的模块内容，包装浏览器刷新能获取到最新的代码
 
 测试一：关闭 devServer.hot ，看看是否有新构建模块  
 答：会新构建，并且走 liveReload 模式，也就是浏览器刷新模式，这个是 webpack-dev-server 中配置的
 
-从 webpack-dev-server 入口看起，看看是如何实例化 webpack 的  
-走 compiler.watch 模式，并且在 compiler.hooks.done 之后，会去监察 compilation.fileDependencies 等文件依赖，在变化之后做了什么
+#### 2.3.1 webpack-dev-server 启动 webpack watch 模式
+
+问：从 webpack-dev-server 入口看起，看看是如何实例化 webpack 的  
+答：走 compiler.watch 模式，并且在 compiler.hooks.done 之后，会去监察 compilation.fileDependencies 等文件依赖，在变化之后做了什么
+
+webpack-dev-middleware
+```javascript
+context.watching = compiler.watch(options.watchOptions, (err) => {})
+```
+
+webpack-dev-middleware 是一个封装器，执行之后作为 express 或 koa 的中间件，将 compiler 产生的文件提供给对应服务器。  
+直接使用它时，在文件变更之后，需要手动刷新浏览器  
+webpack-dev-server 使用它时，只是作为静态文件服务器实现
 
 webpack.watching.watch 方法
 ```javascript
@@ -202,12 +213,14 @@ watch(files, dirs, missing) {
 ```
 
 在文件变化的时候，会通过 watching._invalidate，依次走到 watching._go，将更改的文件名保存在 `compiler.modifiedFiles` 上。  
+
+问：在文件变更的时候，会去从入口重新构建所有文件吗？还是说走缓存，只构建变更的文件？或者说以变更文件作为新入口？
+
 再去看看 compiler, compilation 是如何处理变更文件的  
-全局搜索了 webpack 项目，发现没有地方用到 compiler.modifiedFiles 属性，难道是要 webpack-dev-server 自己处理吗？  
+全局搜索了 webpack 项目，发现没有地方用到 compiler.modifiedFiles 属性，难道是要 webpack-dev-server 自己处理吗？或者说压根不处理  
 再回到 webpack-dev-server server 中来看，它是如何监听文件变化的
 
-> webpack-dev-middleware 是一个封装器，执行之后作为 express 或 koa 的中间件，将 compiler 产生的文件提供给对应服务器。  
-> 直接使用它时，在文件变更之后，需要手动刷新浏览器
+#### 2.3.2 webpack-dev-server 接收构建结果文件
 
 在 webpack-dev-server 中添加了如下钩子  
 ```javascript
@@ -221,11 +234,15 @@ done.tap('webpack-dev-server', (stats) => {
 });
 ```
 
-总结: 在 `compiler.hooks.done` 完成 emitAssets 之后，会根据 compilation 生成 stats 信息，并使用 getStats 获取 stats.toJson 发送给 ws client
+总结: 在 `compiler.hooks.done` 完成 emitAssets 之后，会根据 compilation 生成 stats 信息，并使用 getStats 获取 hash值 发送给 ws client
 
 ### 2.4 webpack-dev-server 服务架构
 
-在 webpack-dev-server 内部，启动了 `http 服务器`，还启动了 `sockjs 服务器`。sockjs 和 websocket 有什么不同？sockjs 是模拟实现 websocket
+1. 实现基本 hmr 功能：在 webpack-dev-server 内部，启动了 `http 服务器`，还启动了 `sockjs 服务器`。
+并且给出口 main.js 插入 sock-client.js, dev-server.js 相关代码，添加 webpack.HotModuleReplacementPlugin 插件
+2. 启动 webpack watch 模式，并且实例化 express + webpack-dev-middleware 的静态服务器功能
+
+> sockjs 和 websocket 有什么不同？sockjs 是模拟实现 websocket
 
 http 服务器相关实现
 ```javascript
@@ -247,7 +264,7 @@ createServer() {
 在 devServer 配置中，inline 表示在 bundle 中插入 hmr runtime 脚本，来看看相关代码  
 在 updateCompiler 方法中，如果有 hot or hotOnly 配置，则会默认加上
 
-1. webpack-dev-server Server 调用 updateCompiler 修改 compiler 配置添加 hmr HotModuleReplacementPlugin
+1. webpack-dev-server Server 调用 updateCompiler 修改 compiler 配置
 ```javascript
 class Server {
   constructor(compiler, options = {}, _log) {
@@ -285,7 +302,7 @@ function updateCompiler(compiler, options) {
 }
 ```
 
-3. addEntries(webpackConfig, options) 修改 webpack config 配置
+3. addEntries(webpackConfig, options) 修改 webpack config 配置，并添加 hmr HotModuleReplacementPlugin
 ```javascript
 function addEntries(config, options, server) {
   // 1 定义 clientEntry, 通常是 webpack-dev-server/client/index.js?http://localhost:3000
@@ -340,6 +357,78 @@ function addEntries(config, options, server) {
 > 前面我们看到了 webpack-dev-server 是修改了 entry 入口和 添加了 HotModuleReplacementPlugin 插件
 
 来看看打包进去的 client/index.js 和 dev-server.js 做了什么。(注意：webpack-dev-server 服务端已经启动了一个 http 服务器和一个 sockjs 服务器)
+
+client/index.js
+```javascript
+var reloadApp = require('./utils/reloadApp');
+var onSocketMessage = {
+  hash: function hash(_hash) {
+    status.currentHash = _hash;
+  },
+  ok: function ok() {
+    sendMessage('Ok');
+    reloadApp(options, status);
+  }
+}
+socket(socketUrl, onSocketMessage);
+```
+
+reloadApp
+```javascript
+function reloadApp(_ref, _ref2) {
+  if (hot) {
+    log.info('[WDS] App hot update...');
+    var hotEmitter = require('webpack/hot/emitter');
+    hotEmitter.emit('webpackHotUpdate', currentHash);
+    if (typeof self !== 'undefined' && self.window) {
+      self.postMessage("webpackHotUpdate".concat(currentHash), '*');
+    }
+  }
+}
+```
+
+dev-server.js
+```javascript
+if (module.hot) {
+	var check = function check() {
+		module.hot
+			.check(true)
+			.then(function (updatedModules) {
+				if (upToDate()) {
+					log("info", "[HMR] App is up to date.");
+				}
+			}).catch(function (err) {});
+	};
+	var hotEmitter = require("./emitter");
+	hotEmitter.on("webpackHotUpdate", function (currentHash) {
+		lastHash = currentHash;
+		if (!upToDate() && module.hot.status() === "idle") {
+			log("info", "[HMR] Checking for updates on the server...");
+			check();
+		}
+	});
+}
+```
+归纳总结：  
+1. client/index.js 是启动一个 sock-client 客户端，用于和服务器 sockjs 消息通信，接受 hash 结果和一些构建进度等信息；
+2. client/index.js 通过 postMessage ok 发送消息给本地 dev-server.js 客户端，reloadApp 调用 eventEmitter 传递 webpackHotUpdate 事件和 currentHash 参数给 dev-server.js 客户端，同时也调用 postMessage 广播 webpackHotUpdate 信息
+3. dev-server.js 作为本地热更新实际处理模块，接收 currentHash 和 webpackHotUpdate 等信息，本质还是调用 `module.hot.check` 去更新
+
+### 2.7 HotModuleReplacementPlugin 做了什么
+
+前置知识  
+1. webpack-dev-server 通过修改 compiler 增加 entry 入口，将 client/index.js 和 dev-server.js 打到 main.js 中
+2. webpack-dev-server 启动了 sockjs 服务器和 http 服务器
+3. client/index.js 是启动一个 sock-client 客户端，用于和服务器 sockjs 消息通信，接受 hash 结果，并通过 eventEmitter 发送消息给本地 dev-server.js 客户端
+4. dev-server.js 接收 hash 事件，并调用 module.hot.check 更新本地代码
+5. webpack-dev-server 在监听到 compiler.done 时，会向客户端发起 ws 消息 hash 和 ok，携带 hash 值
+
+现在的问题：module.hot 是哪里加的？为什么 module.hot.check 能找到更新文件？仅根据变化后的 hash 是如何处理文件变更的？  
+还剩下 webpack.HotModuleReplacementPlugin 插件没有分析
+
+插件实现了本地 hmr runtime  
+1. 提供 module.hot.check、module.hot.apply、module.hot.accept 接口
+2. 内部实现检查更新、下载更新、应用更新
 
 
 > 通过 `http://localhost:8081/webpack-dev-server` 查看 dev 环境的构建代码
