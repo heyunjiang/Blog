@@ -6,6 +6,8 @@ time: 2018.8.14
 
 今天来总结一下它们3者的联系
 
+> 多列布局：css3 支持快速多列布局 column-width 或 column-counts，就会自动计算多列布局，上下再到左右布局
+
 ## 1 block
 
 block 元素，也就是所说的块级元素，通常有 div, header, nav, footer, article 等元素

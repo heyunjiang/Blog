@@ -430,6 +430,8 @@ if (module.hot) {
 1. 提供 module.hot.check、module.hot.apply、module.hot.accept 接口
 2. 内部实现检查更新、下载更新、应用更新
 
+module.hot.check: 发起 http 请求更新 manifest，下载 updated chunk  
+module.hot.apply: 标记 updated module 为无效，然后解除所有无效 module，更新 hash，调用所有 accept handler
 
 > 通过 `http://localhost:8081/webpack-dev-server` 查看 dev 环境的构建代码
 
@@ -438,4 +440,5 @@ if (module.hot) {
 [webpack hmr 概念介绍](https://webpack.docschina.org/concepts/hot-module-replacement/)  
 [vue-loader hmr](https://vue-loader.vuejs.org/zh/guide/hot-reload.html#%E7%8A%B6%E6%80%81%E4%BF%9D%E7%95%99%E8%A7%84%E5%88%99)  
 [vscode launch.json 配置](https://www.barretlee.com/blog/2019/03/18/debugging-in-vscode-tutorial/)  
-[sockjs, websocket, stompjs](https://segmentfault.com/a/1190000017204277)
+[sockjs, websocket, stompjs](https://segmentfault.com/a/1190000017204277)  
+[Webpack HMR 原理解析](https://zhuanlan.zhihu.com/p/30669007)

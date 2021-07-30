@@ -52,6 +52,9 @@ update: 2021-03-22 11:43:29
 10. runtime: `__webpack-require__` 等 webpack 用于模块加载处理的代码
 11. manifest: 打包结果包含了原有代码结构信息的文件，打包结果是啥？是模块标识符 + 模块组合成的对象？
 
+临时增加  
+1. eslint 配置：使用 eslint-webpack-plugin 代替 eslint-loader
+
 ### 1.2 常用配置
 
 ```javascript
