@@ -36,6 +36,7 @@ webpack 支持的模块，不需要使用 loader
 2. commonjs module 中的特性，比如模块缓存、__dirname 等，在 webpack 中如何处理？
 3. es module 使用 import 可以动态加载模块，webpack 如何处理？
 4. import 'hello' 和 import hello from 'hello' 有什么区别？
+5. exports is not defined 在使用 umd 包时，为什么会有这个问题？
 
 ## 2 模块化实现原理
 
@@ -53,4 +54,5 @@ webpack 支持的模块，不需要使用 loader
 
 ## 参考文章
 
-[webpack 模块化](https://webpack.docschina.org/concepts/modules/)
+[webpack 模块化](https://webpack.docschina.org/concepts/modules/)  
+[mixin exports and import](https://stackoverflow.com/questions/50057470/exports-is-not-defined-webpack-4)
