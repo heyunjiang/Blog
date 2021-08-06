@@ -5,7 +5,34 @@ author: heyunjiang
 
 ## 1 遇到的问题
 
-今天在做 jsx 渲染绑定 ref 时，遇到了一个问题：同样的写法，在 A 项目中能成功绑定到当前组件实例.$refs 上，在 B 项目则绑定不上去
+今天在做 jsx 渲染绑定 ref 时，遇到了一个问题：组件同样的写法，在 A 项目中能成功绑定到当前组件实例.$refs 上，在 B 项目则绑定不上去
+
+```javascript
+// Component A
+render: (h, item, formData) => {
+  return (
+    <div>
+      <Specification
+        ref='specificationRef'
+        isServiceTree={this.isServiceTree}
+      >
+      </Specification>
+    </div>
+  )
+}
+// Component B
+render: (h, item, formData) => {
+  return (
+    <el-card>
+      <Specification
+        ref='specificationRef'
+        isServiceTree={this.isServiceTree}
+      >
+      </Specification>
+    </el-card>
+  )
+}
+```
 
 解决步骤一：google 搜索 `vue jsx ref undefined` 关键词，无结果。看来不是什么通用的问题，多半是自己哪里写的有问题，于是自行解决。  
 解决步骤二：思考解决方案，问题可能出现因素：jsx 渲染丢失 ref 属性、ref 绑定到子组件实例上了
@@ -19,21 +46,21 @@ vue createElement 方法三个参数分别为：标签名、data配置对象、�
 
 编译前  
 ```javascript
-renderContent: (h, item, formData) => {
+render: (h, item, formData) => {
   return (
-    <MSpecification
+    <Specification
       ref='specificationRef'
       isServiceTree={this.isServiceTree}
     >
-    </MSpecification>
+    </Specification>
   )
 }
 ```
 编译后
 ```javascript
-renderContent:function(t,r,n){
+render:function(t,r,n){
   return t(
-    "MSpecification",
+    "Specification",
     {
       ref:"specificationRef",
       attrs:{isServiceTree:e.isServiceTree}
@@ -57,7 +84,7 @@ vue 官方文档有如下说明：
 2. 不一定会绑定到代码所写的组件上，因为可能存在作为另一个组件 slot 存在，那么会挂载到另一个组件上
 
 那么 ref 在 vue 源码是在哪里绑定的呢？  
-首先我们知道 createElement 方法的第二个参数会被保存到 vnode.data 对象上，在 vm._render 生成 vnode 之后，才会调用 vm._update 去渲染生成组件实例
+首先我们知道 $createElement 方法的第二个参数 data 会被保存到 vnode.data 对象上，在 vm._render 生成 vnode 之后，才会调用 vm._update 去渲染生成组件实例
 
 registerRef 源码
 ```javascript
@@ -99,12 +126,33 @@ export function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
 
 在组件初始化时，会调用 initRender 初始化组件，内部就绑定了 vm.$createElement 方法，固定了 context 为 vm 本身  
 ```javascript
-vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+export function initRender (vm: Component) {
+  vm._vnode = null // the root of the child tree
+  vm._staticTrees = null // v-once cached trees
+  const options = vm.$options
+  const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
+  const renderContext = parentVnode && parentVnode.context
+  vm.$slots = resolveSlots(options._renderChildren, renderContext)
+  vm.$scopedSlots = emptyObject
+  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+  vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+}
+
+export function createElement (
+  context: Component,
+  tag: any,
+  data: any,
+  children: any,
+  normalizationType: any,
+  alwaysNormalize: boolean
+): VNode | Array<VNode> {}
 ```
-也就是说我们在调用 render 时，第一个传入的 createElement 参数就控制了当前生成的 vnode 实例的 context 对象值，即谁来编译，就指向谁
+也就是说我们在调用 render 时，第一个传入的 createElement 参数就控制了当前生成的 vnode 实例的 context 对象值，即谁来编译(调用谁的 $createElement 方法)，就指向谁(闭包应用)
 
 ## 总结
 
-1. render 的第一个参数 createElement 控制了 vnode.context 值
-2. vnode.data.ref 会被绑定到父组件上，不一定是当前编写代码所在的组件
-3. 通过 registerRef 方式绑定的 ref
+1. ref 会被绑定到父组件上，不一定是当前编写代码所在的组件
+2. 组件 render 方法的第一个参数 h(可以理解为 $createElement) 控制了生成的 vnode.context 值，vnode.context 也就是父组件实例
+3. 通过 registerRef 方式绑定的 ref，总是绑定在父组件上
+
+> 文章涞源：[github heyunjiang](https://github.com/heyunjiang/Blog/blob/master/vue/vue%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-ref.md)
