@@ -144,7 +144,7 @@
     - ✔ [vue2 边角知识](vue/vue2-边角.md)
     - ✔ [vue3 功能总结](vue/vue3-功能总结.md)
     - vue3 深入
-      - [vue3 响应式系统](vue/vue3响应式系统.md)
+      - [vue3 响应式系统](vue/vue3源码解读/vue3响应式系统.md)
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock

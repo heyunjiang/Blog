@@ -3,12 +3,24 @@
 time: 2021.2.25  
 author: heyunjiang
 
+## 背景
+
+vue2 升级到 vue3，包含了如下变化  
+1. 全局 api 变化：vue3 统一由 createApp 生成的实例来设置，比如 app.use, app.config, app.directive
+2. 配置选项的变化：vue3 去除了 model 选项；同时支持配置选项和 setUp 组合式 api
+3. attribute 的变化：vue3 废弃了 v-bind.sync 写法，支持多个 v-model 写法；v-for key 写在 tempalte 上；
+4. event 的变化：未被定义在 `emits` 数组中的事件，会被默认未原生事件
+5. 函数式组件功能弱化：vue3 有状态组件性能优化到跟函数式组件无差异，并且 vue3 支持返回多个根节点
+6. render 函数变化：`h` 需要明确 import 引入；查找已经注册的组件需要使用 `resolveComponent`，对于 template 写法不会有影响
+7. 插槽变化：jsx 中废除 vue2 的 this.$scopedSlots 写法，统一使用 this.$slots 来调用；vue3 插槽节点都被定义为子节点了？不是 scopedSlot 属性了？同前面废除 $scopedSlots 理解，应该是
+8. 
+
 ## 1 常用功能总结
 
 1. createApp 代替 new Vue 生成组件，全局 api
 2. vite 入口是 html，直接使用 es6 script module 引入 js 执行
 3. vue3 组合式 api，vue2 选项式 api
-4. 函数式组件：vue3 使用 export 箭头函数直接创建函数式组件，与 vue2 的 functional 关键字不同，vue3 在有状态组件和函数式组件上性能已经持平
+4. 函数式组件：vue3 使用 export 箭头函数直接创建函数式组件，废弃了 functional 标识；与 vue2 不同，vue3 在有状态组件和函数式组件上性能已经持平
 5. data 对象：vue3 data 必须返回一个函数，与 vue2 可以返回 plain object | function 不同；mixin 混入的 data 只是浅层次合并
 6. template 多个根节点
 7. 全局 api：vue3 一些全局 api 需要通过实例 app 来挂载使用，包含 config, component, directive, mixin, use
