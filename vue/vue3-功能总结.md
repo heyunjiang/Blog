@@ -5,18 +5,20 @@ author: heyunjiang
 
 ## 背景
 
-vue2 升级到 vue3，包含了如下变化  
+vue2 升级到 vue3，包含了全局 api、tempalte 模板语法、组件配置选项、事件、插槽、css等变化，概括如下  
 1. 全局 api 变化：vue3 统一由 createApp 生成的实例来设置，比如 app.use, app.config, app.directive
-2. 配置选项的变化：vue3 去除了 model 选项；同时支持配置选项和 setUp 组合式 api
-3. attribute 的变化：vue3 废弃了 v-bind.sync 写法，支持多个 v-model 写法；v-for key 写在 tempalte 上；
-4. event 的变化：未被定义在 `emits` 数组中的事件，会被默认未原生事件
-5. 函数式组件功能弱化：vue3 有状态组件性能优化到跟函数式组件无差异，并且 vue3 支持返回多个根节点
-6. render 函数变化：`h` 需要明确 import 引入；查找已经注册的组件需要使用 `resolveComponent`，对于 template 写法不会有影响
+2. template 内元素 attribute 的变化：vue3 废弃了 v-bind.sync 写法，支持多个 v-model 写法；v-for key 写在 tempalte 上；支持多个根节点
+3. 配置选项 - model的变化：vue3 去除了 model 选项
+4. 配置选项 - 事件的变化：未被定义在 `emits` 数组中的事件，会被默认未原生事件；废除了 $listeners 属性
+5. 函数式组件功能弱化：vue3 有状态组件性能优化到跟函数式组件无差异，并且 vue3 支持返回多个根节点。废除了 functional 关键字
+6. 配置选项 - render 函数变化：`h` 需要明确 import 引入；查找已经注册的组件需要使用 `resolveComponent`，对于 template 写法不会有影响
 7. 插槽变化：jsx 中废除 vue2 的 this.$scopedSlots 写法，统一使用 this.$slots 来调用；vue3 插槽节点都被定义为子节点了？不是 scopedSlot 属性了？同前面废除 $scopedSlots 理解，应该是
-8. 
+8. 配置选项 - 生命周期：使用 beforeUnmount 代替 beforeDestory，unmounted 代替 destroyed
+9. css 变量：使用 v-bind 实现 css 变量通过 js 控制
 
-## 1 常用功能总结
+## 1 功能总结
 
+基础变更点  
 1. createApp 代替 new Vue 生成组件，全局 api
 2. vite 入口是 html，直接使用 es6 script module 引入 js 执行
 3. vue3 组合式 api，vue2 选项式 api
@@ -32,10 +34,12 @@ vue2 升级到 vue3，包含了如下变化
 13. v-if v-for 优先级：vue2 v-for 优先级更高，vue3 v-if 优先级更高
 14. 异步组件：vue3 函数式组件为纯函数，异步组件需要使用 `defineAsyncComponent` 明确指定
 15. 自定义指令生命周期更改为类组件生命周期
-16. 组件 attribute 继承：默认组件单个根元素会继承未声明 prop 的 attribute，多个根元素则会给出警告，可以使用 inheritAttrs: false 来放弃继承
+16. inheritAttrs：组件 attribute 继承，默认组件单个根元素会继承未声明 prop 的 attribute，多个根元素则会给出警告，可以使用 inheritAttrs: false 来放弃继承
 17. 事件命名：自定义事件需要使用 kebab-case 命名，或者全部小写，大写是不支持的
 18. emits 选项：在 emits 选项数组中把当前组件 emit 的所有事件都汇总，方便管理，并且可以做事件拦截判断有效性
 19. teleport：使用 `<teleport to="#endofbody">` 来将子组件渲染到特定的 dom 元素下
+20. $attrs 变更：$listeners 废除，事件合并入 this.$attrs，比如 `<div v-bind="$attrs" />`；class, style 也合并到 $attrs 对象上，可以通过 `inheritAttrs: false` 放弃默认规则来自定义
+21. 手动实例化组件：废除 propsData，而是通过 createApp 第二个参数传入
 
 ### 1.1 全局插件使用
 
@@ -59,6 +63,25 @@ app.use(VueRouter)
 3. 可以使用多个 v-model
 4. 单个 v-model，组件内部对应的是默认 modelValue
 
+### 1.3 app.config
+
+1. errorHandler
+2. warnHandler
+3. globalProperties: 用以替代 vue2 的 Vue.prototype 配置
+4. optionMergeStrategies：mixin 合并规则控制
+5. performance：在支持 performance.mark 的浏览器中监测组件的初始化、编译、渲染、更新的性能
+6. compilerOptions：运行时编译的配置
+
+### 1.4 应用 api
+
+通过 createApp 返回的 app 对象，可以用于注册全局组件、注册全局指令、使用 use 加载插件，类似 vue2 的 Vue.component 等
+
+### 1.5 全局 api
+
+
+
+### 1.6 实例 api
+
 ## 2 问题归纳
 
 1. vue2 各组件是 vm.$options._base.extend(object) 对象，生成的 vue 实例，那么 vue3 组件是继续使用 createApp 来生成实例的吗？
@@ -75,8 +98,8 @@ import { reactive, ref, toRefs, onMounted, watch, computed, provide, inject... }
 ```
 
 1. reactive: reactive({key: value})
-2. ref: ref(0)，用于封装独立原始值，作为响应式对象，返回包裹后的引用对象；直接访问这个对象，需要访问对象的 value 属性，而对象作为 reactive 封装的对象属性时，会自动展开，不用访问其 value 属性
-3. toRefs：响应式对象数据解耦需要使用 toRefs 包裹，后续使用到再了解实现原理
+2. ref: ref(0)，用于封装独立原始值，作为响应式对象，返回包裹后的引用对象；直接访问这个对象，需要访问对象的 value 属性，而对象作为 reactive 封装的对象属性或 vm 实例时，会自动展开，不用访问其 value 属性；如果 ref 的 key 和定义在 html 元素上的 ref 属性相同时，ref 指向 vnode 节点
+3. toRefs：响应式对象数据解耦需要使用 toRefs 包裹，后续使用到再了解实现原理。通常在 setup 中使用 props 来使用它。同 toRef 处理可能不存在的响应式属性
 4. onMounted()：通常在 setup 选项中使用，加入的方法会在 mounted 生命周期中执行。在 mounted 函数内部哪个位置执行呢？
 5. watch()：通常在 setup 选项中使用，用于监听 ref 生成的响应式对象
 6. computed()：通常在 setup 选项中使用，用于动态计算 ref 生成的响应式对象，具有返回值，这点与 watch 不同
@@ -89,10 +112,33 @@ import { reactive, ref, toRefs, onMounted, watch, computed, provide, inject... }
 2. 执行时机在组件创建之前，那具体在什么时候呢？是在 beforeCreate 之后吗？
 3. 参数为：props, context
 4. 作用：返回的内容(return obj, arr or string 等等)，是直接挂载到当前组件实例 this 对象上，用作给其他生命周期方法、method、watch、computed、template 等使用
-5. context对象包含属性：attrs, slots, emit
+5. context对象包含属性：attrs, slots, emit；context 是非响应式的，可以任意解构
 6. 不能访问的实例属性：data, computed, methods
-7. 返回 render 函数：会替代 template 和组件自身的 render 吗？
+7. 返回 render 函数：会替代 template 和组件自身的 render 吗？会
+
+## 4 ts 支持
+
+1. webpack 配置 ts-loader 处理 ts
+```javascript
+{
+  test: /\.tsx?$/,
+  loader: 'ts-loader',
+  options: {
+    appendTsSuffixTo: [/\.vue$/],
+  },
+  exclude: /node_modules/,
+}
+```
+2. 所有 vue 组件使用 `defineComponent` 包裹起来
+```javascript
+import { defineComponent } from 'vue'
+export default defineComponent({
+})
+```
+3. computed 对象数据需要明确添加 ts 类型注解
+4. 
 
 ## 参考文章
 
-[vue3 中文官网](https://vue3js.cn/docs/zh/guide/migration/introduction.html#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
+[vue3 中文官网](https://vue3js.cn/docs/zh/guide/migration/introduction.html#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)  
+[vue3 + ts](https://v3.cn.vuejs.org/guide/typescript-support.html#typescript-%E6%94%AF%E6%8C%81)
