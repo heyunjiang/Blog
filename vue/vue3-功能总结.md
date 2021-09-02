@@ -76,11 +76,85 @@ app.use(VueRouter)
 
 通过 createApp 返回的 app 对象，可以用于注册全局组件、注册全局指令、使用 use 加载插件，类似 vue2 的 Vue.component 等
 
+1. app.component
+2. app.directive
+3. app.config
+4. app.use
+5. app.mixin
+6. app.mount
+7. app.unmount
+8. app.provide
+9. app.version
+
+问题：  
+1. app 是如何影响到内部其余组件的
+2. 它自身就是一个实例吗
+3. 内部组件是如何渲染及挂载的
+
 ### 1.5 全局 api
 
+指的是 `import { createApp, ref } from 'vue'` 引入的 api，也就是 vue export 的各种对象，与 createApp 生成的 app 对象不同  
+1. vue 输出的全局 api 是提供给开发者自定义组合使用的功能
+2. app 是?看看源码实现吧
 
+1. createApp
+2. h
+3. defineComponent: 目前来看是用于 ts 时
+4. defineAsyncComponent：定义异步组件，只会在需要的时候才去加载，同 router 配合时需要查看 router 文档
+5. defineCustomElement：定义自定义组件，暂时没有用到
+6. resolveComponent：在 setup 和 render 中使用，返回一个 component，找不到则返回组件名称；是配置对象，还是组件实例？
+7. resolveDynamicComponent：在 setup 和 render 中使用，返回一个已解析的 component 或 vnode，参数为 name 或组件配置对象，找不到会发出警告
+8. resolveDirective：在 setup 和 render 中使用，返回一个 Directive，参数为 name，找不到返回 undefined
+9. withDirectives
+10. createRenderer: 自定义渲染器，有啥场景？
+11. nextTick：同 vm.$nextTick
+12. mergeProps: 用于 props 合并，返回新对象，不会修改愿对象，是如何做到的？对象 deepclone 吗？
+13. useCssModule：在 setup 和 render 中使用，返回当前组件的 css module 对象，与 vue2 手动引入 css 文件处理不同
+14. version
+
+问题：为什么不包含响应式 api
 
 ### 1.6 实例 api
+
+属性  
+1. vm.$data
+2. vm.$props
+3. vm.$el: 当前实例正在使用的根元素，多根节点则是顶部的占位元素
+4. vm.$options: 组件配置选项
+5. vm.$parent：访问父实例，但是没有 vm.$children 了
+6. vm.$root：组件树根实例
+7. vm.$slot: vm.$slot.default(), vm.$slot.header() 函数调用，统一了默认插槽和具名插槽，废除了 vm.$scopedSlot
+8. vm.$refs: 同 vue2
+9. vm.$attrs：包含了所有没有被解析的 template 属性，比如 class, style, 事件等
+
+方法  
+1. vm.$watch
+2. vm.$emit
+3. vm.$forceUpdate: 影响实例本身和插槽内的子组件，不是所有子组件？如何理解
+4. vm.$nextTick
+
+### 1.7 响应式 api
+
+是一种特殊的 全局 api，包含了基础 api reactive 等、Refs、Computed 和 watch
+
+基础响应式，主要是 reactive
+1. reactive()：将 object 对象转换为响应式的，基于 proxy。和 ref 有什么区别？能处理基础类型和数组函数吗？
+2. readonly()
+3. isProxy(): 检测对象是否是基于 reactive or readonly 处理后的数据
+4. isReactive()
+5. isReadonly()
+6. toRaw(): 获取原始对象，绕过 proxy 访问和修改原始对象
+7. markRaw()：标记一个对象，返回对象本身，让其不会被 reactive 等转换为 proxy
+8. shallowReactive()：不同于 reactive，shallowReactive是只监听第一层。有什么用？
+9. shallowReadonly()：有什么使用场景？
+
+ref  
+1. ref()
+2. unref()
+3. toRef(): 获取响应式对象的某个属性，并且设置其为响应式值
+4. toRefs(): 批量获取响应式对象的第一层属性，并且设置属性为响应式值，返回的是普通对象，但是对象值是 ref 响应式的，主要用于解构赋值
+5. isRef()
+6. 
 
 ## 2 问题归纳
 

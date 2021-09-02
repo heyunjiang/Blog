@@ -19,3 +19,13 @@ author: heyunjiang
 1. http.createServer()：创建 http 服务器，结果为 http.Server 实例
 2. http.get()：是不带请求体的 http.request
 3. http.request()：发出 http 请求，可以指定远程服务器地址、端口，也可以指定请求 headers、method、protocol、timeout 等
+
+## 2 http.ServerResponse 类
+
+在使用 `http.createServer(options, requestListener)` 启动服务器之后，在 requestListener callback 或 request 事件时，作为第二个参数 response 传入
+
+服务器返回消息给客户端  
+1. response.write(data, encoding)
+2. response.end([data[, encoding]][, callback])
+
+每个 response 必须调用 end 方法结束本次请求，调用之后表示通知服务器本次请求已经完成

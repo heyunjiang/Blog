@@ -1,11 +1,12 @@
 # 原由
 
-time: 2018.11.1
+time: 2018.11.1  
+udpate: 2021-09-02 17:21:18
 
 目录
 
 [1 目的](#1-目的)  
-[2 koa](#2-koa)  
+[2 koa 基础总结](#2-koa-基础总结)  
 &nbsp;&nbsp;[2.1 koa 对象方法](#2.1-koa-对象方法)  
 &nbsp;&nbsp;[2.2 上下文 Context](#2.2-上下文-Context)  
 &nbsp;&nbsp;[2.3 Request 别名](#2.3-Request-别名)  
@@ -18,10 +19,10 @@ time: 2018.11.1
 已经掌握了前端开发，目前向中间层学习，准备入手 nodejs 做服务端，但是又没有找到合适的学习方式。  
 看到 thinkjs 和 egg 都是基于 koa 进行扩展的，打算先学习一下 koa，通过 koa 学习 nodejs 的应用，在服务端的位置等。
 
-## 2 koa
+## 2 koa 基础总结
 
 1. koa 应用程序：包含一组中间件函数的对象
-2. 中间件组织方式：堆栈，采用 next() 放入栈 (非队列)
+2. 中间件组织方式：采用队列方式组织和执行各中间件，内部通过 next 显示调用下一个中间件函数执行器
 
 ```javascript
 const Koa = require('koa');
@@ -46,10 +47,6 @@ app.use(async ctx => {
 
 app.listen(3000);
 ```
-
-采用 new 的方式创建 app 对象，该对象有一系列方法
-
-这里总结了 koa 的一系列 api
 
 ### 2.1 koa 对象方法
 
@@ -96,9 +93,9 @@ app.on('error', (err, ctx) => {
 
 在每个中间件中，其参数包含了 `ctx` 对象
 
-1. ctx.req：node 的 request 对象
+1. ctx.req：node 的 request 对象，不建议直接使用
 2. ctx.res：node 的 response 对象
-3. ctx.request: koa 的 request 对象
+3. ctx.request: koa 的 request 对象，ctx.req === ctx.request.req，通常使用 ctx.request 处理请求 request
 4. ctx.response：koa 的 response 对象
 5. ctx.state：推荐的命名空间，用于通过中间件传递信息和前端视图
 6. ctx.app：应用程序的实例引用
@@ -108,7 +105,7 @@ app.on('error', (err, ctx) => {
 10. ctx.assert(value, status, msg, properties)： 类似 invarient ，当 !value 时，抛出错误
 11. ctx.respond：通过设置 `ctx.respond = false` ，可以绕过 koa 内置的 response 处理，操作原始的 response 对象
 
-### 2.3 Request 别名
+### 2.3 koa Request 对象访问代理
 
 ctx.header
 ctx.headers
@@ -140,7 +137,7 @@ ctx.acceptsCharsets()
 ctx.acceptsLanguages()
 ctx.get()
 
-### 2.4 Response 别名
+### 2.4 koa Response 对象访问代理
 
 ctx.body
 ctx.status
@@ -193,10 +190,171 @@ response.body 类型与 http 协议的 `Content-Type` 字段关系
 3. Stream - `application/octet-stream`
 4. Object - `application/json` Object 通常为普通对象、数组
 
-## 3 koa 实战
+## 3 koa 源码解析
 
-koa 只是对 http 服务做了一个封装，主要 api 3 类，context, request, response
+从源码了解 koa 的整体功能，了解核心 api 实现，比如 koa 对象，实例方法 use, listen，ctx 对象等  
+问题：  
+1. koa 中间件执行顺序是怎么样？在官方文档中说的是：按照堆栈的方式组织和执行的，也就是说定义在后面的会先执行？不会，属于队列方式，先定义先执行，还是得实际操作或看源码才能明白
+2. 为什么要封装 context 对象？什么时候创建？
 
-对于 nodejs 的应用，很多还是要写它原本的api。那怎么实战 nodejs 呢？
+koa 对象核心代码
+```javascript
+module.exports = class Application extends Emitter {
+  constructor (options) {
+    super()
+    this.middleware = []
+    this.context = Object.create(context)
+    this.request = Object.create(request)
+    this.response = Object.create(response)
+  }
+  listen (...args) {
+    const server = http.createServer(this.callback())
+    return server.listen(...args)
+  }
+  use (fn) {
+    this.middleware.push(fn)
+    return this
+  }
+  callback () {
+    const fn = compose(this.middleware)
+    const handleRequest = (req, res) => {
+      const ctx = this.createContext(req, res)
+      return this.handleRequest(ctx, fn)
+    }
+    return handleRequest
+  }
+  handleRequest (ctx, fnMiddleware) {
+    const res = ctx.res
+    res.statusCode = 404
+    const onerror = err => ctx.onerror(err)
+    const handleResponse = () => respond(ctx)
+    onFinished(res, onerror)
+    return fnMiddleware(ctx).then(handleResponse).catch(onerror)
+  }
+}
 
-[thinkjs](https://thinkjs.org/doc/index.html)
+function respond (ctx) {
+  const res = ctx.res
+  let body = ctx.body
+  body = JSON.stringify(body)
+  res.end(body)
+}
+```
+
+归纳总结：  
+1. koa 代码简洁，内部调用 `http.createServer` 创建服务器，封装了自身的插件规范、request、response，没有多做什么事情
+2. 中间件采用数组栈保存，通过 compose 处理调用顺序，生成的 fn 是如何调用内部中间件
+
+### 3.1 koa 中间件编写
+
+```javascript
+app.use(async (ctx, next) => {
+  await next();
+  const rt = ctx.response.get('X-Response-Time');
+});
+
+app.use(async (ctx, next) => {
+  const start = Date.now();
+  await next();
+  const ms = Date.now() - start;
+  ctx.set('X-Response-Time', `${ms}ms`);
+});
+
+app.use(async ctx => {
+  ctx.body = 'Hello World';
+});
+```
+
+中间件函数是输入 context 对象，返回 promise 对象
+
+### 3.2 koa 中间件实现原理
+
+前面总结到如下内容  
+1. 中间件保存为 middleware 数组，每个中间件定义为一个 async 函数，内部处理异步逻辑
+2. 通过 compose 调用所有中间件，compose 返回一个函数
+3. 在 http request callback 中，compose 返回函数被执行，输入参数为 ctx 对象
+4. compose 返回函数执行结果输出为 promise
+
+来看看 compose 是如何调用函数数组的  
+```javascript
+function flatten (arr) {
+  return arr.reduce((acc, next) => acc.concat(Array.isArray(next) ? flatten(next) : next), [])
+}
+function compose (middleware) {
+  middleware = flatten(middleware)
+  return function (context, next) {
+    // last called middleware #
+    let index = -1
+    return dispatch(0)
+    function dispatch (i) {
+      if (i <= index) return Promise.reject(new Error('next() called multiple times'))
+      index = i
+      let fn = middleware[i]
+      if (i === middleware.length) fn = next
+      if (!fn) return Promise.resolve()
+      try {
+        return Promise.resolve(fn(context, dispatch.bind(null, i + 1)));
+      } catch (err) {
+        return Promise.reject(err)
+      }
+    }
+  }
+}
+```
+
+归纳总结  
+1. 基于 promise 特性，在 compose 返回函数执行时，其返回的 promise 需要在各中间件函数执行完毕之后，才会变成 resolved 状态
+2. 各中间件需要显示调用 `dispatch` 执行器，也就是 `next()`
+3. 中间件函数调用顺序为先定义先执行，可以通过 next 显示调用下一个中间件函数执行器，执行完毕再回到当前函数，基于 `async` 异步函数原理
+
+### 3.3 createContext
+
+每次 http 请求调用的 callback
+```javascript
+callback () {
+  const fn = compose(this.middleware)
+  const handleRequest = (req, res) => {
+    const ctx = this.createContext(req, res)
+    return this.handleRequest(ctx, fn)
+  }
+  return handleRequest
+}
+```
+
+createContext  
+```javascript
+createContext (req, res) {
+  const context = Object.create(this.context)
+  const request = context.request = Object.create(this.request)
+  const response = context.response = Object.create(this.response)
+  context.app = request.app = response.app = this
+  context.req = request.req = response.req = req
+  context.res = request.res = response.res = res
+  request.ctx = response.ctx = context
+  request.response = response
+  response.request = request
+  context.originalUrl = request.originalUrl = req.url
+  context.state = {}
+  return context
+}
+```
+
+归纳分析：  
+1. 约定：通过访问 context.request 来操作请求，不要通过 context.req 来操作原始请求对象，通 response
+2. 为什么要对 node.request 封装一层？
+
+## 4 归纳总结
+
+1. koa 就是一个包含一组中间件函数的对象
+2. 中间件函数是按照队列的方式进行组织执行的，基于 async 异步实现，通过 next 显示调用中间件函数执行器
+3. koa 仅仅实现了一个 http 服务器，封装了 context 对象供各中间件对 request, response 处理
+4. nodejs 服务端编程，几乎都是需要基于 http 服务实现，而 koa 正是对 http 服务的一层封装
+5. context 对象在 app 各中间件应用中全局可以使用
+6. 每次 http 请求都新建一个 context 对象，并且调用中间件链
+
+## 参考文章
+
+[thinkjs](https://thinkjs.org/doc/index.html)  
+[koa2 官网](https://koa.bootcss.com/)  
+[koa 进阶学习笔记](https://chenshenhai.github.io/koa2-note/note/start/info.html)  
+[koa 中间件](https://github.com/guo-yu/koa-guide#%E4%B8%AD%E9%97%B4%E4%BB%B6middleware)
