@@ -17,6 +17,20 @@ author: heyunjiang
 1. 文本超出显示省略号：使用 nowrap
 2. 文本换行风格：使用 normal 或者 pre-inline，主要是处理连续空白和自动换行
 
+遇到的问题：在将浏览器中 dom 结构中的换行数据(没有明显包含 \n，但是是存在换行字符串)复制之后，在 console 中赋值给一个变量，赋值表达式还看得到明显换行，但是赋值计算之后则变成了 \n，则无法在浏览器中使用 `white-space: pre-inline` 来渲染出换行效果  
+```javascript
+let str = `But ere she from the church-door stepped
+     She smiled and told us why:
+'It was a wicked woman's curse,'
+     Quoth she, 'and what care I?'
+
+She smiled, and smiled, and passed it off
+     Ere from the door she stept—`
+str //
+"But ere she from the church-door stepped\n     She smiled and told us why:\n'It was a wicked woman's curse,'\n     Quoth she, 'and what care I?'\n\nShe smiled, and smiled, and passed it off\n     Ere from the door she stept—"
+```
+可以看到换行已经变成了换行符 \n，那么现在该怎么渲染 str 达到换行效果呢？
+
 ## 2 和 overflow-wrap, word-break,  hyphens 的关系
 
 white-space 是定义了空白及换行，那么 overflow-wrap 也是定义了换行，2者有什么联系？

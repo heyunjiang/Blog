@@ -1,7 +1,8 @@
 # typescript
 
 time: 2018.8.09  
-update: 2020.12.28
+update: 2020.12.28  
+update: 2021-09-16 19:24:39
 
 一直都没有怎么去学习 typescript ，但是今天阅读 antd 源码的时候，发现它是用 ts 写的，大部分源码都能看懂，但是它的一些语法不是很懂，比如 `export default class Button extends React.Component<ButtonProps, any>` ，它尾巴上的 `<ButtonProps, any>` 是什么，是 React.Component 自带可以这样子写的吗，还是 ts 赋予的？
 
@@ -26,12 +27,16 @@ update: 2020.12.28
 1. ts 是 js 类型的超集，可以编译成纯 js
 2. 存在强类型语言的某些特征，比如 static 、 interface 等，方便类型约束，提升代码鲁棒性
 
+问题：es6 class 有 static, interface 没？
+
 优势  
 1. 语义化增强：完备的类型系统让代码阅读更方便明了
 2. 语法错误提前暴露
 3. 编辑器和ide代码补全
 4. 类型系统包容性强：类型推论、第三方系统兼容性强
 5. 社区活跃：vue、antd 都是用 ts 写的
+
+目的：完善 javascript 过于灵活导致的代码质量参差不齐的问题
 
 ## 2 typescript 基本语法
 
@@ -43,6 +48,8 @@ update: 2020.12.28
 6. 类型断言：使用 `as` 关键字，可用于接口、类的断言，用以解决 ts 报错的不确定性问题。`let strLength: number = (someValue as string).length;`；也可以使用 `(<string>someValue).length` 来做类型断言
 7. 类型别名：使用 `type` 关键字，type NameOrResolver = Name | NameResolver
 8. 枚举：使用 `enum` 关键字，enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat} 约定取值范围，会被编译为从 0 开始递增的数组。在 ts 中作为一种数据结构，编译之后为数组和对象的结合体
+
+问题：es 函数默认值是 `=` 还是 `:`
 
 类型声明  
 1. 普通类型：采用冒号 `:`，例如 let myFavoriteNumber: string | number;

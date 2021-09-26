@@ -12,7 +12,7 @@ udpate: 2021-09-02 17:21:18
 &nbsp;&nbsp;[2.3 Request 别名](#2.3-Request-别名)  
 &nbsp;&nbsp;[2.4 Response 别名](#2.4-Response-别名)  
 &nbsp;&nbsp;[2.5 koa response](#2.5-koa-response)  
-[3 koa 实战](#3-koa-实战)  
+[3 koa 源码解析](#3-koa-源码解析)  
 
 ## 1 目的
 
@@ -265,13 +265,16 @@ app.use(async ctx => {
 });
 ```
 
-中间件函数是输入 context 对象，返回 promise 对象
+1. 中间件函数是输入 context 对象，返回 promise 对象
+2. koa 是通过中间件函数来处理 http 请求及响应，没有其他地方来处理，如果没有中间件，则最终返回的 context.body 是空内容
+3. next 函数表示调用下一个中间件，等待下一个中间件 promise resolve 之后，才会继续执行当前中间件
+4. 每次请求都会完整调用一遍所有中间件
 
 ### 3.2 koa 中间件实现原理
 
 前面总结到如下内容  
-1. 中间件保存为 middleware 数组，每个中间件定义为一个 async 函数，内部处理异步逻辑
-2. 通过 compose 调用所有中间件，compose 返回一个函数
+1. 中间件保存为 middleware 数组，每个中间件定义为一个 `async` 函数，内部处理异步逻辑
+2. 通过 `compose` 调用所有中间件，compose 返回一个函数
 3. 在 http request callback 中，compose 返回函数被执行，输入参数为 ctx 对象
 4. compose 返回函数执行结果输出为 promise
 
@@ -303,9 +306,9 @@ function compose (middleware) {
 ```
 
 归纳总结  
-1. 基于 promise 特性，在 compose 返回函数执行时，其返回的 promise 需要在各中间件函数执行完毕之后，才会变成 resolved 状态
-2. 各中间件需要显示调用 `dispatch` 执行器，也就是 `next()`
-3. 中间件函数调用顺序为先定义先执行，可以通过 next 显示调用下一个中间件函数执行器，执行完毕再回到当前函数，基于 `async` 异步函数原理
+1. 基于 promise 特性，在 compose 返回函数执行时，其返回的 promise 需要在各中间件函数执行完毕之后(函数执行，其参数如果为函数执行表达式，那么需要等待参数函数执行完毕，才会去执行当前函数)，才会变成 resolved 状态
+2. 中间件函数调用器：各中间件需要显示调用 `dispatch` 执行器，也就是 `next()`
+3. 洋葱模型：中间件函数调用顺序为先定义先执行，可以通过 next 显示调用下一个中间件函数执行器，执行完毕再回到当前函数，基于 `async` 异步函数原理
 
 ### 3.3 createContext
 

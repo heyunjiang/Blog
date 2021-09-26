@@ -28,4 +28,4 @@ author: heyunjiang
 1. response.write(data, encoding)
 2. response.end([data[, encoding]][, callback])
 
-每个 response 必须调用 end 方法结束本次请求，调用之后表示通知服务器本次请求已经完成
+每个 response 必须调用 `end` 方法结束本次请求，调用之后表示通知服务器本次请求已经完成

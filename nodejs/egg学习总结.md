@@ -1,7 +1,8 @@
 # egg 学习总结
 
 time: 2018.11.08  
-update: 2020.11.10
+update: 2020.11.10  
+update: 2021-09-26 10:32:48
 
 ## 1 为什么学习 egg
 
@@ -12,6 +13,11 @@ update: 2020.11.10
 
 1. 启动的 nodejs 服务，如果只做中间层，其在整个应用中的架构中是什么位置？如果与其他服务通信？
 2. egg 是如何同 koa 整合的？
+3. 数据库为什么要使用 orm，或者说使用 orm 有什么好处？
+4. egg-mysql 插件工作原理是什么？
+5. egg 应用的启动流程？
+6. egg loader 是什么？通过 egg-core 查看
+7. egg 本身作为一个最基础的框架，被应用使用
 
 ## 3 egg 知识点
 
@@ -105,7 +111,7 @@ describe('test/app/middleware/robot.test.js', () => {
 
 ### 3.5 扩展
 
-在 app/extend 目录下，app/extend/{application,context,request,response}.js 来扩展 Koa 中对应的四个对象的原型
+在 app/extend 目录下，app/extend/{application, context, request, response, helper}.js 来扩展相应对象
 
 ### 3.6 插件
 
@@ -123,6 +129,21 @@ describe('test/app/middleware/robot.test.js', () => {
 2. 定时从远程接口更新本地缓存
 3. 定时进行文件切割、临时文件删除
 
+### 3.8 内置对象
+
+Application  
+1. 从 koa 继承而来
+2. 每个应用只会实例化一个
+3. 在基于 controller, service 基类的实例中, 使用 this.app, this.ctx.app 访问 application 对象
+
+Context  
+1. 从 koa 继承而来
+2. 每个请求都会实例化一个
+3. 会将 service 挂载到 context 对象上，所以可以通过 this.ctx.service.hello 来获取
+4. 在基于 controller, service 基类的实例中, 使用 this.ctx 访问 context 对象
+
+还有 Controller, Service, Request, Response, Helper, Config, Logger, Subscription 对象
+
 ## 4 数据库
 
 这里总结下 mysql 使用技巧  
@@ -137,6 +158,13 @@ ORM 简要总结
 
 总结：  
 1. orm 是一种关系型数据库操作由面向对象方式的操作规范，而 typeorm 是一个 orm 的 `数据库框架`
+
+## 5 egg 源码解读
+
+基础背景  
+1. egg 继承 koa 实现
+2. 使用 loader 实现了 controller, service 等模块的加载和处理
+3. egg 本身
 
 ## 参考文章
 
