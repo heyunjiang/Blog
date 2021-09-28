@@ -87,6 +87,19 @@ author: heyunjiang
 
 ### 4.1 remote 工作原理
 
+## 5 解决方案 - 全局样式污染
+
+主应用可能污染子应用，子应用可能污染整个父应用。  
+目前运行方式：同时启动父子应用，在父应用内部加载子应用，同时查看效果，所以暂时不处理父应用污染子应用问题。这里仅解决 `子应用污染父应用` 问题
+
+污染类型  
+1. 不同组件库样式污染
+2. 自定义全局样式污染
+
+针对不同组件库，解决方案是 `按需引入样式`，比如 element-plus 可以使用 [unplugin-vue-components](https://element-plus.gitee.io/zh-CN/guide/quickstart.html#on-demand-import) 实现按需加载组件和样式
+
+针对全局样式污染：需要在所有全局样式前增加命名空间，名字为子应用 id，保证全局唯一
+
 ## 参考文章
 
 [webpack 官方](https://webpack.docschina.org/concepts/module-federation/)  
