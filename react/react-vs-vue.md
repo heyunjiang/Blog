@@ -48,20 +48,20 @@ update: 2019.4.2
 | `1渐进式框架` | ✔  | ✔  |
 | `2虚拟dom` | ✔  | ✔  |
 | `2虚拟dom`-特点 | 一个根实例 + 树形后代多实例  | 一个根实例 + 树形后代多实例  |
-| `2虚拟dom`-更新方式 | diff新旧虚拟树?  | diff?  |
+| `2虚拟dom`-更新方式 | diff新旧虚拟树  | diff 新旧虚拟树  |
 | `3数据流`-响应式数据 | 非响应式数据 | 双向数据邦定 |
 | `3数据流`-props | 单向数据流 | 单向数据流 |
-| `3数据流`-data | 在 constructor 方法内部设置 this.state = {} | data(){return {}}，首层为响应式数据？ |
+| `3数据流`-data | 在 constructor 方法内部设置 this.state = {} | data(){return {}} |
 | `3数据流`-数据驱动 | 主动调用 setState 方法，添加到数据更新队列 | 1. 响应式数据：defineProperty、proxy 添加 watcher 给每个组件的 data 对象；<br>2. 也可以主动 this.hello = 'world'，数据变动添加到更新队列；<br>3. this.$set(this.hello, 'world', 27) 添加响应式数据，或者更新数组、对象的值，直接更新数组对应下标值、更新对象属性是不能将数据添加到更新队列，界面无法更新；<br>4. v-model、v-bind.sync 双向邦定标单数据 |
 | `3数据流`-数组更新 | this.setState() | 支持直接 arr.push() 或者 arr = [...arr, newItem] |
 | `4组件`-格式 | 标准 es6 class 对象, `.js` | vue 指定格式, `.vue` |
 | `4组件`-根组件渲染 | ReactDOM.render(element, document.body) | new Vue({ele, router, template, components}) |
 | `4组件`-实例 | 每个组件都是一个 react 实例 | 每个组件都是一个 vue 实例 |
 | `4组件`-自定义组件命名 | 名称必须大写开头 | 名称可以大写小写开头 |
-| `4组件`-全局注册 |  | Vue.component()<br>一些通用、常用组件可以考虑全局注册，通过 webpack 进行目录性质的全局注册 |
-| `4组件`-局部注册 | export default class Hello extends React.component {} | export default {name:'Hello', data(){return {}}} |
+| `4组件`-全局注册 | 无 | Vue.component()<br>一些通用、常用组件可以考虑全局注册，通过 webpack 进行目录性质的全局注册 |
+| `4组件`-局部注册 | 输出 class 对象或定义函数返回元素，export default class Hello extends React.component {} | 输出 object 配置对象或定义函数返回元素，export default {name:'Hello', data(){return {}}} |
 | `4组件`-jsx-解析 | React.createElement(component, props, ...children) 的语法糖 | render: createElement => createElement(...) |
-| `4组件`-jsx-内容变量 | {hello} | jsx 同 react 一致，模板：{{hello}}、v-html |
+| `4组件`-jsx-内容变量 | {hello} | jsx 同 react 一致，模板：{{hello}} |
 | `4组件`-jsx-属性变量 | `<span title={this.state.title}>` | jsx 同 react 一致，模板：`<span v-bind:title="title">` |
 | `4组件`-jsx-属性批量传递 | {...childPros} | jsx 同 react 一致，模板：v-bind="childPros" |
 | `4组件`-jsx-属性变量不传值 | 默认为 true | 默认为 true |
@@ -84,20 +84,11 @@ update: 2019.4.2
 | `5生命周期`-实例错误处理 | getDerivedStateFromError()、componentDidCatch() | errorCaptured() |
 | `6事件`-邦定 | onClick="clickCallback" | v-on:click="clickCallback" 或 @click="clickCallback" |
 | `6事件`-兼容性 | ✔  | ✔  |
-| `6事件`-访问原始event |   | @click="func($event)"  |
-| `6事件`-事件修饰 |   | .stop, .prevent, .capture, .native, .self, .once, .passive，按键修饰、系统修饰  |
-| `6事件`-v-model |   | 在自定义组件上使用 v-model ，需要在组件内部声明 model 配置，然后 emit 事件  |
-| `6事件`-v-bind.sync |  | 实现原理类似 v-model ，只不是 emit 事件时需要加前缀 `update`  |
-| `6事件`-自定义-定义事件并触发 |   | 定义：@personalEvent="func";<br> 触发：this.$emit('personalEvent')  |
-| `6事件`-自定义-事件名 |   | 要求必须定义和调用时一致，这个和组件名、props名不一样，事件名采用 kebab-case 方式  |
 | `扩展`-状态管理 | redux  | vuex  |
+| 渲染到指定 dom 节点 | ReactDom.createPortal()  | vue3 teleport 属性  |
 
-待补充：  
-1. 在不同生命周期时，框架做了什么事情
-2. 指令 v-if 的实现原理，vue-loader 是如何处理的，AST, 需要详细总结
-3. 组件实例个数如何计算，占用内存大小跟组件个数有关系吗？
-4. vue 模板如何解析，结合 vue-loader，不同于 jsx
-5. .vue 组件如何生成实例的
+相似点  
+1. teleport 为了解决样式跳出父组件限制的
 
 ## 2 vue 特色
 

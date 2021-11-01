@@ -141,4 +141,4 @@ Components.utils.unload()
 ## 参考文章
 
 [es6 阮一峰](https://es6.ruanyifeng.com/#docs/module)  
-[js code module](https://developer.mozilla.org/zh-CN/docs/Mozilla/JavaScript_code_modules)
+[js code module](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Modules)
