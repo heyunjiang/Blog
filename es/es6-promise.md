@@ -10,9 +10,8 @@ update: 2019.01.16
 [2. promise 原型上的方法](#2-promise-原型上的方法)  
 [3. promise 错误处理](#3-promise-错误处理)  
 [4. promise 特征](#4-promise-特征)  
-[5. promise 学习中的问题](#5-promise-学习中的问题)  
-[6. promise 应用](#6-promise-应用)  
-[7. promise 模拟实现](#7-promise-模拟实现)  
+[5. promise 应用](#5-promise-应用)  
+[6. promise 模拟实现](#6-promise-模拟实现)  
 
 创建 promise 中的代码会立即执行，then 内部任务属于 microtask 任务，会在本轮事件结束之前调用; 而 macrotask 会在下轮事件开始之前调用
 
@@ -85,9 +84,10 @@ Promise.reject(thenable)
 
 ## 3 promise 错误处理
 
-1. 在 promise 内部发生的错误，具有冒泡性质，会被最近的一个 catch 捕获到
+1. 在 promise 内部发生的错误，具有冒泡性质，会被最近的一个 catch 捕获到，所以可以只在最后一个 catch 处理所有的错误
 2. 在 resolve() 之后抛出的错误，会被忽略
 3. 在 promise 内部发生的错误，不会传递到外层代码，即不能被 try...catch 捕获到，成为一个未被捕获到的事件
+4. throw 错误会直接创建一个 rejected 的返回，会被 .catch 捕获，同作用域内其余代码不会继续执行
 
 ## 4 promise 特征
 
@@ -96,41 +96,18 @@ Promise.reject(thenable)
 1. promise 状态只能由异步操作结果决定，不受其它操作影响
 2. promise 内部状态变化，由实例内部的 `resolve` 和 `reject` 2个函数实现，分别对应 fullfilled 和 rejected 状态，状态改变之后不能再变
 3. promise 在实例化创建的时候，会立即执行，不能被取消
-4. promise 内部抛出的错误，不会反应到外部
+4. promise **内部抛出的错误，不会反应到外部**
 5. promise 只有构造函数的参数函数有 `resolve` 和 `reject` 2个函数，其他 promise 实例不能使用这2个函数
 6. new Promise() 生成的是一个对象
 7. then 方法的参数为 promise 对象的回调函数
 8. then 方法返回一个新的 promise 对象，从进入时状态为 pending 状态，因此可以链式调用
+9. resolve 一个 promise，这个 promise 会在之后调用，等它的状态变化之后，之前的链式 then 才会继续执行
+10. 非链式调用的 then 加入的回调，会在 promise resolve 之后一起执行了，所以 promise 的 **回调可能是多个**
+11. then 执行返回普通值
 
-## 5 promise 学习中的问题
+## 5 promise 应用
 
-1. resolve(param) 函数参数 param 传递给 then 方法的第一个参数函数，并且 resolve 执行后将通过构造函数生成的 promise 对象的状态变成 fulfilled。如果这个 param 参数为一个 promise ，那么这个 promise 对象的状态如何变化呢？
-2. promise 对象的状态是否必须从 pending 变成 fulfilled 或 rejected？
-3. then 方法返回的 promise 对象，如果不包含异步操作，它的状态如何变化，是否可以链式调用？
-4. promise 的异步任务回调为什么就能链式写法呢？
-
-### 5.1 resolve(param) 函数参数 param 传递给 then 方法的第一个参数函数，并且 resolve 执行后将通过构造函数生成的 promise 对象的状态变成 fulfilled。如果这个 param 参数为一个 promise ，那么这个 promise 对象的状态如何变化呢？
-
-答：构造函数通过 resolve 方法传递参数 promiseB，同 then 方法返回值。如果传递的是一个 promise 对象 `promiseB`，resolve 方法会作一个判断，如果是 promise 对象，则 promiseB 会立即调用 `promise.then(resolve, reject)`，此刻 promiseB 调用前一个对象的 `resolve | reject` 方法，promiseB 状态是已经确定了的，这就让 promiseB 决定了前一个 promise 对象的状态了。
-
-### 5.2 promise 对象的状态是否必须从 pending 变成 fulfilled 或 rejected？
-
-答：不是，比如通过构造函数创建的 promise 对象，如果内部不调用 resolve() 方法，则该 promise 对象始终为 `pending` 状态
-
-### 5.3 then 方法返回的 promise 对象，如果不包含异步操作，它的状态如何变化，是否可以链式调用？
-
-答：如果不包含异步操作，则直接执行完成，状态为 `fulfilled`。  
-如果包含异步操作呢？比如返回的是一个 promise ，则这个问题就同 5.1 一样了，在 then 方法中返回 promise 对象，跟在构造函数中调用 resolve(param) 方法传递 promise 一样。  
-如果不返回 promise ，则默认是 fulfilled。
-
-### 5.4 promise 的异步任务回调为什么就能链式写法呢？
-
-答：简单讲，promise 的 then 方法的参数，是我们写的回调处理函数，不是立即执行，是作为参数传递的。
-
-## 6 promise 应用
-
-在常规使用中，通常我们不会使用构造函数 `new Promise()` 方式创建 promise 对象，而是直接使用某些具体的 api 来创建 promise 对象，比如 fetch 等方法
-
+在常规使用中，通常我们不会使用构造函数 `new Promise()` 方式创建 promise 对象，而是直接使用某些具体的 api 来创建 promise 对象，比如 fetch 等方法  
 promise 对象的状态变化，可以在一定时间后 resolved ，也可以立即 resolved。
 
 ```javascript
@@ -140,7 +117,7 @@ const wait = time => new Promise(resolve => setTimeout(resolve, time || 10000))
 Promise.resolve().then()
 ```
 
-## 7 promise 模拟实现
+## 6 promise 模拟实现
 
 ```javascript
 const PENGDING = 'pending';

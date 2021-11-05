@@ -18,7 +18,7 @@ async 就是一个函数的修饰符，不同于普通函数，async 返回一�
 async 函数是 generator 函数的语法糖。与 generator 函数不同的是，async 有 4 项改进
 
 1. 内置执行器：对于异步操作的同步写法，generator必须亲自写执行过程，而 async 属于自执行，但是 async 函数不再有 generator 的保存状态功能了
-2. 更好的语义：使用 `async/awair` 代替 `*/yield`
+2. 更好的语义：使用 `async/await` 代替 `*/yield`
 3. 适用性更广：yield 命令后面通常是 Promise 对象，但是 await 后面可以是 promise 对象、thenable对象(包含then方法的对象)和原始类型的值
 4. 返回值是 promise ：generator 初次执行的返回值是一个 iterator 对象，可以采用 ... 遍历，每次调用 next() 执行返回一个对象 `{value: 0, done: false}` ；而 async 函数执行返回的结果是一个 promise
 
