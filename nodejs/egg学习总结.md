@@ -170,4 +170,5 @@ ORM 简要总结
 
 [egg 官网](https://eggjs.org/zh-cn/basics/schedule.html)  
 [orm 阮一峰](http://www.ruanyifeng.com/blog/2019/02/orm-tutorial.html)  
-[github typeorm](https://github.com/typeorm/typeorm)
+[github typeorm](https://github.com/typeorm/typeorm)  
+[egg 启动流程图](https://zhuanlan.zhihu.com/p/93026521)

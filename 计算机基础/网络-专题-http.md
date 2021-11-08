@@ -19,7 +19,7 @@
 
 ## 1 基础知识
 
-1. http协议简历在tcp协议之上，http协议的性能瓶颈及其性能优化都是针对tcp操作的
+1. http协议建立在tcp协议之上，http协议的性能瓶颈及其性能优化都是针对tcp操作的
 2. 目前在未应用https或http2之前，默认都是http1.1
 3. https是运行在ssl/tls上的安全协议
 4. spdy基于https，支持多路复用与header压缩，提高效率，拥有https的优点
@@ -28,7 +28,7 @@
 http 请求模型
 
 ```http
-// http post 请求头
+# http post 请求头
 POST /plmPortal/platForm/getPlatFormByEnterprise HTTP/1.1
 Host: plmcloud.yonyou.com
 Connection: keep-alive
@@ -42,7 +42,7 @@ Accept-Encoding: gzip, deflate
 Accept-Language: zh-CN,zh;q=0.9
 Cookie: JSESSIONID=43B8D7A60DFE3A8BC8EA3D28D87070A;
 
-// http post 响应头
+# http post 响应头
 HTTP/1.1 200 OK
 Server: Apache-Coyote/1.1
 Content-Type: text/javascript;charset=UTF-8
@@ -88,8 +88,7 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 
 ### 2.3 数据明文传输
 
-> 怎么解决？  
-> 加密
+改为加密传输
 
 ### 2.4 tcp3次握手
 
@@ -109,7 +108,8 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 
 使用过多会对服务器造成过大的压力
 
-> 怎么解决？
+> 怎么解决？  
+> 只使用一个长链接，复用
 
 ## 3 http1.1相较与http1.0的优点
 
@@ -147,17 +147,17 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 2. http2支持http、https传输，spdy强制https
 3. header压缩算法不同，http2 HPACK，SPDY DEFLATE
 
-http2 相较于 http1 只是在 http1 的基础上扩展了一些功能，还是采用的 tcp 作为传输层的控制协议，最大特点是长连接、多路复用、header压缩
+http2 相较于 http1 只是在 http1 的基础上扩展了一些功能，还是采用的 tcp 作为传输层的控制协议，最大特点是安全链接、多路复用、header压缩、长链接
 
 ## 8 有了http2，不用再做哪些优化
 
 1. HTTP2对数据进行二进制分帧，
-2. 在http和tls之间增加的一层分帧层，
-3. 每个分片包含分片信息和header压缩信息，
-4. 通过一个tcp连接，无序地传输分片，然后再在接收端组装，
-5. 而不必考虑代码合并或者sprite图优化了(所有需要的资源一次性地给你，然后分片无序传输给你)，
+2. 在http和tls之间增加的一层分帧层
+3. 每个分片包含分片信息和header压缩信息
+4. 通过一个tcp连接，无序地传输分片，然后再在接收端组装
+5. 而不必考虑代码合并或者sprite图优化了(所有需要的资源一次性地给你，然后分片无序传输给你)
 6. 这个唯一的tcp连接是一个双工字节流连接，服务器主动推送资源
-7. 分片之间存在优先级，解决了资源阻塞问题，
+7. 分片之间存在优先级，解决了资源阻塞问题
 
 ## 9 ssl 握手
 
@@ -171,7 +171,7 @@ http2 相较于 http1 只是在 http1 的基础上扩展了一些功能，还是
 
 握手阶段：在tcp3次握手之前，会有ssl四次握手
 
-1. 客户端->服务端：`clientHello`、`tls版本`、`可用的加密算法集合`、`可用的压缩算法`、`第一个随机数`
+1. 客户端->服务端：`clientHello`、`可用的tls版本`、`可用的加密算法集合`、`可用的压缩算法`、`第一个随机数`
 2. 服务端->客户端：`serverHello`、`采用的tls版本`、`采用的加密算法`、`采用的压缩算法`、`ca证书，含公钥`、`第二个随机数`
 3. 客户端->服务端: `确认加密结束`、`第三个随机数`、`ack`
 4. 服务端->客户端：`确认加密`、`ack`
@@ -233,6 +233,7 @@ chrome 勾选 disable-cache 就会在 http request header 加上 `cache-control:
 问题：  
 1. 304 是从哪里读取的缓存？memory or disk?
 2. 存储在 memory or disk，是有何根据？
+3. no-cache, max-age, expires, last-modified 优先级？
 
 [从浏览器的Disable cache谈起](https://juejin.cn/post/6844904145057480718)
 

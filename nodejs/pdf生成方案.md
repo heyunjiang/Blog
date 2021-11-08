@@ -204,4 +204,5 @@ time: 2021-11-05 16:00:14
 [puppeteer troubleshooting](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#chrome-headless-doesnt-launch)  
 [puppeteer linux 依赖安装](https://github.com/puppeteer/puppeteer/issues/560#issuecomment-325224766)  
 [puppeteer sandbox 问题](https://github.com/puppeteer/puppeteer/issues/3698)  
-[md-to-pdf](https://github.com/simonhaenisch/md-to-pdf)
+[md-to-pdf](https://github.com/simonhaenisch/md-to-pdf)  
+[centos 安装字体](https://www.cnblogs.com/qtong/p/10875438.html)
