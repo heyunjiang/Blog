@@ -191,7 +191,46 @@ time: 2021-11-05 16:00:14
 
 测试能成功，但是正式跑还是不行。自己又搞了一个基础镜像，把字体放在对应目录下就好
 
-## 3 在线编辑功能整体架构
+## 3 pdf 样式渲染问题
+
+time: 2021-11-18 10:19:26
+
+### 3.1 问题描述与分析
+
+问题描述：生成的 pdf 和实际页面内容样式存在差异，比如普通文本被识别为超链接、图片渲染位置不对、新标题换行失效、br 换行失效等问题  
+问题分析：之前使用的是 md 文件直接渲染成 html 然后转 pdf，而浏览器中跑的 app 是包含了自身的 style 样式，包含了 js 修改 dom 后的结果。我们同样使用 chromium 渲染，可以解决代理容器的默认样式问题。现在还剩下项目中的 style 和 js 执行结果处理
+
+### 3.2 解决方案探索
+
+既然纯渲染 md 不行，那就需要把样式补上。样式在页面最终渲染包含4个来源：style 标签插入样式、link 引入样式、dom 内联样式、js 插入样式。  
+那最终 puppetter 渲染的 html 文件怎么插入这4个来源的样式呢？这里通过 `md 渲染` 就不行了，有2个原因，一是因为实际浏览器中跑的可能是另一个 md 解析器，它又插入了自己的样式，我们服务端使用的 Marked 处理不一致，这里就存在一个通用型的问题。二是 md 渲染，我们就需要把所有页面上用到的 link、script 引入的外部文件内容预先获取到，插入 html 中，这里又有问题，如果只是通过渲染时再去加载，就会存在跨域资源获取不到的问题，如果预先获取，js 的内容就会很长。
+排除 md 渲染，还可以直接使用客户直接见到的 `页面渲染`，也就是获取浏览器直接渲染的结果
+
+页面渲染实现方案探索：  
+1. 通过 url 直接打开项目网站，项目前端支持 layout=noop 只渲染需要下载 pdf 的部分。优点是最完美保存前端样式与内容、生成速度快，缺点是如果需要登录，那么就不方便，比如做自动登录会存在账号信息泄露问题
+2. 遍历指定 dom tree，通过 window.getComputedStyle(node) 来获取样式对象，然后转换成内联样式。优点是最完美保存前端样式与内容，缺点是生成速度慢，并且 html string 会变得非常大，作为备选方案
+3. 获取指定 dom tree outerHTML，然后插入 style 和 link 内容。优点是简单方便，缺点是会丢失部分样式，因为父节点也会影响子节点样式
+4. 遍历完整 html tree，将 link 内容获取到并转为 style 插入 head。优点是最完美保存前端样式，暂时没发现缺点
+
+这里采用方案四：通过遍历 html tree，客户端生成 html string 传递给服务器，服务器再去调用 puppetter 渲染生成 pdf。
+
+### 3.3 遍历 html tree
+
+我们理想最终结果是一个纯 html 文件，不包含外链 css, js。通过客户端生成 html string  
+由于只需要指定的 dom 节点，不需要的节点需要设置成 `display: none`，可以让节点不渲染，但是又不丢失需要影响子节点的样式，比如 font 等继承属性、:last-child 等选择器样式
+
+那怎么去遍历 html tree 呢？
+1. 遍历 html.outerHTML 字符串，通过 `htmlparser2` 来解析 ast
+2. 直接遍历 dom tree
+
+暂时不好说谁好谁不好。我这里参考 html2canvas 的源码实现，直接遍历 dom tree，这里就比 ast 解析要简单，因为可以有 api 可以直接判断是否包含指定 dom 节点。
+在遍历 dom tree 要注意几点  
+1. 不需要的节点设置为 `display: none`
+2. 为了不影响原有 dom tree，这里需要对 dom 做层拷贝
+3. 如果是 link ，则使用 fetch 去获取内容，然后转换成 style 标签插入
+4. 如果是 script ，则直接丢弃
+
+## 4 在线编辑功能整体架构
 
 1. 基础环境：包含 centos + nodejs 14 lts + puppeteer 依赖的私有镜像
 2. 客户端：chromium 浏览器
@@ -205,4 +244,6 @@ time: 2021-11-05 16:00:14
 [puppeteer linux 依赖安装](https://github.com/puppeteer/puppeteer/issues/560#issuecomment-325224766)  
 [puppeteer sandbox 问题](https://github.com/puppeteer/puppeteer/issues/3698)  
 [md-to-pdf](https://github.com/simonhaenisch/md-to-pdf)  
-[centos 安装字体](https://www.cnblogs.com/qtong/p/10875438.html)
+[centos 安装字体](https://www.cnblogs.com/qtong/p/10875438.html)  
+[html2canvas](https://github.com/niklasvh/html2canvas)  
+[htmlparser2](https://www.npmjs.com/package/htmlparser2)
