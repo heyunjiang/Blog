@@ -334,6 +334,16 @@ js array sort 排序原理：默认是将数组每一项转换成字符串，然
 
 参数函数可以控制排序顺序，(a, b) => a - b 可以让数字数组升序排序
 
+#### 1.3.12 删除数组中某一项
+
+```javascript
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
+```
+
 ### 1.4 object
 
 #### 1.4.1 属性名表达式

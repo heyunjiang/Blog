@@ -8,22 +8,12 @@
  * 1. 图片、svg、ttf 字体，这3种不会去做处理，所以最终渲染结果可能会和页面有所差异
  */
 
-const download = string => {
-  const eleLink = document.createElement('a')
-  eleLink.download = 'test.html'
-  eleLink.style.display = 'none'
-  eleLink.href = URL.createObjectURL(new File([string], 'test.html'))
-  document.body.appendChild(eleLink)
-  eleLink.click()
-  document.body.removeChild(eleLink)
-}
-
 class DomCloner {
   constructor(element) {
     this.referenceElement = element
     this.referenceElementCloner = null
     this.documentElement = this.cloneNode(element.ownerDocument.documentElement)
-    this.fixHeight()
+    this.dofix()
   }
   cloneNode(node) {
     if (node.nodeType === 3) {
@@ -61,8 +51,9 @@ class DomCloner {
       const reg = new RegExp(`^(http:|https:)?\/\/${location.host}`)
       arrLinks.forEach(async node => {
         const href = node.getAttribute('href')
-        // 同域则改成 style 获取，跨域则保持 link 不变。用以解决同域登录态问题
-        if (!/^(http|\/\/)/.test(href) || reg.test(href)) {
+        // 同域则改成 style 获取，跨域则保持 link 不变。- 用以解决同域登录态问题
+        // 获取子路径文件、或者同域文件
+        if (!/^http/.test(href) || reg.test(href)) {
           try {
             const data = await fetch(node.getAttribute('href'), {
               credentials: 'same-origin',
@@ -83,6 +74,11 @@ class DomCloner {
       })
     })
   }
+  dofix() {
+    this.fixHeight()
+    this.fixUrl(this.documentElement.getElementsByTagName('link'))
+    this.fixUrl(this.documentElement.getElementsByTagName('img'))
+  }
   fixHeight() {
     if (!this.referenceElementCloner) { return }
     let parent = this.referenceElementCloner.parentNode
@@ -94,6 +90,17 @@ class DomCloner {
       parent.style.padding = '0'
       parent.style.margin = '0'
       parent = parent.parentNode
+    }
+  }
+  fixUrl(doms) {
+    if (doms instanceof HTMLCollection) {
+      const protocol = location.protocol
+      doms = [...doms]
+      doms.forEach(node => {
+        const attrType = node.hasAttribute('href') ? 'href' : 'src'
+        const value = node.getAttribute(attrType)
+        if (/^(\/\/)/.test(value)) { node.setAttribute(attrType, protocol + value) }
+      })
     }
   }
   destory() {
@@ -109,6 +116,16 @@ async function html2html(dom) {
   const html = cloneDocument.documentElement.outerHTML
   cloneDocument.destory()
   return html
+}
+
+const download = string => {
+  const eleLink = document.createElement('a')
+  eleLink.download = 'test.html'
+  eleLink.style.display = 'none'
+  eleLink.href = URL.createObjectURL(new File([string], 'test.html'))
+  document.body.appendChild(eleLink)
+  eleLink.click()
+  document.body.removeChild(eleLink)
 }
 
 (async () => {
