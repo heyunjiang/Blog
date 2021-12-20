@@ -21,7 +21,7 @@ vue2 升级到 vue3，包含了全局 api、tempalte 模板语法、组件配置
 基础变更点  
 1. createApp 代替 new Vue 生成组件，全局 api
 2. vite 入口是 html，直接使用 es6 script module 引入 js 执行
-3. vue3 组合式 api，vue2 选项式 api
+3. vue3 组合式 api，主要体现在 setup 函数，vue2 选项式 api
 4. 函数式组件：vue3 使用 export 箭头函数直接创建函数式组件，废弃了 functional 标识；与 vue2 不同，vue3 在有状态组件和函数式组件上性能已经持平
 5. data 对象：vue3 data 必须返回一个函数，与 vue2 可以返回 plain object | function 不同；mixin 混入的 data 只是浅层次合并
 6. template 多个根节点
@@ -210,7 +210,6 @@ export default defineComponent({
 })
 ```
 3. computed 对象数据需要明确添加 ts 类型注解
-4. 
 
 ## 参考文章
 

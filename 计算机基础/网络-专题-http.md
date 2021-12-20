@@ -74,6 +74,44 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 
 [cache 原理](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching)
 
+### 1.1 内容协商
+
+内容协商，指客户端和服务端协商资源表示形态，比如通过 `accept-encoding: gzip` 表示期望经过 gzip 压缩。通常包含如下信息  
+1. accept-encoding
+2. accept-language
+
+### 1.2 定长包体
+
+定长包体：如果 content-length 指定，那么接收端就会严格按照该参数来处理，如果实际数据 length 大于 content-length，那么接收方只会接收到指定长度的数据；如果实际数据 length 小于 content-length，那么接收方接收不到任何数据；
+不定长包体：如果 http header 包含了 `Transfer-Encoding: Chunk`，那么 content-length 就会失效
+
+### 1.3 分片下载
+
+通过 http header Range 字段，指定接收的二进制数据长度，比如 `curl http://www.xxx.xxx?hello.txt -H 'Range: byte=10-14'` 表示获取 txt 文件的第11-15个字符。
+1. 服务器会为这整个下载流程生成一个 `ETag` 指纹
+2. response http code: 206 partial content
+3. response Content-Range: bytes 123-129/129
+4. request Range: bytes=123-。如果服务器不支持 Range header，那么会返回 200 全部的内容
+5. 如果请求多段 Range:bytes=1-5,7-9，那么服务器会返回 `Content-Type: multipart/byteranges;boundary`
+
+### 1.4 条件请求
+
+响应头部  
+1. Etag: W"xsdfsa"，W 表示 weak 弱验证器，不要 W 表示强验证器
+2. Last-Modify: Http Date ，表示资源上次修改时间
+
+请求头部  
+1. If-Match: Etag
+2. If-None-Match: Etag
+3. If-Modify-Since: Http Date
+4. If-Unmodify-Since: Http Date
+5. If-Range: Etag/Http Date
+
+应用场景  
+1. 缓存更新，在缓存过期之后，可以通过 Etag or Http Date 去验证缓存是否失效。304 表示 not-modify，可以继续使用缓存，那后续还会验证是否失效吗？200 表示缓存更新
+2. 增量更新，在分片下载和暂停下载时，可以使用 `If-Unmodify-Since` 或 `If-Match` 判断是否有更新。412 表示验证失败，需要重新获取所有数据
+3. 更新丢失问题，在共同更新资源时，可以使用乐观锁保证第一个更新成功，后续的更新必须把第一次的更新获取到本地再更新。使用 `If-None-Match: Etag` 条件请求头来判断是否有更新
+
 ## 2 http 基本优化要点
 
 ### 2.1 带宽

@@ -300,7 +300,7 @@ html5 不采用 sgml 作为父集， 它实现的主要功能有：图像、位�
 
 1. 绘画：canvas
 2. 音频、视频：video, audio
-3. 存储：localstorage, sessionstorage
+3. 存储：localstorage, sessionstorage, indexedDB
 4. 新技术(解决方案)：websocket, webworker, geolocation
 5. 语义化标签：article, header, footer, nav, section
 6. form 控件: calendar, date, time, email, url, search
@@ -310,3 +310,16 @@ html5 不采用 sgml 作为父集， 它实现的主要功能有：图像、位�
 > 注意： iframe 还是保留的
 
 兼容不支持html5的浏览器： html5shim (原理 createElement 、添加默认样式)
+
+### 6.1 indexedDB 和 localstorage 区别
+
+| 区别项      | indexedDB  | localStorage 和 sessionStorage |
+| --         | --         | -- |
+| 存储量      | 几百M       | 5M |
+| 存储数据格式 | 对象、字符串、文件、二进制 | string |
+| 异步模式    | 异步 + 事务  | 同步 |
+
+## 参考文章
+
+[知乎 - 放弃localStorage,拥抱IndexedDB](https://zhuanlan.zhihu.com/p/95076534)  
+[localforage](https://localforage.docschina.org/)  

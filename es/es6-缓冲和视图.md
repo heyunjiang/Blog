@@ -4,13 +4,15 @@ time: 2019.01.22
 
 ## 1 es6-类数组
 
-在 javascript 中类数组对象有多个，比如: ArrayBuffer, arguments, domList ...  
+在 javascript 中类数组对象有多个，比如: ArrayBuffer, arguments, domList, Int8Array ...  
 类数组和正常的数组 Array 不同，通过调用 Array.isArray() 来判断类数组，会返回 false。
 
 对于原始二进制数据的存储与访问，不能通过普通 Array 对象及其方法来实现。  
 javascript 采用了缓冲和视图来实现，用以保证最大的灵活性和效率。
 
 ## 2 缓冲和视图
+
+ArrayBuffer，内部存储二进制数据，可以使用 chrome-dev-tool Memory Inspector 来查看 ArrayBuffer，调试其内部数据变化，其中包含了二进制数据对应的 utf16 编码结果和 ASCII 对应的实际可读字符
 
 缓冲：由 ArrayBuffer 对象实现，它表示的是一个二进制数据数据缓冲区，没有具体的格式，由宿主环境自己实现，用户不能直接操作访问。
 
