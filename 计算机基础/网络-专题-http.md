@@ -251,7 +251,7 @@ time: 2021-04-21 14:33:48
 
 缓存分类  
 1. 私有缓存：即用户浏览器缓存，通过 http get 下载的资源，提供给用户浏览器前进后退、离线查看、减少多余请求等
-2. 共享缓存：即 isp 或公司环境代理，保存在中间服务器上的缓存资源
+2. 共享缓存：即 isp 或公司环境代理，保存在中间服务器上的缓存资源，通常代理缓存会返回 response.headers.age 表示共享缓存有效期
 
 ### 12.1 http cache-control 控制缓存
 
@@ -264,33 +264,41 @@ time: 2021-04-21 14:33:48
 
 cache-control: no-cache 位于  
 1. response: 表示资源走协商缓存
-2. request: 表示资源不会默认走本地缓存，都会向服务器发起请求(这个不对，因为在有的 js 请求也带上了 no-cache，但是还是从 memory 中读的数据)。如果服务器强行返回 304，则还是会取缓存？待验证
+2. request: 表示资源不会默认走本地缓存和代理缓存，都会向服务器发起请求。如果服务器强行返回 304，则还是会取缓存
 
 chrome 勾选 disable-cache 就会在 http request header 加上 `cache-control: no-cache` 字段，并且强行向服务器发起请求，不会主动走缓存(说明勾选 disable-cache 不是只修改了 http request header)
 
 问题：  
 1. 304 是从哪里读取的缓存？memory or disk?
 2. 存储在 memory or disk，是有何根据？
-3. no-cache, max-age, expires, last-modified 优先级？
+3. 缓存时间控制属性 freshness_lefttime: max-age, smax-age, expires, 预估时间 优先级？smax-age > max-age > expires > 预估时间(rfc 文档建议(downloadDate - Last-Modified) / 10)
 
 [从浏览器的Disable cache谈起](https://juejin.cn/post/6844904145057480718)
 
 ### 12.2 缓存过期
 
-我们设置的 max-age 时间到期后，缓存就属于过期缓存。过期处理：  
-1. 浏览器命中缓存，会发起请求携带 `if-none-match` 或 `if-modified-since` +  `Etag` (如果请求资源 response 返回了 Etag，后续 request 验证缓存过期会带上) 到服务器监测资源是否有更新
-2. 没有更新服务器返回 304
-3. 如果服务器验证 `if-none-match` 或 `if-modified-since` 已过期，则会返回最新资源，客户端再次根据 cache-control 来更新缓存，把之前旧的缓存删除
+缓存过期的判断方式: `freshness_lefttime > Age`  
+freshness_lefttime: smax-age, max-age, expires, 预估时间  
+Age: 表示原服务器发出响应到使用缓存的请求发出时，因为请求的数据可能是缓存在中间缓存服务上。通常请求中包含了 Age header
 
-除了 cache-control，也有通过 Expires, Date, Last-Modified 来计算缓存时间
-1. 如果没有 max-age，但是有 Expires + Date，则 Expires > Date 则表示缓存有效
-2. 如果没有 max-age + Expires，但是有 Last-Modified，则缓存计算规则为 (Date - Last-Modified) / 10
+过期处理：  
+1. 浏览器命中缓存，如果响应 cache-control 包含了 `max-stale: 60`，那么在 60s 内都可以使用
+2. 否则会发起请求携带 `if-none-match` +  `Etag` 或 `if-modified-since` (如果请求资源 response 返回了 Etag，后续 request 验证缓存过期会带上) 到服务器监测资源是否有更新
+3. 没有更新服务器返回 304，继续使用缓存，下次请求依然会去验证，不过每次因为不需要数据的传输，速度还是很快
+4. 如果服务器验证 `if-none-match` 或 `if-modified-since` 已过期，则会返回最新资源，客户端再次根据 cache-control 来更新缓存，把之前旧的缓存删除
 
 问题：如果还在缓存有效期内，如何强更新呢？  
-答：设置 must-revalidate；点击浏览器刷新按钮；浏览器偏好设置里设置Advanced->Cache为强制验证缓存；vary 校验
+答：设置 `cache-control: must-revalidate`；点击浏览器刷新按钮；浏览器偏好设置里设置Advanced->Cache为强制验证缓存；vary 校验
 
-vary 校验缓存使用规则：请求服务器最新资源时，服务器除了返回 cache-control 外，还返回了 `vary: Etag` 字段；在通过 cache-control 添加了资源缓存后，后续资源请求需要携带缓存资源 vary 要求的 http header 字段及值，匹配上才可以使用缓存  
-思考：我们通过 vary 设置了缓存之后，后续可以通过提前发起请求获取 vary 要求的字段值，服务器控制使用需要命中缓存
+vary 校验缓存使用规则：请求服务器最新资源时，服务器除了返回 cache-control 外，还返回了 `vary: Content-Ecoding` 字段；在通过 cache-control 添加了资源缓存后，后续资源请求需要携带缓存资源 vary 要求的 http header 字段及值，匹配上才可以使用缓存，因为需要保证每次的数据格式一致
+
+### 12.3 缓存实践
+
+不同的资源对应不同的缓存策略  
+通常来说，js, css 是不经常发生变化，但是 html 是经常发生变化的。在 spa 应用中，变化的 js 的 hash 值是会变化的。
+1. html: 不缓存，或者缓存很短。cache-ctrol: no-store
+2. js库、css库: cache-control: max-age=10年
+3. js普通文件、css普通文件: cache-control: no-cache + etag | last-modify 来协商缓存
 
 ## 参考文章
 
