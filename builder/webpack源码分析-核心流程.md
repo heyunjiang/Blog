@@ -173,6 +173,8 @@ module.exports = String(test) === '[object z]';
 });
 ```
 
+所有模块都是保存在 `modules` 对象里面，有的结果又名为 `__webpack_modules__`
+
 webpack umd 加载模块
 ```javascript
 (function webpackUniversalModuleDefinition(root, factory) {

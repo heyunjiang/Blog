@@ -19,6 +19,10 @@ author: heyunjiang
 4. vue 项目远程加载组件，能加载组件实例吗？**能**
 5. vue2 能加载 vue3 实例不？因为直接加载组件配置文件肯定是不行的，他们依赖的 vue 版本不同，实例可以 import 之后，**手动执行 $mount 方法**
 6. vue 组件配置能加 vuex, router 配置吗？**能**
+7. 子应用暴露的是 umd 格式，是否我只需要打包成 umd 就可以了，主应用直接通过 script 加载我的子应用即可？mf 和直接加载 umd 有什么差异？  
+mf 加载的模块，虽然也是通过 umd 模式远程加载，加载的也是 webpack 模块，由 mf 插件解析了，平时开发还是按普通模块开发即可。  
+如果我们项目直接打包成 umd 库，父项目怎么去加载呢？script 加载：也可以在路由匹配到时再去 script（webpack 内部叫做 `__webpack_requre__.e`） 加载，然后拿全局变量渲染 vue3 组件，仿佛也是可以的。
+但是如果只是输出 umd，自身项目模块又怎么跑呢？可以多个配置，输出多种结果
 
 注意事项：  
 1. remote 需要控制好 output.pablicPath，不然 host 可能加载不到资源
@@ -63,7 +67,7 @@ author: heyunjiang
 ## 3 微前端实现思考
 
 1. 子应用暴露组件配置，父应用直接加载组件配置，作为 vm.components 来实现。思考点：webpack mf 是如何加载到组件文件的，这个也是 mf 工作原理
-2. 子应用暴露组件配置，但是配置包含了 store, router。思考点：子应用能独立存在 store, router 吗？为什么？
+2. 子应用暴露组件配置，但是配置包含了 store, router。思考点：子应用能独立存在 store, router 吗？
 3. 子应用暴露 vue 实例。思考点：vue 渲染时，如果 vm.components 下的组件是实例，而不是实例配置，能发生什么？
 不行，vue createComponent 支持配置文件对象、Vue.extend 之后的构造函数对象、function，不支持实例化后的 vm 对象。除非拿到对象之后主动 $mount 到对应节点
 4. 子应用暴露 vue3 配置，react 配置，能实现吗？
@@ -104,4 +108,5 @@ author: heyunjiang
 
 [webpack 官方](https://webpack.docschina.org/concepts/module-federation/)  
 [moduleFeration demo](https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes)  
-[mf 在线体验](https://stackblitz.com/github/webpack/webpack.js.org/tree/master/examples/module-federation?file=app2%2Fwebpack.config.js&terminal=start&terminal=)
+[mf 在线体验](https://stackblitz.com/github/webpack/webpack.js.org/tree/master/examples/module-federation?file=app2%2Fwebpack.config.js&terminal=start&terminal=)  
+[mf 原理](https://zhuanlan.zhihu.com/p/245114955)

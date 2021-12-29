@@ -108,8 +108,33 @@ es modules 方式
 1. 如果想使用 import export 命令，则需要指定文件后缀名 `.mjs` 或者 package.json `type = module`
 2. 如果目录在 package.json 中指定了 `main` 字段，则会直接去加载 main 指定路径文件。也可以指定 exports 字段，优先级 exports > main
 
-> 我们在日常业务开发中，通常都是使用 nodejs 环境，让 webpack 处理一下 import export。我们平时写的 import export，都是 es module，但是 webpack 打包结果不一样，是啥原因呢。  
+> 问：我们在日常业务开发中，通常都是使用 nodejs 环境，让 webpack 处理一下 import export。我们平时写的 import export，都是 es module，但是 webpack 打包结果不一样，是啥原因呢。  
 > 答：是为了兼容不支持 esm 的浏览器
+
+### 5.3 umd 模块
+
+umd 表示同时兼容 amd, cjs, 全局变量的写法，通常包含如下头部  
+```javascript
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(["jquery", "underscore"], factory);
+    } else if (typeof exports === "object") {
+        module.exports = factory(require("jquery"), require("underscore"));
+    } else {
+        root.Requester = factory(root.$, root._);
+    }
+}(this, function ($, _) {
+    // this is where I defined my module implementation
+
+    var Requester = { // ... };
+
+    return Requester;
+}));
+```
+
+特点如下  
+1. 首先判断当前环境，对不同环境加载对应的模块依赖
+2. 支持 script 方式加载、cjs 模块加载，但是不支持 esm 加载
 
 ## 6 javascript code module
 

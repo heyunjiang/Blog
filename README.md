@@ -109,6 +109,7 @@
   - [vite](builder/vite.md)
   - ✔ [babel plugin](builder/babel.md)
   - ✔ [sourcemap原理](builder/sourcemap原理.md) mappings 单元行列映射
+  - [monorepo基础](builder/monorepo基础.md) monorepo 基础学习
 - 框架
   - [mvvm](other/mvvm.md) 都在用 mvvm ，到底什么 mvvm 是什么？
   - [源码解读-antd](react/源码解读-antd.md)
@@ -224,6 +225,11 @@ lowcode: 目的是解放前端生产力，让后端、产品、设计都能使�
 工程化方向  
 1. 面向 es module 构建、webassembly 构建
 2. 前端监控、性能优化
+
+具体技术点  
+1. 基础补强：h2, tls, http 缓存实践
+2. monorepo 跨技术栈实践
+3. vue3 + esmodule + ts + vite 实践 (webpack modulefederation 需要使用 webpack，这里我们暂时不处理，直接使用 vite 操作)
 
 工作怎么做：  
 1. 主动原则：主动做事、改掉被动接受信息，尽快完成业务开发，就有时间去思考更多信息；主动思考业务效果、拿运营数据、跟各负责人沟通、处理更复杂任务，获取更多信息，不断完善、改善自身能力
