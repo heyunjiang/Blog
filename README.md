@@ -88,6 +88,7 @@
   - ✔ [浏览器安全](browser/深入浏览器-安全.md) 常见 xss 攻击及防御，csrf 攻防
   - ✔ [利用无头浏览器实现ui自动化测试](browser/利用无头浏览器实现ui自动化测试.md) 亮点技能 - ui 自动化测试
   - [关于前端监控的几点思考](browser/关于前端监控的几点思考.md)
+  - [webComponents](browser/webComponents.md) webComponents，自定义元素，shadow dom 实现样式隔离
 - electron
   - [electron-自定义构建](electron/electron-自定义构建.md)
   - ✔ [c++ - 基础](electron/c++-基础.md)
