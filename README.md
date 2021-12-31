@@ -107,7 +107,7 @@
   - [webpack 源码分析-tapable](builder/webpack-源码分析-tapable.md)
   - ✔ [webpack-plugin](builder/webpack-plugin.md) plugin 开发方式
   - ✔ [webpack-loader](builder/webpack-loader.md) loader 开发方式及原理
-  - [vite](builder/vite.md)
+  - [vite](builder/vite.md) vite 基本原理
   - ✔ [babel plugin](builder/babel.md)
   - ✔ [sourcemap原理](builder/sourcemap原理.md) mappings 单元行列映射
   - [monorepo基础](builder/monorepo基础.md) monorepo 基础学习

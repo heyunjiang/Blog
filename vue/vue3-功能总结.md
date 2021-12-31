@@ -154,18 +154,18 @@ ref
 3. toRef(): 获取响应式对象的某个属性，并且设置其为响应式值
 4. toRefs(): 批量获取响应式对象的第一层属性，并且设置属性为响应式值，返回的是普通对象，但是对象值是 ref 响应式的，主要用于解构赋值
 5. isRef()
-6. 
 
 ## 2 问题归纳
 
 1. vue2 各组件是 vm.$options._base.extend(object) 对象，生成的 vue 实例，那么 vue3 组件是继续使用 createApp 来生成实例的吗？
 2. vue2 一些全局对象挂载在 Vue 对象上有什么不好的点？1. 同时实例化多个 Vue 实例，则不能独享私有配置 2. 全局配置污染测试用例，比如全局的 mixin, use 
-3. vue3 响应式系统，对比 vue2，除了使用 proxy 来拦截，是使用什么方式来更新呢？vue2 是 dep + watcher 来实现
+3. vue3 响应式系统，对比 vue2，除了使用 proxy 来拦截，是使用什么方式来更新呢？vue2 是 dep + watcher 来实现，vue3 track
 4. vue3 数据驱动原理，也就是编译生成 render 函数，通过 render 生成 vnode，vnode 生成 dom 流程，是否与 vue2 不同
 
 ## 3 组合式 api
 
-组合式 api 的目的，是为了将逻辑代码块抽离，在需要的组件内部合理组装
+组合式 api 的目的，是为了将逻辑代码块抽离，在需要的组件内部合理组装。本质是数据逻辑与模板的拆分，通过 setup 去拿想要的数据。  
+> 类似之前的 mixin 非直接混入用法，也可以只 import mixin 对象的属性和方法
 
 ```javascript
 import { reactive, ref, toRefs, onMounted, watch, computed, provide, inject... } from 'vue'
@@ -190,6 +190,30 @@ import { reactive, ref, toRefs, onMounted, watch, computed, provide, inject... }
 6. 不能访问的实例属性：data, computed, methods
 7. 返回 render 函数：会替代 template 和组件自身的 render 吗？会
 
+### 3.2 <script setup>
+
+每个 sfc 中，可以包含一个 `<script>` 和 一个 `<script setup>`
+
+1. 是组合式 api setup() 的语法糖
+2. 内部代码在组件被创建时被执行，而不是引入时执行
+3. 顶层绑定直接暴露给模板，比如声明的变量、函数声明、import 的组件(特殊)等
+4. 声明 props 必须使用 `defineProps`
+5. 声明 emits 必须使用 `defineEmits`
+6. 可以使用 `defineExpose` 主动暴露对象数据
+7. 但配 `<script>` 一起使用：什么场景？深入使用再考虑
+8. 可以使用顶层 await
+9. 能使用 ts 声明
+
+既然作为 setup 的语法糖，并且提供了组件 props, emits 声明实现，代码中我们可以直接使用它
+
+### 3.3 composition api vs mixin
+
+vue2 在如下场景中使用到了 mixin：多个 tab 对应的内容大致一样，可以抽离通用的方法、属性和生命周期等，实现代码复用。
+
+mixin 使用有如下弊端  
+1. 需要打开每个 mixin 查看每个属性含义：复杂组件，每个 mixin 属性都需要去指定的 mixin 了解它的属性含义，而组合式 api 是在 setup 中显示引入模块的属性和方法，就在当前组件 setup 中能看到
+2. 灵活性：mixin 不能传参，而组合式 api 可以
+
 ## 4 ts 支持
 
 1. webpack 配置 ts-loader 处理 ts
@@ -210,6 +234,13 @@ export default defineComponent({
 })
 ```
 3. computed 对象数据需要明确添加 ts 类型注解
+
+## 临时思考
+
+找新工作时，想到一个点可以去了解公司岗位，问面试官如下问题  
+1. 部门对社招新人有啥培养
+2. 业务开发任务多不
+3. 有哪些前端发展方向，可能有哪些机会
 
 ## 参考文章
 
