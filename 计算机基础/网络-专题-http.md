@@ -10,7 +10,7 @@
 [4 https相较与http1.1的区别](#4-https相较与http1.1的区别)  
 [5 将网站改造成https](#5-将网站改造成https)  
 [6 SPDY](#6-SPDY)  
-[7 http2](#7-http2)  
+[7 http2【重点】](#7-http2【重点】)  
 [8 有了http2，不用再做哪些优化](#8-有了http2，不用再做哪些优化)  
 [9 ssl 握手](#9-ssl-握手)  
 [10 tcp首部、ip首部有啥作用](#10-tcp首部、ip首部有啥作用)  
@@ -179,7 +179,7 @@ Date: Thu, 01 Nov 2018 10:42:09 GMT
 
 > 注意：高版本的chrome对spdy已经不支持
 
-## 7 http2
+## 7 http2【重点】
 
 ### 7.1 http2 相较于 http1 特点  
 
@@ -192,22 +192,88 @@ http2 可以基于 tls 实现，也可以基于 tcp 实现。不同实现，对�
 1. 基于 tls，简称 h2。浏览器只支持 h2
 2. 基于 tcp，简称 h2c
 
+http2 的缺陷  
+1. tcp + tls 握手时间过长
+2. 队头阻塞问题：tcp 要求发送和接收的顺序保持一致，如果网络出现丢包，那么对应流在重传之前，就可能会出现剩余 ip 报文被阻塞在队列中，也就是原本并发的流，却收到阻塞变成串行
+
 ### 7.2 流、消息、帧
 
 1. 建立一个 tcp 链接，保持长链接
-2. 后续数据传递的是帧 frame，通过 wireshark 转包的都是一个一个的帧
+2. 后续数据传递的是帧 frame，通过 wireshark 转包的都是一个一个的帧，也就是说实际请求就有 tcp + h2帧 构成
 3. 每个帧会有一个 `streamId`，通过在应用层形成的流概念，体现了多路复用，即多 stream 复用一个 tcp 链接
-4. 帧数据格式分2种：头部 header、data，每个 stream 要包含一个或多个帧。服务器按顺序发送帧，客户端组装，浏览器展示出来的每个请求还是独立查看
+4. 帧数据格式分多种：头部 header、data、priority、ping、push_promise(服务器推送) 等，每种类型对应自己的 type。每个 stream 要包含一个或多个帧。服务器按顺序发送帧，客户端组装，浏览器展示出来的每个请求还是独立查看
 5. 消息是一种概念，每个流里面有1个或多个消息。消息也就是请求，浏览器会在 network 有体现
 6. 在同一个 tcp 链接种，客户端发起的请求 `streamId 为奇数`，服务端发起的推送请求 streamId 为偶数
 7. 每次建立一个新的 stream, 其 streamId 就必须网上增加，直到达到每个 tcp 链接对应的 stream 个数，然后会新建立 tcp 链接
 
-### 7.3 h2 相关问题
+### 7.3 HPACK 头部压缩算法
+
+1. 使用 `静态字典序号` 表示常用的头部：比如 2 表示 `:method: get`，7 表示 `:scheme: https`
+2. 使用 `haffman编码` 表示常用头部的复杂值，比如 `19: Haffman('/resource')`
+3. 动态表是啥？动态编码算法，暂时不考虑
+
+haffman 编码  
+1. 原理：出现概率大的符号采用较短的编码，出现概率小的符号使用较长的编码
+2. 静态 haffman 编码：`haffman 编码表`，使用指定数字表示常见的英文字母，整体位数缩短，自然提交就小了。比如一个字母使用一个字节表示，而 haffman 编码就可以使用 5 位来表示，可以达到 8:5 的压缩比，方便后续还原。而常见的比如 1 可以使用 `00001` 表示，不常见的 3 就使用 `011001` 表示，8:5 只是大致概率
+
+### 7.4 服务器主动推送
+
+在建立好一个 tcp 链接之后，后续可以传递不同类型的 frame 数据，而服务器推送也是此刻传递的。  
+问题：这个 tcp 链接可以保持多久？因为服务器推送是可能很久之后才推送  
+回答：服务器推送是基于已经建立好的 tcp 链接，如果之前的 tcp 关闭了，那么不会推送。这点不同于 websocket 一直保持的链接
+
+基本知识
+1. 服务器首先返回 frame type = push_promise 格式的帧，该帧中指明了具体数据所在的流 `push_promise_stream_id`
+2. 接下来服务器会返回其他 frame，就包含了 header, data 帧
+
+应用场景：  
+1. 资源预先推送：比如 html 中包含多个 css, js 链接，在请求了第一个 html 之后，服务器就可以持续推送其他资源链接，客户端缓存
+
+### 7.5 stream 状态
+
+基础知识：同一个 tcp 链接上，可以同时存在多个 open 状态的 stream，然后传递 frame 帧数据。实际网络请求中，我们只有帧传递，流的状态是通过帧来表示
+
+流的状态及帧  
+1. idle：流初始化之后，状态为 idle，后续可以发送或接收 frame 数据，进入 open、reserved(local)、reserved(remote)
+2. open：流在初始化之后，收到或发送 header 帧之后，进入 open 状态
+3. reserved：流在初始化之后，收到或发送 push_promise 帧之后，进入 reserved 状态或直接 closed
+4. half_closed：半关闭状态，表示后续不会再进行发送和响应。流在 reserved 状态，收到或发送 header 帧之后，即进入半关闭状态；流在 open 状态，收到或发送 end_stream 帧之后，进入半关闭状态
+5. closed: 关闭状态。在 open 状态，如果收到或发送 reset_stream 帧，则直接关闭流；还可以有 half_closed 和 reserved 在操作之后进入 closed 状态
+
+应用场景：取消请求，在 http1 中直接关闭 tcp 链接 (abort) 即可，在 http2 中则需要发送 RST_STREAM 帧来关闭当前流，而不影响其他流。在发送 RST_STREAM 时，包含了响应的错误码，这里暂时没有总结
+
+stream 优先级：流的优先级，原因是我们请求 html, css, js, image 数据时的优先级不同。通过 frame.priority 帧 + weight 权重来控制流的优先级
+
+### 7.6 stream 流控
+
+除了在 tcp 层做拥塞控制，h2 提供了 http 层面的流控。  
+为什么需要流控？  
+1. stream 数量过多，会争夺 tcp 的流控制权，可能会导致 流阻塞
+2. 代理服务器的内存有限，如果流过多会占用更多的内存
+
+基本原则  
+1. 流是应用层面的概念，也就是说应用层 http 也实现了流的拥塞控制
+2. 由接收端设定上线，发送端遵循，通过 `WINDOW_UPDATE` 控制帧的 `window_size_increment` 字段来设定空间就这么大
+3. 只有 data 帧会遵守流控，其他如 header 则不会
+4. 流控不能被设置关闭，并且默认窗口都是 65535 字节
+5. 流控仅正对 tcp 链接的两端，即代理服务器不透传 WINDOW_UPDATE 帧，那实际是如何控制的呢？
+
+如何控制？  
+1. 数据体积控制：接收端传递 WINDOW_UPDATE 帧给发送端，告诉发送端窗口就这么大。达到上线之后，则需要排队等候或者建立新的 tcp 链接
+2. 流数量限制：也可以通过 `SETTINGS_MAX_CONNECT_STREAMS` 来控制 open 或 half_closed 状态的流的数量。达到上线则不再当前 tcp 链接上创建更多的流了，而是需要建立新的 tcp 链接
+
+### 7.7 grpc 中应用 http2
+
+grpc 框架是基于 http2 来实现服务器与服务器之间的通信。  
+首先也是建立 tcp 链接，然后发送帧，此刻的帧是 grpc 帧，浏览器中的是 http2 帧
+
+### 7.x h2 相关问题
 
 1. http2 是在应用层上做的调整，如果充分利用 tcp 的性能呢？
 2. 浏览器发起的请求都是 https://，服务器是怎么识别为 http2 的呢？在建立 tls 链接时，浏览器提供 h1, h2 让服务器选择，服务器主动选择
 3. http1 浏览器对请求有个数限制，http2 有没有？也有，不过是不固定，h2 对同一个tcp链接中的流个数有限制，每个流可能对应多个消息请求
 4. 为什么以二进制格式传递数据，整个体积就小了？
+5. tcp 链接可以保持多久？
 
 ## 8 有了http2，不用再做哪些优化
 
@@ -322,6 +388,18 @@ vary 校验缓存使用规则：请求服务器最新资源时，服务器除了
 2. js库、css库: cache-control: max-age=10年
 3. js普通文件、css普通文件: cache-control: no-cache + etag | last-modify 来协商缓存
 
+## 13 http3
+
+quic 协议，也叫 http3，是基于 udp 实现了 tcp 之前的相关功能，还是基于 http2 的 api 实现  
+1. 在浏览器中的体现为 `Protocol = http/2 + quic/43`
+2. quic 实现了拥塞控制、丢包重传、tls 1.3、多路复用 (multiStreaming)
+3. 链接迁移：通过 frame 帧中的 CID(connection id) 控制目标
+4. 解决了对头阻塞问题：udp 没有队列概念，不要求按顺序到达，也就是说流的数据来了，谁先完整就先处理谁
+5. 1个 rtt 解决握手问题
+6. 0个 rtt 恢复会话握手，即使用上次建立链接生成的密钥信息
+
 ## 参考文章
 
-[混合内容升级 https](https://juejin.cn/post/6844904101826789389)
+[混合内容升级 https](https://juejin.cn/post/6844904101826789389)  
+[知乎 如何看待 http3](https://www.zhihu.com/question/302412059)  
+[http3 了解](https://http3-explained.haxx.se/zh/)
