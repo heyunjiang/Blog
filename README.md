@@ -94,7 +94,7 @@
   - ✔ [c++ - 基础](electron/c++-基础.md)
   - [python - 基础](electron/python-基础.md)
 - 微前端
-  - [微前端基础知识](微前端/微前端基础知识.md)
+  - ✔ [微前端基础知识](微前端/微前端基础知识.md)
 - builder
   - ✔ [npm基础](builder/npm专题.md)
   - [ast的思考](builder/ast的思考.md)
@@ -147,7 +147,8 @@
     - ✔ [vue2 边角知识](vue/vue2-边角.md)
     - ✔ [vue3 功能总结](vue/vue3-功能总结.md)
     - vue3 深入
-      - [vue3 响应式系统](vue/vue3源码解读/vue3响应式系统.md)
+      - [vue3 响应式系统](vue/vue3源码解读/vue3响应式系统.md) track and trigger
+      - [vue3 渲染流程](vue/vue3渲染流程.md)
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
@@ -178,7 +179,7 @@
   - ✔ [vultr 搭梯子](计算机基础/vultr搭梯子.md)  科学上网，你懂的
   - 操作系统
   - 计算机网络
-    - [http专题](计算机基础/网络-专题-http.md) http1, http2, http3
+    - ✔ [http专题](计算机基础/网络-专题-http.md) http1, http2, http3
     - ✔ [常见 http 状态码、解释及解决方案](计算机基础/网络-httpCode.md)
     - ✔ [七层协议](计算机网络/网络-七层协议.md)
     - ✔ [网络抓包](计算机网络/网络-抓包.md) wireshark
@@ -199,8 +200,6 @@
 - 人工智能
   - [人工智能入门](人工智能/人工智能入门.md)
   - [python入门](人工智能/python入门.md)
-- 示例 demo
-  - 智能提示组件: 在 textarea 输入时，基于 react + getBoundingClietRect + element.selectionStart 实现的智能提示
 
 > 注：没有链接的表示待发展、学习的技术
 
@@ -222,14 +221,16 @@ lowcode: 目的是解放前端生产力，让后端、产品、设计都能使�
 
 个人成长、长期积累、平缓心态、不能临时抱佛脚影响心态
 
-工程化方向  
-1. 面向 es module 构建、webassembly 构建
-2. 前端监控、性能优化
+### 3.1 最近具体发展事项
 
-具体技术点  
-1. 基础补强：h2, tls, http 缓存实践
-2. monorepo 跨技术栈实践
-3. vue3 + esmodule + ts + vite 实践 (webpack modulefederation 需要使用 webpack，这里我们暂时不处理，直接使用 vite 操作)
+思考事项  
+1. 职业发展
+2. 技术学习 80% + 广度学习 20%
+
+技术学习方向: vue3 + esmodule + ts + vite 实践  
+广度学习：宏观关注前端整体发展方向，前端职业给企业带来的价值、在企业的地位，考虑就业形式、投入产出比。学习个人综合实例提升点，为不断突破做准备
+
+### 3.2 一些原则
 
 工作怎么做：  
 1. 主动原则：主动做事、改掉被动接受信息，尽快完成业务开发，就有时间去思考更多信息；主动思考业务效果、拿运营数据、跟各负责人沟通、处理更复杂任务，获取更多信息，不断完善、改善自身能力
