@@ -32,13 +32,25 @@ author: heyunjiang
 10. css 代码分割：默认开启异步 chunk 中 css 代码拆分，并通过该 chunk 自动加载，也可以配置 `build.cssCodeSplit = false` 来禁用拆分，将所有 css 合并为一个文件，build.library 默认为不分割
 11. 静态资源处理
 
-2021-12-31 12:07:46：目前已经学习了 vite 的基础知识，大致明白它的一个工作原理，后续在实际项目中，针对依赖预构建、hmr 等细节技术去源码学习
+2021-12-31 12:07:46  
+目前已经学习了 vite 的基础知识，大致明白它的一个工作原理，后续在实际项目中，针对依赖预构建、hmr 等细节技术去源码学习
+
+2022-01-25 16:34:09  
+今天在了解 esbuild 时，对比 vite 学习时，突然有个感想：学习了好几个构建工具，这些工具做了什么事情，现在需要大体归纳一下：
+语法转换(jsx, ts, es, nodejs)、模块化、tree shaking、代码合并与压缩、代码拆分、css module、css预处理语言、hmr
 
 ## 2 依赖预构建
 
 学习2个点  
-1. 对 npm 包的构建处理
+1. 对 npm 包的构建处理，是如何将 cjs, umd 转换成 esm
 2. 修改 import 地址
+
+基础知识  
+1. 使用 esbuild 执行预构建
+2. 自动依赖搜寻：如果 `node_modules/.vite/` 目录下没有缓存，则会从 node_modules 目录继续去找
+3. 构建入口三种：dependencies, lockfile, vite.config.js 中配置的 optimizeDeps.include
+
+如何集成 esbuild 的？
 
 ## 3 静态资源处理
 

@@ -276,6 +276,17 @@ stream 优先级：流的优先级，原因是我们请求 html, css, js, image 
 grpc 框架是基于 http2 来实现服务器与服务器之间的通信。  
 首先也是建立 tcp 链接，然后发送帧，此刻的帧是 grpc 帧，浏览器中的是 http2 帧
 
+### 7.9 传输2进制数据
+
+为什么传输二进制数据？底层网线和光缆不都是传输的二进制数据吗？  
+
+1. http1.x 超文本传输协议，使用文本传输数据，比如 `hello234`，tcp 是传输二进制数据，ip 分二进制包
+2. tcp 是将上层 http 的文本给转换成二进制？
+3. http2 是直接处理为二进制数据，不需要 tcp 转换？
+4. 文本数据，指的是宿主环境解析二进制数据之后呈现给用户的格式，用户编码使用的文本，后续也通过宿主环境解析处理为二进制数据
+5. http2 是一种协议，浏览器和服务器可选
+6. http2 和 http1.x 不同，在二进制数据处理上，http2 是自己处理，http1.x 是交给 tcp 处理
+
 ### 7.x h2 相关问题
 
 1. http2 是在应用层上做的调整，如果充分利用 tcp 的性能呢？流控
@@ -492,4 +503,6 @@ quic 协议，也叫 http3，是基于 udp 实现了 tcp 之前的相关功能�
 
 [混合内容升级 https](https://juejin.cn/post/6844904101826789389)  
 [知乎 如何看待 http3](https://www.zhihu.com/question/302412059)  
-[http3 了解](https://http3-explained.haxx.se/zh/)
+[http3 了解](https://http3-explained.haxx.se/zh/)  
+[二进制编码传输协议](https://segmentfault.com/a/1190000022356844)  
+[http 传输文本还是二进制](https://segmentfault.com/q/1010000006670932)
