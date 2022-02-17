@@ -8,8 +8,8 @@ time: 2022-01-21 10:56:50
 
 在 runtime-dom 模块，export 2 个关键 api
 
+runtime-dom index.ts 入口文件
 ```javascript
-// runtime-dom index.ts 入口文件
 import {
   createRenderer
 } from '@vue/runtime-core'
@@ -247,7 +247,50 @@ export function createAppAPI<HostElement>(
 3. 生成 vnode 时机：app.$mount 使用的是 mountComponent 来渲染，内部是通过 `vm._update(vm._render(), hydrating)`，通过 vm._render 生成 vnode，通过 vm._update 来渲染 vnode
 4. 前期准备，vue2 是通过执行 mixin 来准备 vue.prototype 基本结构，vue3 是直接暴露 createApp，内部 component, vnode 基本结构是代码就写好了的
 
-### 1.2 render 渲染
+### 1.2 import 加载组件渲染
+
+我们知道根组件是通过 createApp 生成的组件实例，这里有几个疑问  
+1. createApp 可以直接接受一个 .vue 组件对象，那么 .vue 编译结果是什么呢？
+2. createApp 可以接受配置 render 不？
+
+一个 App.vue 编译部分结果  
+```javascript
+import LeftMenu from "/src/components/LeftMenu.vue";
+import {createVNode as _createVNode, createElementVNode as _createElementVNode, resolveComponent as _resolveComponent, openBlock as _openBlock, createElementBlock as _createElementBlock, pushScopeId as _pushScopeId, popScopeId as _popScopeId} from "/node_modules/.vite/vue.js?v=221ddc95";
+import _export_sfc from "/@id/plugin-vue:export-helper";
+
+const _sfc_main = /* @__PURE__ */
+_defineComponent({
+    setup(__props, {expose}) {
+        expose();
+        const __returned__ = {
+            LeftMenu
+        };
+        Object.defineProperty(__returned__, "__isScriptSetup", {
+            enumerable: false,
+            value: true
+        });
+        return __returned__;
+    }
+});
+
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_router_view = _resolveComponent("router-view");
+  return _openBlock(),
+  _createElementBlock("div", _hoisted_1, [_createElementVNode("div", _hoisted_2, [_createVNode($setup["LeftMenu"])]), _createElementVNode("div", _hoisted_3, [_createVNode(_component_router_view)])]);
+}
+export default /* @__PURE__ */
+_export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-7ba5bd90"], ["__file", "/Users/80245690/Desktop/project/dataspherestudio/web/packages/taskAnalysis/src/App.vue"]]);
+```
+
+编译结果分析  
+1. esm function return 可以返回多个值？
+2. 组件使用 `_export_sfc` 包裹返回，第一个参数是使用 `_defineComponent` 生成的对象，组件 setup 和配置式组件最终都会编译成 _defineComponent 函数包裹的对象
+3. tempalte 最终编译为使用 `_createElementBlock`、`_createElementVNode`、`_createVNode` 函数组成的数组
+
+所以组件渲染，需要结合这几个函数一起来看
+
+### 1.3 render 渲染
 
 根据 createApp 生成的 vnode 作为入口，调用 mountComponent 来渲染组件
 
@@ -276,7 +319,7 @@ const render: RootRenderFunction = (vnode, container, isSVG) => {
 1. vue3 生命周期
 2. vue3 diff 实现
 
-### 1.3 mountComponent 渲染组件
+### 1.4 mountComponent 渲染组件
 
 在 render 的 patch 函数中，是通过对 vnode 的类型来判断渲染，如果是组件，则会执行 mountComponent
 
@@ -426,6 +469,6 @@ const setupRenderEffect: SetupRenderEffectFn = (
 2. 初次渲染、更新都是封装在 effect 函数中的
 3. 与 vue2 主动 callhook 不同，vue3 是直接执行生命周期函数，比如 `invokeArrayFns(bm)`
 
-### 1.4 vue2 diff vs vue3 diff
+### 1.5 vue2 diff vs vue3 diff
 
 todo

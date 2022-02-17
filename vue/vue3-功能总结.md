@@ -59,9 +59,10 @@ app.use(VueRouter)
 ### 1.2 v-model
 
 1. v-model 替代了 v-bind.sync 双向数据绑定
-2. v-model:title="pageTitle"
+2. v-model:title="pageTitle"，组件内部对应的 prop 为 title，对应的事件为 `update:title`
 3. 可以使用多个 v-model
-4. 单个 v-model，组件内部对应的是默认 modelValue
+4. 单个 v-model，组件内部对应的是默认 `modelValue`，对应的事件是 `update:modelValue`，废弃了原本的 model 选项和 v-bind 的 .sync 修饰符
+5. 修饰符：.capitalize
 
 ### 1.3 app.config
 
@@ -155,6 +156,8 @@ ref
 4. toRefs(): 批量获取响应式对象的第一层属性，并且设置属性为响应式值，返回的是普通对象，但是对象值是 ref 响应式的，主要用于解构赋值
 5. isRef()
 
+toRef 和 toRefs 有什么不同？2者相同点都是对响应式对象结构，不同的是 toRefs 是返回的对象，toRef 返回的具体属性，如果想获取原对象不存在的属性，则需要使用 toRef 来添加响应式数据
+
 ## 2 问题归纳
 
 1. vue2 各组件是 vm.$options._base.extend(object) 对象，生成的 vue 实例，那么 vue3 组件是继续使用 createApp 来生成实例的吗？
@@ -180,13 +183,18 @@ import { reactive, ref, toRefs, onMounted, watch, computed, provide, inject... }
 7. 剩余其他在 setup 选项中使用的生命周期方法：onBeforeMount、onBeforeUpdate、onUpdated、onBeforeUnmount、onUnmounted、onErrorCaptured、onRenderTracked、onRenderTriggered
 8. provide, inject 也可以作为独立的 api 使用
 
+项目经验总结：  
+1. 使用 vuex 数据时，需要访问 this 对象，则需要使用选项式 api 操作，通常一个组件中同时包含 setup 和 export default 2种 script
+2. 使用 2种 script 时，不支持 render 渲染，需要处理成 template 模板写法
+3. 
+
 ### 3.1 setup 选项
 
 1. 作为独立选项，并且放置在 props 之下，data 之前
 2. 执行时机在组件创建之前，那具体在什么时候呢？是在 beforeCreate 之后吗？
 3. 参数为：props, context
 4. 作用：返回的内容(return obj, arr or string 等等)，是直接挂载到当前组件实例 this 对象上，用作给其他生命周期方法、method、watch、computed、template 等使用
-5. context对象包含属性：attrs, slots, emit；context 是非响应式的，可以任意解构
+5. context对象包含属性：attrs, slots, emit, expose；context 是非响应式的，可以任意解构
 6. 不能访问的实例属性：data, computed, methods
 7. 返回 render 函数：会替代 template 和组件自身的 render 吗？会
 
@@ -200,11 +208,16 @@ import { reactive, ref, toRefs, onMounted, watch, computed, provide, inject... }
 4. 声明 props 必须使用 `defineProps`
 5. 声明 emits 必须使用 `defineEmits`
 6. 可以使用 `defineExpose` 主动暴露对象数据
-7. 但配 `<script>` 一起使用：什么场景？深入使用再考虑
+7. 搭配 `<script>` 一起使用：什么场景？深入使用再考虑
 8. 可以使用顶层 await
 9. 能使用 ts 声明
 
 既然作为 setup 的语法糖，并且提供了组件 props, emits 声明实现，代码中我们可以直接使用它
+
+问题：setup 是在组件实例创建之前执行的，也就是此刻访问不到 this 对象，那么它如何同其他组件通信呢？  
+1. localStorage
+2. defineProps
+3. 和 script 共存，通过 this 对象传递
 
 ### 3.3 composition api vs mixin
 

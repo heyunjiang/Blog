@@ -9,6 +9,8 @@ author: heyunjiang
 2. 为什么普通状态组件性能能和函数式组件持平？在 vue2 中普通组件生成了 vm 实例和 vnode 对象，vue3 做了什么处理？
 3. css v-bind 实现原理
 4. 应用 app 和最终实例有什么区别？
+5. import 加载的 vue 组件，编译之后使用的哪个方法生成组件实例，和根实例 createApp 是如何结合的？
+6. 
 
 ## 参考文章
 
