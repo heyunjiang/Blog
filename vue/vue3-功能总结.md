@@ -6,7 +6,7 @@ author: heyunjiang
 ## 背景
 
 vue2 升级到 vue3，包含了全局 api、tempalte 模板语法、组件配置选项、事件、插槽、css等变化，概括如下  
-1. 全局 api 变化：vue3 统一由 createApp 生成的实例来设置，比如 app.use, app.config, app.directive
+1. 全局 api 变化：vue3 统一由 createApp 生成应用实例来设置，比如 app.use, app.config, app.directive
 2. template 内元素 attribute 的变化：vue3 废弃了 v-bind.sync 写法，支持多个 v-model 写法；v-for key 写在 tempalte 上；支持多个根节点
 3. 配置选项 - model的变化：vue3 去除了 model 选项
 4. 配置选项 - 事件的变化：未被定义在 `emits` 数组中的事件，会被默认为原生事件；废除了 $listeners 属性
@@ -19,9 +19,9 @@ vue2 升级到 vue3，包含了全局 api、tempalte 模板语法、组件配置
 ## 1 功能总结
 
 基础变更点  
-1. createApp 代替 new Vue 生成组件，全局 api
+1. createApp 代替 new Vue 生成应用实例，参数接受根组件配置，从而将应用 api 和组件 api 分开，实现全局 1应用实例 + n组件实例，简化组件
 2. vite 入口是 html，直接使用 es6 script module 引入 js 执行
-3. vue3 组合式 api，主要体现在 setup 函数，vue2 选项式 api
+3. vue3 组合式 api，主要体现在 setup 函数，setup 结合 composables 函数实现组合；vue2 选项式 api
 4. 函数式组件：vue3 使用 export 箭头函数直接创建函数式组件，废弃了 functional 标识；与 vue2 不同，vue3 在有状态组件和函数式组件上性能已经持平
 5. data 对象：vue3 data 必须返回一个函数，与 vue2 可以返回 plain object | function 不同；mixin 混入的 data 只是浅层次合并
 6. template 多个根节点
@@ -54,7 +54,7 @@ app.use(VueRouter)
 
 思考：vue3 插件使用是挂载在根实例上的，与 vue2 挂载在 Vue 对象上有什么区别？  
 解答：vue2 是在 Vue.prototype 上扩展 router 属性，在子组件使用 extend 继承根组件上挂载的 Vue 对象时，会共享 prototype，从而实现插件的相关功能。
-那么 vue3 挂载在根实例上，一样也可以通过 vm.root 来读取插件数据。
+那么 vue3 挂载在应用实例上，一样也可以通过 vm.root 来读取插件数据。
 
 ### 1.2 v-model
 
@@ -89,8 +89,8 @@ app.use(VueRouter)
 
 问题：  
 1. app 是如何影响到内部其余组件的
-2. 它自身就是一个实例吗
-3. 内部组件是如何渲染及挂载的
+2. 它自身就是一个实例吗？它是一个应用实例
+3. 内部组件是如何渲染及挂载的？使用根组件作为渲染起点
 
 ### 1.5 全局 api
 

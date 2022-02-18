@@ -4,11 +4,11 @@ time: 2022-01-21 10:56:50
 
 ## 1 渲染流程
 
-### 1.1 全局 createApp
+### 1.1 全局 createApp 生成应用实例
 
 在 runtime-dom 模块，export 2 个关键 api
 
-runtime-dom index.ts 入口文件
+runtime-dom index.ts 入口文件调用 createRenderer 生成 createApp  
 ```javascript
 import {
   createRenderer
@@ -53,7 +53,7 @@ createRenderer 是调用 baseCreateRenderer，内部构造提供 createApp 和 r
 `createApp`：createRenderer 生成的工厂函数，生成实际 app 对象  
 `render`：可以在 createApp 内部使用，也可以独立使用，用以渲染 vnode 对象到 domContainer，内部调用 patch 渲染，也就是 vue2 的 `vm._update` 方法，内部调用的 `Vue.prototype.__patch__`
 
-上面写了 createApp 生成实际 app，这个只是用法，是怎么生成的呢？  
+上面写了 createApp 生成实际 app，这个只是用法，createApp 是怎么生成的呢？  
 ```javascript
 // runtime-core apiCreateApp.ts
 export function createAppAPI<HostElement>(
@@ -236,9 +236,9 @@ export function createAppAPI<HostElement>(
 这个函数长了一点，不过却是我们 vue 实例对象的核心 api 实现，包含了 app.use、app.mount, 有必要展示出来
 
 归纳总结  
-1. createApp 生成 app 实例对象，通过函数返回的 plain object，保证每个 app 是唯一的
-2. app.mount 使用的 render 来渲染真实 dom
-3. app._context 是 vue 组件配置描述对象，包含了 app, config, mixin, components, directives, provides 属性
+1. 在 runtime-core 模块中调用 createAppAPI 生成 createApp 方法。 createApp 生成 app 应用实例对象
+2. app.mount 使用根组件作为入口，createVNode 生成根 vnode ；在 renderer.ts 中声明的 render 方法是将 vnode tree 渲染为真实 dom tree
+3. app._context 是全局实例配置描述对象，包含了全局组件、全局 mixin、全局指令、插件、全局配置、optionsCache weakmap 等
 4. 生成 vnode 时机：是在 app.mount 方法执行时，才调用 createVNode 生成 vnode，然后 render 来渲染 dom
 
 与 vue2 类似的是  
@@ -247,13 +247,18 @@ export function createAppAPI<HostElement>(
 3. 生成 vnode 时机：app.$mount 使用的是 mountComponent 来渲染，内部是通过 `vm._update(vm._render(), hydrating)`，通过 vm._render 生成 vnode，通过 vm._update 来渲染 vnode
 4. 前期准备，vue2 是通过执行 mixin 来准备 vue.prototype 基本结构，vue3 是直接暴露 createApp，内部 component, vnode 基本结构是代码就写好了的
 
-### 1.2 import 加载组件渲染
+### 1.2 app.mount 渲染入口，先生成 vnode tree
 
-我们知道根组件是通过 createApp 生成的组件实例，这里有几个疑问  
+在生成 app 实例之后，开发者手动调用 app.mount 挂载渲染，其内部依次调用 `createVNode`, `render` 方法  
+createVNode 接受传入 createApp 的组件参数，这个组件参数是什么呢？
+
+#### 1.2.1 defineComponent 生成组件对象
+
+我们知道根组件是作为 createApp 的参数，这里有几个疑问  
 1. createApp 可以直接接受一个 .vue 组件对象，那么 .vue 编译结果是什么呢？
 2. createApp 可以接受配置 render 不？
 
-一个 App.vue 编译部分结果  
+App.vue 编译部分结果  
 ```javascript
 import LeftMenu from "/src/components/LeftMenu.vue";
 import {createVNode as _createVNode, createElementVNode as _createElementVNode, resolveComponent as _resolveComponent, openBlock as _openBlock, createElementBlock as _createElementBlock, pushScopeId as _pushScopeId, popScopeId as _popScopeId} from "/node_modules/.vite/vue.js?v=221ddc95";
@@ -284,16 +289,44 @@ _export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-7ba5bd90"
 ```
 
 编译结果分析  
-1. esm function return 可以返回多个值？
+1. esm function return 可以返回多个值？第一个参数不返回，只返回最后一个
 2. 组件使用 `_export_sfc` 包裹返回，第一个参数是使用 `_defineComponent` 生成的对象，组件 setup 和配置式组件最终都会编译成 _defineComponent 函数包裹的对象
 3. tempalte 最终编译为使用 `_createElementBlock`、`_createElementVNode`、`_createVNode` 函数组成的数组
 
-所以组件渲染，需要结合这几个函数一起来看
+_export_sfc 函数执行返回的是什么，通过编译代码结果反推 `var EXPORT_HELPER_ID = "plugin-vue:export-helper";` + `import _export_sfc from '${EXPORT_HELPER_ID}'`，
+发现 _export_sfc 就是 vite 的 `plugin-vue` 中 `helper.ts` 导出的函数，来看看代码实现  
+```javascript
+export default (sfc, props) => {
+  const target = sfc.__vccOpts || sfc;
+  for (const [key, val] of props) {
+    target[key] = val;
+  }
+  return target;
+}
+```
+它就是一个包裹器，将 props 添加到对应的组件上而已。实际还是看看 `_defineComponent` 返回的是什么  
+defineComponent 是 vue 提供的一个全局 api  
+```javascript
+export function defineComponent(options: unknown) {
+  return isFunction(options) ? { setup: options, name: options.name } : options
+}
+```
+defineComponent 内部是直接返回的组件配置对象，但是它实现了 ts 的函数多重重载，控制了返回值的类型，用于手动编写渲染函数、tsx、ide 工具的支持
 
-### 1.3 render 渲染
+#### 1.2.2 createVNode 生成 vnode 对象
+
+现在已经知道了，传入 createVNode 其实就是普通的 object 对象，每个组件内部有自己的 render 方法。猜想同 vue 一样，通过递归调用 createVNode 生成 vnode tree，然后调用 render 将 vnode tree 渲染为真实 dom
+继续看看 createVNode 实现  
+```javascript
+
+```
+注意：暂时先不看，因为有 vue2 基础，大致知道通过配置对象生成 vnode tree
+
+### 1.3 render 将 vnode tree 渲染为真实 dom
 
 根据 createApp 生成的 vnode 作为入口，调用 mountComponent 来渲染组件
 
+render 函数
 ```javascript
 const render: RootRenderFunction = (vnode, container, isSVG) => {
   if (vnode == null) {
@@ -311,18 +344,86 @@ const render: RootRenderFunction = (vnode, container, isSVG) => {
 内部通过 patch 来渲染真实 dom，和 vue2 vm._update 内部使用的 `vm.__patch__` 一样
 不过内部 patch 实现有所差异，vue3 内部判断相对 vue2 多一些，因为 vue3 支持 fragment 渲染
 
+vue3 patch 实现
 ```javascript
-// vue3 patch 实现
+const patch: PatchFn = (
+  n1,
+  n2,
+  container
+) => {
+  const { type, ref, shapeFlag } = n2
+  switch (type) {
+    case Text:
+      processText(n1, n2, container, anchor)
+      break
+    case Comment:
+      processCommentNode(n1, n2, container, anchor)
+      break
+    case Fragment:
+      processFragment(...)
+      break
+    default:
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(...)
+      } else if (shapeFlag & ShapeFlags.COMPONENT) {
+        processComponent(
+          n1,
+          n2,
+          container,
+          anchor,
+          parentComponent,
+          parentSuspense,
+          isSVG,
+          slotScopeIds,
+          optimized
+        )
+      } else if (shapeFlag & ShapeFlags.TELEPORT) {
+        ;(type as typeof TeleportImpl).process(
+          n1 as TeleportVNode,
+          n2 as TeleportVNode,
+          container,
+          anchor,
+          parentComponent,
+          parentSuspense,
+          isSVG,
+          slotScopeIds,
+          optimized,
+          internals
+        )
+      } else if (__FEATURE_SUSPENSE__ && shapeFlag & ShapeFlags.SUSPENSE) {
+        ;(type as typeof SuspenseImpl).process(
+          n1,
+          n2,
+          container,
+          anchor,
+          parentComponent,
+          parentSuspense,
+          isSVG,
+          slotScopeIds,
+          optimized,
+          internals
+        )
+      }
+  }
+
+  // set ref
+  if (ref != null && parentComponent) {
+    setRef(ref, n1 && n1.ref, parentSuspense, n2 || n1, !n2)
+  }
+}
 ```
 
-接下来学习点  
-1. vue3 生命周期
-2. vue3 diff 实现
+总结归纳 patch  
+1. patch 做为 render 直接调用的方法，用于处理 vnode
+2. patch 内部对 vnode 类型做判断处理针对渲染，支持 text, comment, fragment, element, component, teleport, suspense 等类型
 
-### 1.4 mountComponent 渲染组件
+processComponent 内部实现是调用 mountComponent 初次渲染或 updateComponent 做更新渲染
 
-在 render 的 patch 函数中，是通过对 vnode 的类型来判断渲染，如果是组件，则会执行 mountComponent
+#### 1.3.1 mountComponent 渲染组件
 
+在 render 的 patch 函数中，是通过对 vnode 的类型来判断渲染，如果是组件，则会执行 mountComponent；而 mountComponent 才会涉及到组件的实例化流程
+
+mountComponent  
 ```javascript
 const mountComponent: MountComponentFn = (
   initialVNode,
@@ -350,6 +451,123 @@ const mountComponent: MountComponentFn = (
     isSVG,
     optimized
   )
+}
+```
+
+#### 1.3.2 vue 组件实例化流程
+
+mountComponent 内部三个方法调用就执行了 vue 组件实例化流程，其方法说明  
+1. createComponentInstance 生成组件实例对象必要参数：在 runtime-core 中定义了 component.ts 组件模块，内部定义了 createComponentInstance 方法，它只返回了实例对象需要的必要参数
+2. setupComponent 方法将组件中定义的 props、slot 添加到 instance 对象上，并且调用 setupStatefulComponent 方法处理 setup 配置函数，获取 setup 执行结果。
+在末尾有执行 finishComponentSetup 函数，内部有兼容 vue2 的配置型组件，调用 applyOptions 处理，包含了 beforeCreate, created, data, methods, watch, computed 等配置处理，内部也调用了 vue3 的响应式 api watch, computed 等做响应处理，同时也兼容了 vue2 的 beforeDestroy 等废弃 api
+3. setupRenderEffect 作为 mountComponent 的最后渲染函数
+
+setupComponent
+```javascript
+export function setupComponent(
+  instance: ComponentInternalInstance,
+  isSSR = false
+) {
+  isInSSRComponentSetup = isSSR
+
+  const { props, children } = instance.vnode
+  const isStateful = isStatefulComponent(instance)
+  initProps(instance, props, isStateful, isSSR)
+  initSlots(instance, children)
+
+  const setupResult = isStateful
+    ? setupStatefulComponent(instance, isSSR)
+    : undefined
+  isInSSRComponentSetup = false
+  return setupResult
+}
+```
+
+applyOptions  
+```javascript
+export function applyOptions(instance: ComponentInternalInstance) {
+  const options = resolveMergedOptions(instance)
+  const publicThis = instance.proxy! as any
+  const ctx = instance.ctx
+  shouldCacheAccess = false
+  if (options.beforeCreate) {
+    callHook(options.beforeCreate, instance, LifecycleHooks.BEFORE_CREATE)
+  }
+
+  const {...} = options
+
+  const checkDuplicateProperties = __DEV__ ? createDuplicateChecker() : null
+  if (injectOptions) {}
+  if (methods) {}
+  if (dataOptions) {}
+  shouldCacheAccess = true
+  if (computedOptions) {}
+  if (watchOptions) {}
+  if (provideOptions) {}
+  if (created) {
+    callHook(created, instance, LifecycleHooks.CREATED)
+  }
+
+  function registerLifecycleHook(
+    register: Function,
+    hook?: Function | Function[]
+  ) {
+    if (isArray(hook)) {
+      hook.forEach(_hook => register(_hook.bind(publicThis)))
+    } else if (hook) {
+      register((hook as Function).bind(publicThis))
+    }
+  }
+
+  registerLifecycleHook(onBeforeMount, beforeMount)
+  registerLifecycleHook(onMounted, mounted)
+  registerLifecycleHook(onBeforeUpdate, beforeUpdate)
+  registerLifecycleHook(onUpdated, updated)
+  registerLifecycleHook(onActivated, activated)
+  registerLifecycleHook(onDeactivated, deactivated)
+  registerLifecycleHook(onErrorCaptured, errorCaptured)
+  registerLifecycleHook(onRenderTracked, renderTracked)
+  registerLifecycleHook(onRenderTriggered, renderTriggered)
+  registerLifecycleHook(onBeforeUnmount, beforeUnmount)
+  registerLifecycleHook(onUnmounted, unmounted)
+  registerLifecycleHook(onServerPrefetch, serverPrefetch)
+
+  if (__COMPAT__) {
+    if (
+      beforeDestroy &&
+      softAssertCompatEnabled(DeprecationTypes.OPTIONS_BEFORE_DESTROY, instance)
+    ) {
+      registerLifecycleHook(onBeforeUnmount, beforeDestroy)
+    }
+    if (
+      destroyed &&
+      softAssertCompatEnabled(DeprecationTypes.OPTIONS_DESTROYED, instance)
+    ) {
+      registerLifecycleHook(onUnmounted, destroyed)
+    }
+  }
+
+  if (isArray(expose)) {}
+
+  // options that are handled when creating the instance but also need to be
+  // applied from mixins
+  if (render && instance.render === NOOP) {
+    instance.render = render as InternalRenderFunction
+  }
+  if (inheritAttrs != null) {
+    instance.inheritAttrs = inheritAttrs
+  }
+
+  // asset options.
+  if (components) instance.components = components as any
+  if (directives) instance.directives = directives
+  if (
+    __COMPAT__ &&
+    filters &&
+    isCompatEnabled(DeprecationTypes.FILTERS, instance)
+  ) {
+    instance.filters = filters
+  }
 }
 ```
 
@@ -467,8 +685,37 @@ const setupRenderEffect: SetupRenderEffectFn = (
 归纳总结  
 1. setupRenderEffect 作为 effect 函数调用者，表示响应式系统在组件 mount 的时候才将渲染流程函数作为 activeEffect
 2. 初次渲染、更新都是封装在 effect 函数中的
-3. 与 vue2 主动 callhook 不同，vue3 是直接执行生命周期函数，比如 `invokeArrayFns(bm)`
+3. 与 vue2 主动 callhook 不同，vue3 是直接执行生命周期函数，比如 `invokeArrayFns(bm)`，其内部调用了4个生成周期函数：bm as beforeMount, m as mounted, bu as beforeUpdate, u as updated
+4. 组件最终渲染还是会递归调用 patch 渲染
+
+生命周期总结  
+1. 在组件渲染 effect 中，有4种生命周期：bm as beforeMount, m as mounted, bu as beforeUpdate, u as updated
+2. 在组件 unmount 中会执行2种生命周期：beforeUnmount, unmounted
+3. 在 setupComponent 嵌套调用的 applyOptions 中调用了2种生命周期：beforeCreate, created
 
 ### 1.5 vue2 diff vs vue3 diff
 
-todo
+继续看看 setupRenderEffect 组件更新，如果已经 mounted，那么会走 patch(vnode1, vnode2) + updateComponent 做 diff 渲染
+
+需要解决的点  
+1. patch 对比优化时，时哪个标识可以跳过对比渲染 - patchFlag 标识
+2. 组件渲染 diff 算法
+
+updateComponent
+```javascript
+const updateComponent = (n1: VNode, n2: VNode, optimized: boolean) => {
+    const instance = (n2.component = n1.component)!
+    if (shouldUpdateComponent(n1, n2, optimized)) {
+      instance.update()
+    } else {
+      // no update needed. just copy over properties
+      n2.component = n1.component
+      n2.el = n1.el
+      instance.vnode = n2
+    }
+  }
+```
+
+说明  
+1. `shouldUpdateComponent` 会使用 vnode.patchFlag 判断是否需要更新
+2. `instance.update()` 是再次调用了 setupRenderEffect 方法去更新组件

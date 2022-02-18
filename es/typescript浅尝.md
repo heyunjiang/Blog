@@ -27,7 +27,13 @@ update: 2021-09-16 19:24:39
 1. ts 是 js 类型的超集，可以编译成纯 js
 2. 存在强类型语言的某些特征，比如 static 、 interface 等，方便类型约束，提升代码鲁棒性
 
-问题：es6 class 有 static, interface 没？
+问题：  
+1. es6 class 有 static, interface 没？
+2. interface 有哪些用？怎么用？
+3. .d.ts 的 declare 有什么用？怎么用？
+4. as 通常用于 ts 报错的不确定性处理，通常在访问可能存在的属性场景，那么在 export 导出中使用怎么理解 `export const createApp = ((...args) => {}) as CreateAppFunction<Element>`
+5. 类型声明，`let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer` 后面的 Renderer 是复合声明吗？
+6. export type 是什么意思？
 
 优势  
 1. 语义化增强：完备的类型系统让代码阅读更方便明了
