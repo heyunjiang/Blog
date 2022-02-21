@@ -693,12 +693,12 @@ const setupRenderEffect: SetupRenderEffectFn = (
 2. 在组件 unmount 中会执行2种生命周期：beforeUnmount, unmounted
 3. 在 setupComponent 嵌套调用的 applyOptions 中调用了2种生命周期：beforeCreate, created
 
-### 1.5 vue2 diff vs vue3 diff
+### 1.4 vue2 diff vs vue3 diff
 
 继续看看 setupRenderEffect 组件更新，如果已经 mounted，那么会走 patch(vnode1, vnode2) + updateComponent 做 diff 渲染
 
 需要解决的点  
-1. patch 对比优化时，时哪个标识可以跳过对比渲染 - patchFlag 标识
+1. patch 对比优化时，时哪个标识可以跳过对比渲染 - patchFlag 标识，在 compiler 编译 template 为 _sfc_render 时会为 `_createElementBlock` 等方法添加 patchFlag 值
 2. 组件渲染 diff 算法
 
 updateComponent
@@ -719,3 +719,20 @@ const updateComponent = (n1: VNode, n2: VNode, optimized: boolean) => {
 说明  
 1. `shouldUpdateComponent` 会使用 vnode.patchFlag 判断是否需要更新
 2. `instance.update()` 是再次调用了 setupRenderEffect 方法去更新组件
+
+patchKeyedChildren diff 核心算法  
+```javascript
+
+```
+
+## 2 vue3 vs vue2
+
+1. vue3 有应用实例，所有插件、mixin、全局配置是放在应用实例上的
+2. 组件实例区别：vnode.component, vnode.appContext.components
+3. 全局属性挂载：vue2.prototype, vue3.config.gloablProperties，可以通过 vnode.appContext 拿到应用环境对象
+4. 独立 router：vue2 每个组件可以挂载自己独立的 router 对象，而 vue3 想要实现类似的功能，比如内部实现另一个 app 对象挂载 router
+
+接下来要做的  
+1. 对比 vue2, vue3 diff，文章 + 源码
+2. 熟悉 vue2, vue3 组件渲染流程
+3. 熟悉 vue3 相关 api ，并查阅核心实现

@@ -10,7 +10,8 @@ author: heyunjiang
 3. css v-bind 实现原理
 4. 应用 app 和组件实例有什么区别？1个应用实例渲染时以根组件作为入口，也就是会对应n个组件
 5. import 加载的 vue 组件，编译之后使用的哪个方法生成组件实例，和根实例 createApp 是如何结合的？
-6. 
+6. 子组件是怎么获取全局配置的组件、store、router 等数据？看看每个组件的实现，通过定义在 app.config.globalProperties 上
+7. 子组件是如何获取应用上的配置的？vnode.appContext.components
 
 ## 阅读源码目的
 
