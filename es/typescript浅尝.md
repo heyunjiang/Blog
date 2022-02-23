@@ -61,7 +61,7 @@ update: 2021-09-16 19:24:39
 1. 普通类型：采用冒号 `:`，例如 let myFavoriteNumber: string | number;
 2. 数组：let hello: number[], 泛型 `let hello: Array<number>`，类数组 `let hello: IArguments = arguments`
 3. 对象：使用 `interface` 声明属性及值类型，或者简单对象则使用 `object` 声明
-4. 函数：(data: object) => boolean，或者使用 interface 来声明
+4. 函数：(data: object) => boolean，参数可以直接使用 object 关键字或者使用 interface 来声明
 
 > 尖括号里面始终表示类型，可以是基础类型，有可以是定义好的 interface、object 等数据类型，也又可能是定义的泛型
 
@@ -73,7 +73,21 @@ update: 2021-09-16 19:24:39
 4. 可选属性：在属性 key 后面加 `?`
 5. 任意属性：使用 propName 关键字，`[propName: string]: string | number;`；它会限制所有接口属性类型；可以添加任意多个属性
 6. 只读属性：使用 readonly 关键字定义，`readonly id: number;`
-7. 声明数组：`[index: numnber]: number`
+7. 声明数组：定义数组或类数组，定义了索引和值类型
+```javascript
+interface MyArray {
+  [index: number]: string
+}
+```
+8. 声明函数：定义函数的参数及返回值类型
+```javascript
+interface MyFun {
+  (source: string): boolean
+}
+```
+9. 声明类：在使用到类时再来学习，类的声明包含了属性、方法、实例 new 的控制
+
+作用-类型声明：用于对象类型参数声明，比如定义变量、函数参数、函数本身、类等
 
 ### 2.2 array
 

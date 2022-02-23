@@ -324,7 +324,7 @@ defineComponent 内部是直接返回的组件配置对象，但是它实现了 
 
 ### 1.3 render 将 vnode tree 渲染为真实 dom
 
-根据 createApp 生成的 vnode 作为入口，调用 mountComponent 来渲染组件
+根据 createVNode 生成的 vnode 作为入口，调用 mountComponent 来渲染组件
 
 render 函数
 ```javascript
@@ -724,6 +724,15 @@ patchKeyedChildren diff 核心算法
 ```javascript
 
 ```
+
+### 1.5 vue 渲染流程总结
+
+1. createApp 生成 app 应用实例
+2. app.mount 调用 createVnode, render 方法
+3. createVnode 生成 vnode tree
+4. render 渲染 vnode tree，内部调用 patch 方法
+5. patch 判断为组件时，调用 mountComponent 开始渲染
+6. mountComponent 内部依次调用 createComponentInstance, setupComponent, setupRenderEffect 生成组件实例和渲染
 
 ## 2 vue3 vs vue2
 
