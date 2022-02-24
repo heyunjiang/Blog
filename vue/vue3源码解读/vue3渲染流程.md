@@ -686,10 +686,11 @@ const setupRenderEffect: SetupRenderEffectFn = (
 1. setupRenderEffect 作为 effect 函数调用者，表示响应式系统在组件 mount 的时候才将渲染流程函数作为 activeEffect
 2. 初次渲染、更新都是封装在 effect 函数中的
 3. 与 vue2 主动 callhook 不同，vue3 是直接执行生命周期函数，比如 `invokeArrayFns(bm)`，其内部调用了4个生成周期函数：bm as beforeMount, m as mounted, bu as beforeUpdate, u as updated
-4. 组件最终渲染还是会递归调用 patch 渲染
+4. 组件的 renderEffect 中，定义了 instance.update 方法，方便组件更新时直接调用
+5. update 方法又使用了 renderComponentRoot 执行 render 方法生成组件内部的子 vnodeTree，然后调用 patch 渲染这颗 vnodeTree，形成递归
 
 生命周期总结  
-1. 在组件渲染 effect 中，有4种生命周期：bm as beforeMount, m as mounted, bu as beforeUpdate, u as updated
+1. 在组件渲染 effect 中，也就是 setupRenderEffect，有4种生命周期：bm as beforeMount, m as mounted, bu as beforeUpdate, u as updated
 2. 在组件 unmount 中会执行2种生命周期：beforeUnmount, unmounted
 3. 在 setupComponent 嵌套调用的 applyOptions 中调用了2种生命周期：beforeCreate, created
 
@@ -731,8 +732,8 @@ patchKeyedChildren diff 核心算法
 2. app.mount 调用 createVnode, render 方法
 3. createVnode 生成 vnode tree
 4. render 渲染 vnode tree，内部调用 patch 方法
-5. patch 判断为组件时，调用 mountComponent 开始渲染
-6. mountComponent 内部依次调用 createComponentInstance, setupComponent, setupRenderEffect 生成组件实例和渲染
+5. `patch` 判断为组件时，调用 mountComponent 开始渲染
+6. mountComponent 内部依次调用 `createComponentInstance, setupComponent, setupRenderEffect` 生成组件实例和渲染
 
 ## 2 vue3 vs vue2
 
