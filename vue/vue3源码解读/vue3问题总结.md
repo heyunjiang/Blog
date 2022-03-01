@@ -17,6 +17,10 @@ author: heyunjiang
 10. ref 和 reactive 怎么区分使用？ref 用于处理原始类型，reactive 处理 object, array 类型。ref 内部使用新建一个 class 对象，提供 get value 属性，调用 track & trigger 支持响应式，而 reactive 是直接使用 proxy 处理。因为 js 对象是引用类型，并且 proxy 处理原始类型会报错，所以 reactive 只能处理 typeof 为 object 的，不能处理 string, number 等原始类型
 11. setup import 的组件，在组件 createVnode 递归时，是如何被找到的？和注册过后的有什么区别？在 setup 中引入的组件，最终是会作为变量 return 出去
 12. 子组件 vnode 是在什么时候生成的？编译之后，封装在 `_sfc_render ` 函数中，作为父组件的 render 配置
+13. dev script watch 可以监听 script setup 添加的响应式数据，prod 却不行
+14. element-plus :root 选择器在 shadow dom 中怎么处理
+15. reactive([]) 对数组处理，为什么不是响应式的？其实是，如果我们通过数组下标访问是响应式的，但是重新对数组或对象赋值，则会替换掉原本的 proxy 对象
+16. template 内编译结果，结合 setup 变量，会被处理为 `$setup['param']` 方式，动态组件则无法直接 import 之后使用，能不能控制 vue3 编译的结果，类似 webpack loader ast 处理
 
 ## 阅读源码目的
 

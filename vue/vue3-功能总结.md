@@ -5,16 +5,16 @@ author: heyunjiang
 
 ## 背景
 
-vue2 升级到 vue3，包含了全局 api、tempalte 模板语法、组件配置选项、事件、插槽、css等变化，概括如下  
-1. 全局 api 变化：vue3 统一由 createApp 生成应用实例来设置，比如 app.use, app.config, app.directive
-2. template 内元素 attribute 的变化：vue3 废弃了 v-bind.sync 写法，支持多个 v-model 写法；v-for key 写在 tempalte 上；支持多个根节点
-3. 配置选项 - model的变化：vue3 去除了 model 选项
-4. 配置选项 - 事件的变化：未被定义在 `emits` 数组中的事件，会被默认为原生事件；废除了 $listeners 属性
-5. 函数式组件功能弱化：vue3 有状态组件性能优化到跟函数式组件无差异，并且 vue3 支持返回多个根节点。废除了 functional 关键字
-6. 配置选项 - render 函数变化：`h` 需要明确 import 引入；查找已经注册的组件需要使用 `resolveComponent`，对于 template 写法不会有影响
-7. 插槽变化：jsx 中废除 vue2 的 this.$scopedSlots 写法，统一使用 this.$slots 来调用；vue3 插槽节点都被定义为子节点了？不是 scopedSlot 属性了？同前面废除 $scopedSlots 理解，应该是
-8. 配置选项 - 生命周期：使用 beforeUnmount 代替 beforeDestory，unmounted 代替 destroyed
-9. css 变量：使用 v-bind 实现 css 变量通过 js 控制
+vue2 到 vue3 变化总结归纳：  
+1. 支持组合式 api：抽离独立的 composables 函数，支持参数，函数内部使用 ref, reactive, watch, onMounted 等全局 api；通常使用 script setup 搭配
+2. template 变化：多级根组件、teleport、v-model、this.$slots、key 绑定到 template 等变化
+3. css：支持在 style 中使用 v-bind 使用定义在 script 中的变量
+4. 分为应用和组件2种实例
+
+内部原理性变化  
+1. 组件轻量化：使用 plain object 替代 vue2 的函数实例对象，use、config、mixin 等方法定义在了应用实例上；
+2. 渲染性能优化：使用 patchFlags 处理了无响应式数据节点对象，直接跳过 diff
+3. 响应式变化：拆分响应式模块，提供 ref, reactive, track, trigger 等 api，内部使用 proxy 简化，使用比较灵活
 
 ## 1 功能总结
 

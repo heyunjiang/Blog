@@ -103,9 +103,35 @@ interface MyFun {
 
 1. 参数个数限定：指定的参数不可多，也不可少，要求严格匹配
 2. 可选参数：同接口属性，使用 `?` 定义，但是函数可选参数之后不能再有其他非可选参数了
-3. 剩余参数：`...items: any[]`
+3. 剩余参数：function hello(firstName: string, ...items: any[]) {}
 4. 参数默认值: function (hello: string = 'hello')
 5. 返回值：function(hello: string): boolean {}
+6. this 参数：为了解决 ts 函数内部访问 this 警告或报错问题，可以生命一个 this 函数参数并指明类型
+7. 函数重载：参数不同，返回值不同。通过多行定义函数
+
+完整函数类型  
+```javascript
+let myAdd: (x: number, y: number) => number = 
+    function(x: number, y: number): number { return x + y }
+```
+
+推断函数类型  
+```javascript
+let myAdd = function(x: number, y: number): number { return x + y } // 会自动推断出左侧变量 myAdd 的类型
+let myAdd: (x: number, y: number) => number = function(x, y) { return x + y } // 会自动推断出右侧函数的参数和返回值类型
+```
+
+简化函数类型  
+```javascript
+let myAdd = function(x: number, y: number) { return x + y } // 会自动推断出左侧变量 myAdd 的类型、右侧函数返回值类型
+```
+
+函数重载  
+```javascript
+function pickCard(x: {suit: string; card: number; }[]): number;
+function pickCard(x: number): {suit: string; card: number; };
+function pickCard(x): any {}
+```
 
 ### 2.4 class
 
@@ -174,23 +200,44 @@ class MyComponent extends React.Component<Props, {}> {
 
 ## 4 泛型
 
-数组泛型：let arr: Array<number> = []; 通过使用 对象 + 尖括号 形式构造泛型声明
-
-在定义函数、接口、类时不指定类型，在使用时再确定。一般很少使用泛型，都使用 any 替代了
-
+泛型是使用尖括号定义泛型变量，`<T>`，其他使用跟函数、数组这些没变化。  
+> 在定义函数、接口、类时不指定类型，在使用时再确定。一般很少使用泛型，都使用 any 替代了  
+注意这几个泛型例子的使用，泛型变量定义的位置
+demo  
 ```typescript
+let arr: Array<number> = [];
 function swap<T, U>(tuple: [T, U]): [U, T] {
     return [tuple[1], tuple[0]];
 }
-
 swap([7, 'seven']); // 相当于使用了类型推论 swap<number, string>([7, 'seven'])
 ```
-
-泛型约束：由于是使用时才确定泛型变量的具体类型，所以不能直接读取泛型变量的属性
-
-泛型的作用  
-1. 声明数组、函数、接口等参数数据类型
-2. 泛型约束：对传入的参数进行条件约束，比如要求有 .length 属性，则使用 extends Lengthwise，还有其他的呢？
+泛型函数  
+```typescript
+let myswap: <T, U>(tuple: [T, U]) => [U, T] = function swap<T, U>(tuple: [T, U]): [U, T] { return [tuple[1], tuple[0]] } // 通过表达式声明时，函数泛型前需要命名
+```
+泛型接口  
+```typescript
+interface GenericIdentity<T> {
+  (arg: T): T;
+}
+function identity<T>(arg: T): T {
+  return arg;
+}
+let myIdentity: GenericIdentity = identity
+```
+泛型类  
+```typescript
+class hello<T> {}
+```
+泛型继承接口 T extends，也叫泛型约束  
+```typescript
+interface hello {
+  world: string;
+}
+function identity<T extends hello>(arg: T): T {
+  return arg.world
+}
+```
 
 ## 5 技巧
 
