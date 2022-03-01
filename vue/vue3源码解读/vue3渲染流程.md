@@ -4,6 +4,8 @@ time: 2022-01-21 10:56:50
 
 ## 1 渲染流程
 
+vue3 渲染入口是 `createApp(rootComponent).mount('#id')`
+
 ### 1.1 全局 createApp 生成应用实例
 
 在 runtime-dom 模块，export 2 个关键 api
@@ -241,7 +243,7 @@ export function createAppAPI<HostElement>(
 3. app._context 是全局实例配置描述对象，包含了全局组件、全局 mixin、全局指令、插件、全局配置、optionsCache weakmap 等
 4. 生成 vnode 时机：是在 app.mount 方法执行时，才调用 createVNode 生成 vnode，然后 render 来渲染 dom
 
-与 vue2 类似的是  
+而 vue2 与vue3类似的流程是  
 1. vue2 是通过 `new Vue` 生成实例 app 对象
 2. app.$mount 使用的是 vm._update 来渲染真实 dom
 3. 生成 vnode 时机：app.$mount 使用的是 mountComponent 来渲染，内部是通过 `vm._update(vm._render(), hydrating)`，通过 vm._render 生成 vnode，通过 vm._update 来渲染 vnode
@@ -304,7 +306,7 @@ export default (sfc, props) => {
   return target;
 }
 ```
-它就是一个包裹器，将 props 添加到对应的组件上而已。实际还是看看 `_defineComponent` 返回的是什么  
+它就是一个包裹器，将 props 添加到对应的组件上而已，也就是将 render 属性添加到 _sfc_main 对象上。实际还是看看 `_defineComponent` 返回的是什么  
 defineComponent 是 vue 提供的一个全局 api  
 ```javascript
 export function defineComponent(options: unknown) {
@@ -315,12 +317,52 @@ defineComponent 内部是直接返回的组件配置对象，但是它实现了 
 
 #### 1.2.2 createVNode 生成 vnode 对象
 
-现在已经知道了，传入 createVNode 其实就是普通的 object 对象，每个组件内部有自己的 render 方法。猜想同 vue 一样，通过递归调用 createVNode 生成 vnode tree，然后调用 render 将 vnode tree 渲染为真实 dom
-继续看看 createVNode 实现  
+现在已经知道了，传入 createVNode 其实就是普通的 object 对象，每个组件内部有自己的 render 方法；而 createVNode 是调用的 createBaseVNode 创建 vnode 对象
+继续看看 createBaseVNode 实现  
 ```javascript
-
+function createBaseVNode(
+  type: VNodeTypes | ClassComponent | typeof NULL_DYNAMIC_COMPONENT,
+  props: (Data & VNodeProps) | null = null,
+  children: unknown = null,
+  patchFlag = 0,
+  dynamicProps: string[] | null = null,
+  shapeFlag = type === Fragment ? 0 : ShapeFlags.ELEMENT,
+  isBlockNode = false,
+  needFullChildrenNormalization = false
+) {
+  const vnode = {
+    __v_isVNode: true,
+    __v_skip: true,
+    type,
+    props,
+    key: props && normalizeKey(props),
+    ref: props && normalizeRef(props),
+    scopeId: currentScopeId,
+    slotScopeIds: null,
+    children,
+    component: null,
+    suspense: null,
+    ssContent: null,
+    ssFallback: null,
+    dirs: null,
+    transition: null,
+    el: null,
+    anchor: null,
+    target: null,
+    targetAnchor: null,
+    staticCount: 0,
+    shapeFlag,
+    patchFlag,
+    dynamicProps,
+    dynamicChildren: null,
+    appContext: null
+  } as VNode
+  return vnode
+}
 ```
-注意：暂时先不看，因为有 vue2 基础，大致知道通过配置对象生成 vnode tree
+总结归纳  
+1. 实际 vnode 对象也就是一个普通的 plain object
+2. vnode 对象内部保存了 appContext、children 等上下文关系
 
 ### 1.3 render 将 vnode tree 渲染为真实 dom
 
@@ -730,10 +772,11 @@ patchKeyedChildren diff 核心算法
 
 1. createApp 生成 app 应用实例
 2. app.mount 调用 createVnode, render 方法
-3. createVnode 生成 vnode tree
-4. render 渲染 vnode tree，内部调用 patch 方法
+3. createVnode 生成 vnode 对象
+4. render 渲染 vnode，内部调用 patch 方法
 5. `patch` 判断为组件时，调用 mountComponent 开始渲染
 6. mountComponent 内部依次调用 `createComponentInstance, setupComponent, setupRenderEffect` 生成组件实例和渲染
+7. 组件 setupRenderEffect.update 方法内部，在 beforeMount 和 mounted 生命周期之间，使用了 renderComponentRoot 执行 render 方法生成组件内部的子 vnodeTree，然后调用 patch 渲染这颗 vnodeTree，形成递归
 
 ## 2 vue3 vs vue2
 

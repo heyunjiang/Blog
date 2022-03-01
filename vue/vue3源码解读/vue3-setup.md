@@ -58,6 +58,7 @@ _defineComponent({
 
 在 app.mount 时，会调用组件的渲染流程，其中包含了 createVnode, render，其中 render 是直接调用 patch 来处理 vnode 的渲染；  
 在 patch 内部，如果判断为组件，则会走 mountComponent，内部包含了 createComponentInstance、setupComponent、setupRenderEffect;  
+> vue3 渲染流程可以查看另一篇文章
 而 setup 则是在 setupComponent 时调用
 
 setupComponent
