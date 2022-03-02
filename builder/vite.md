@@ -16,6 +16,7 @@ author: heyunjiang
 2. 我们写的 jsx、cjs、umd 之类需要编译的语法，vite 怎么处理？预构建
 3. 开发时使用的 esbuild，生产使用 rollup，那么插件 @vitejs/plugin-xxx 是要做2套兼容吗？是如何工作的？
 4. 开发时使用的 esm 规范，npm pkg 有许多 cjs, umd 格式的，vite 怎么处理为 esm？依赖预构建
+5. vite 对 ts 做了什么处理？tsconfig.json 是被谁识别处理的？
 
 1. vite 入口可以是 html, 也可以是 main.js
 2. 依赖预构建：

@@ -26,6 +26,9 @@ update: 2021-09-16 19:24:39
 
 1. ts 是 js 类型的超集，可以编译成纯 js
 2. 存在强类型语言的某些特征，比如 static 、 interface 等，方便类型约束，提升代码鲁棒性
+3. 按类型检查的时机，ts 是动态类型，js 是静态类型
+4. 按是否允许强制转换，ts 和 js 是弱类型，ts 兼容了 js 的类型转换语法
+5. 小项目使用障碍：手动写声明文件、类型
 
 问题：  
 1. es6 class 有 static, interface 没？
@@ -34,15 +37,16 @@ update: 2021-09-16 19:24:39
 4. as 通常用于 ts 报错的不确定性处理，通常在访问可能存在的属性场景，那么在 export 导出中使用怎么理解 `export const createApp = ((...args) => {}) as CreateAppFunction<Element>`
 5. 类型声明，`let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer` 后面的 Renderer 是复合声明吗？
 6. export type 是什么意思？
+7. 在 .ts 文件中引入 ref，会提示 ts 2305 提示 vue 没有导出的成员 ref，怎么解决？
 
 优势  
 1. 语义化增强：完备的类型系统让代码阅读更方便明了
-2. 语法错误提前暴露
-3. 编辑器和ide代码补全
+2. 语法错误提前暴露，在 ts 编译为 js 时报错、在编辑器内部检查报错
+3. 编辑器和ide代码补全、智能提示、跳转
 4. 类型系统包容性强：类型推论、第三方系统兼容性强
 5. 社区活跃：vue、antd 都是用 ts 写的
 
-目的：完善 javascript 过于灵活导致的代码质量参差不齐的问题
+目的：提供类型系统，完善 javascript 过于灵活导致的代码质量参差不齐的问题
 
 ## 2 typescript 基本语法
 
@@ -54,6 +58,7 @@ update: 2021-09-16 19:24:39
 6. 类型断言：使用 `as` 关键字，可用于接口、类的断言，用以解决 ts 报错的不确定性问题。`let strLength: number = (someValue as string).length;`；也可以使用 `(<string>someValue).length` 来做类型断言
 7. 类型别名：使用 `type` 关键字，type NameOrResolver = Name | NameResolver
 8. 枚举：使用 `enum` 关键字，enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat} 约定取值范围，会被编译为从 0 开始递增的数组。在 ts 中作为一种数据结构，编译之后为数组和对象的结合体
+9. 联合类型：使用单竖线 `|`
 
 问题：es 函数默认值是 `=` 还是 `:`
 
@@ -152,8 +157,12 @@ class 包含了 属性、constructor、方法
 
 作用：方便编辑器定位、代码补全
 
-1. 使用 `declare` 关键字定义声明语句
+1. 使用 `declare`、`interface`、`type` 关键字定义声明语句
 2. 声明文件以 `.d.ts` 结尾
+3. 在 package.json 中使用 `types` 字段指向项目的声明文件。如果项目根目录存在 index.d.ts，那么则不需要指明该字段
+
+作用  
+1. 引用第三方库时，需要引用它的声明文件，获取代码提示和补全
 
 ### 2.6 module
 
