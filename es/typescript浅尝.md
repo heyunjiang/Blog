@@ -21,6 +21,7 @@ update: 2021-09-16 19:24:39
 [5 技巧](#5-技巧)  
 [6 与es6 class区别](#6-与es6-class区别)  
 [7 ts 踩坑归纳](#7-ts-踩坑归纳)  
+[8 vue3 使用 ts](#8-vue3-使用-ts)  
 
 ## 1 typescript 简介
 
@@ -32,12 +33,13 @@ update: 2021-09-16 19:24:39
 
 问题：  
 1. es6 class 有 static, interface 没？
-2. interface 有哪些用？怎么用？
-3. .d.ts 的 declare 有什么用？怎么用？
+2. interface 有哪些用？怎么用？定义接口类型，用于定义函数、class 需要的类型
+3. .d.ts 的 declare 有什么用？怎么用？类型声明，用于编辑器的识别处理，包括错误提示、代码补全
 4. as 通常用于 ts 报错的不确定性处理，通常在访问可能存在的属性场景，那么在 export 导出中使用怎么理解 `export const createApp = ((...args) => {}) as CreateAppFunction<Element>`
 5. 类型声明，`let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer` 后面的 Renderer 是复合声明吗？
-6. export type 是什么意思？
+6. export type 是什么意思？声明类型别名或字面量类型限制
 7. 在 .ts 文件中引入 ref，会提示 ts 2305 提示 vue 没有导出的成员 ref，怎么解决？
+8. `export * from "@vue/runtime-dom";` 在 .d.ts 中 import 导入的是什么？
 
 优势  
 1. 语义化增强：完备的类型系统让代码阅读更方便明了
@@ -172,6 +174,23 @@ class 包含了 属性、constructor、方法
 2. export = 和 import =: ts 规定，如果使用 export = 来兼容 commonjs 的导出对象(即 commonjs 和 es6 混用)，则必须使用 import = require 来实现
 3. 除了和 export =  搭配，ts 支持 commonjs require 加载文件吗？
 
+### 2.7 type
+
+先来看看 ts 默认支持的类型  
+1. 基础类型：string, number, boolean, void, undefined, null。后面三个基本不用
+2. 任意类型：let hello: any
+3. 联合类型：let hello: string | number
+4. 接口类型: let hello: interface
+5. 数组类型: let hello: number[]
+6. 函数类型: let fun: (x: number, y: number) => number；函数声明写法 function fun(x: number, y: number): number {}
+7. 内置对象: let hello: Boolean | Error | Date | RegExp | HTMLElement | NodeList
+8. 元组类型: let hello: [string, number] 它限制了数组每一项的取值和 length
+9. 泛型: `let hello: Array<string>`，`let hello: <T>(x: T) => T = function yo<T>(x: T): T {}`
+
+type 的作用  
+1. 定义类型别名：type Name = string; 接着使用 let hello: Name 即可
+2. 定义字符串字面量类型：type Names = 'jack' | 'tom' | 'andy'; 然后使用 function hello(name: Names): any {} 即可。它的作用是限制了对应参数的取值只能是字面量中的一个
+
 ## 3 tsx
 
 在 typescript 实现的 jsx 命名为 `tsx`
@@ -267,6 +286,31 @@ function identity<T extends hello>(arg: T): T {
 生成错误：TypeError: Cannot read property 'isAbsolute' of undefined  
 原因分析：ts 编译时将 es6 import 转为 require 后，使用时默认会去读取 default 作为入口属性，但是标准包在 commonjs require 时，并没有 default 属性  
 解决方案：修改 ts 编译配置 tsconfig.json `"esModuleInterop": true`，这个会默认包裹一层 default 属性
+
+## 8 vue3 使用 ts
+
+项目使用 vite 作为构建工具
+
+### 8.1 vue3 对 ts 的支持
+
+1. 在使用 options api 组件时，使用 `defineComponent` 包裹组件，实现类型推断
+2. 使用 script setup 时，使用 `defineProps`, `defineEmits` 定义 props 和 emits，实现类型推断
+3. lang="ts"
+
+问题：为什么要使用 defineComponent 包裹组件？
+
+总结：vue3 只是提供了 ts 需要的组件类型，这些方法执行的结果还是 ts 代码，没有对 ts 做啥特殊处理
+
+### 8.2 vite 对 ts 的支持
+
+1. 内部实现了 `.ts` 的转译，生成 .js
+2. 类型检查提示由 IDE 和 构建过程实现。构建过程是指 esbuild 和 rollup 插件吗？
+3. .vue 文件使用 `vue-tsc` 工具做类型检查
+
+### 8.3 问题
+
+1. 编辑器如何配置
+2. 
 
 ## 参考文档
 

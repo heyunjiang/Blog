@@ -1,65 +1,62 @@
-# setup
+# 【vue3】为什么我们能直接使用定义在 setup 中的数据？
 
 time: 2022-02-24 14:33:11  
 author: heyunjiang
 
-这里记录 setup 使用时遇到的问题
+setup 作为 vue3 的核心功能，内部定义的响应式数据是如何被组件使用的呢，一起来看看 setup 的被执行流程
 
 ## 1 setup 编译结果
 
-普通 script 配置型编译结果
-```javascript
-const __default__ = {
-    computed: {
-        xxx() {
-            return this.$store.state.xxx;
-        }
-    },
-    mounted() {
-        this.$store.dispatch("xxx");
-        this.$store.dispatch("xxx");
-    }
-};
-```
+先来看看 `<script setup>` 组件的编译结果(简单可以使用 vite 本地开发，通过浏览器查看加载的 vue 文件即可)
 
-setup 编译结果
+源代码
 ```javascript
-import {ref} from "/node_modules/.vite/vue.js?v=221ddc95";
-import {QuestionFilled} from "/node_modules/.vite/@element-plus_icons-vue.js?v=221ddc95";
-import TaskSummary from "/src/views/tableList/TaskSummary.vue";
-import TaskFailTable from "/src/views/tableList/Tables/TaskFailTable.vue?t=1645669030560";
-import projectSummaryRepository from "/src/composables/projectSummaryRepository.ts?t=1645669030560";
-const _sfc_main = /* @__PURE__ */
-_defineComponent({
-    ...__default__,
-    setup(__props, {expose}) {
-        expose();
-        const activeName = ref("taskFail");
-        const taskTypesDesc = {};
-        const {summaryData} = projectSummaryRepository();
-        const __returned__ = {
-            activeName,
-            taskTypesDesc,
-            summaryData,
-            QuestionFilled,
-            TaskSummary,
-            TaskFailTable
-        };
-        Object.defineProperty(__returned__, "__isScriptSetup", {
-            enumerable: false,
-            value: true
-        });
-        return __returned__;
-    }
+<script lang="ts" setup>
+import { ref } from 'vue'
+const filterString = ref('')
+</script>
+
+<template>
+  <el-input v-model="filterString" />
+</template>
+```
+编译结果
+```javascript
+import { ref } from "/dist2/node_modules/.vite/vue.js?v=ede3a932";
+const _sfc_main = /* @__PURE__ */ _defineComponent({
+  setup(__props, { expose }) {
+    expose();
+    const filterString = ref("");
+    const __returned__ = { filterString };
+    Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+    return __returned__;
+  }
 });
+import { resolveComponent as _resolveComponent, openBlock as _openBlock, createBlock as _createBlock } from "/dist2/node_modules/.vite/vue.js?v=ede3a932";
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_el_input = _resolveComponent("el-input");
+  return _openBlock(), _createBlock(_component_el_input, {
+    modelValue: $setup.filterString,
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => $setup.filterString = $event)
+  }, null, 8, ["modelValue"]);
+}
+import _export_sfc from "/dist2/@id/plugin-vue:export-helper";
+export default /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "/Users/80245690/Desktop/project/dataspherestudio/web/packages/taskAnalysis/src/App.vue"]]);
 ```
+在 vue3渲染流程 文章中说明了 _defineComponent, _export_sfc 的具体说明。这里简要总结  
+1. _defineComponent 传入什么就返回什么，_sfc_main 就是一个 plain object {}
+2. _export_sfc 是将参数赋值给 sfc 组件对象，也就是说将 render 函数添加到了 _sfc_main 对象上，最终返回的还是 _sfc_main 对象
 
-## 2 setup 源码执行流程
+总结归纳：  
+1. template 编译为 _sfc_render 函数，也就是 component.render 函数
+2. setup 编译为组件的 setup 函数属性，其内部定义的变量会被封装为返回对象属性
+
+## 2 setup 函数被调用流程
 
 在 app.mount 时，会调用组件的渲染流程，其中包含了 createVnode, render，其中 render 是直接调用 patch 来处理 vnode 的渲染；  
 在 patch 内部，如果判断为组件，则会走 mountComponent，内部包含了 createComponentInstance、setupComponent、setupRenderEffect;  
 > vue3 渲染流程可以查看另一篇文章
-而 setup 则是在 setupComponent 时调用
+**而 setup 则是在 setupComponent 时调用**
 
 setupComponent
 ```javascript
@@ -141,11 +138,12 @@ export function handleSetupResult(
 总结归纳：  
 1. setup 是在组件生成 vnode 之后，在 patch.mountComponent 生成组件实例时才会调用
 2. 如果 setup 返回了函数，则会作为组件的 render 方法。说明 render 会在之后被调用，也就是说 vnode tree 是在组件一边生成 vnode，一边渲染为真实 dom 流程中逐渐完善的
-3. setup 返回的对象属性值，是保存在实例的 setupState 上的
+3. setup 返回的对象属性值，是保存在实例的 setupState 属性上的，即 `instance.setupState`
 
 ## 3 setupState 是什么时候被调用的？
 
-一般指的是在 render 函数中的节点去使用这些变量值。那么 render 函数又是啥时候被调用的？  
+通常我们定义在 setup 中的数据，比如 `const filterString = ref('')` 定义的 ref 变量，是直接在 template 中使用 `v-model` 读取；而 template 又会最终编译为组件配置的 render 函数。  
+那么 setupState 通常是在 render 函数中的 createElement 节点去使用这些变量值。那么 render 函数又是啥时候被调用的？  
 初步猜测，是在实际渲染 vnode 时，也就是在 setupRenderEffect 中调用  
 setupRenderEffect.componentUpdateFn 中一段代码  
 ```javascript
@@ -179,13 +177,19 @@ result = normalizeVNode(
 还是回到编译结果上来看  
 ```javascript
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_router_view = _resolveComponent("router-view");
-  return _openBlock(),
-  _createElementBlock("div", _hoisted_1, [_createElementVNode("div", _hoisted_2, [_createVNode($setup["LeftMenu"])]), _createElementVNode("div", _hoisted_3, [_createVNode(_component_router_view)])]);
+  const _component_el_input = _resolveComponent("el-input");
+  return _openBlock(), _createBlock(_component_el_input, {
+    modelValue: $setup.filterString,
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => $setup.filterString = $event)
+  }, null, 8, ["modelValue"]);
 }
 ```
+可以看到，编译结果直接使用了 $setup 对象，也就是 instance.setupState 对象。
 
-可以看到，编译结果直接使用了 $setup 对象。
+全文总结  
+1. `<script setup>` 最终编译为组件配置属性 setup 函数
+2. setup 函数在组件生成实例之后，调用 `setupComponent` 初始化时执行的，函数返回值赋予了 instance.setupState
+3. setupState 是作为组件 render 的第四个参数，而 template 编译为 render 函数时，指定定义了第四个参数为 $setup，整体约定实现了 setup 返回值的使用
 
 思考：我们代码中是否可以直接使用 $setup 对象  
 答：实例上只存在 setupState，$setup 只是函数定义的参数名；
