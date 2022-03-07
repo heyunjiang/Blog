@@ -42,9 +42,10 @@ author: heyunjiang
 
 ## 2 依赖预构建
 
-学习2个点  
+相关问题  
 1. 对 npm 包的构建处理，是如何将 cjs, umd 转换成 esm
 2. 修改 import 地址
+3. vue 文件是什么时候编译的？怎么编译的？
 
 基础知识  
 1. 使用 esbuild 执行预构建

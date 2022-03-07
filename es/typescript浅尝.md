@@ -38,7 +38,7 @@ update: 2021-09-16 19:24:39
 4. as 通常用于 ts 报错的不确定性处理，通常在访问可能存在的属性场景，那么在 export 导出中使用怎么理解 `export const createApp = ((...args) => {}) as CreateAppFunction<Element>`
 5. 类型声明，`let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer` 后面的 Renderer 是复合声明吗？
 6. export type 是什么意思？声明类型别名或字面量类型限制
-7. 在 .ts 文件中引入 ref，会提示 ts 2305 提示 vue 没有导出的成员 ref，怎么解决？
+7. 在 .ts 文件中引入 vue3 ref，会提示 ts 2305 没有导出的成员 ref，怎么解决？
 8. `export * from "@vue/runtime-dom";` 在 .d.ts 中 import 导入的是什么？
 
 优势  
@@ -307,11 +307,9 @@ function identity<T extends hello>(arg: T): T {
 2. 类型检查提示由 IDE 和 构建过程实现。构建过程是指 esbuild 和 rollup 插件吗？
 3. .vue 文件使用 `vue-tsc` 工具做类型检查
 
-### 8.3 问题
-
-1. 编辑器如何配置
-2. 
+### 8.3 vscode 配置 ts 支持
 
 ## 参考文档
 
-[ts 中文](https://www.tslang.cn/docs/handbook/modules.html)
+[ts 中文](https://www.tslang.cn/docs/handbook/modules.html)  
+[打造TypeScript的Visual Studio Code开发环境](https://zhuanlan.zhihu.com/p/21611724)
