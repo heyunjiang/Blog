@@ -111,6 +111,7 @@
   - ✔ [babel plugin](builder/babel.md)
   - ✔ [sourcemap原理](builder/sourcemap原理.md) mappings 单元行列映射
   - [monorepo基础](builder/monorepo基础.md) monorepo 基础学习
+  - ✔ [esbuild 基本功能总结](builder/esbuild.md) 极速构建工具 esbuild，vite 核心依赖
 - 框架
   - [mvvm](other/mvvm.md) 都在用 mvvm ，到底什么 mvvm 是什么？
   - [源码解读-antd](react/源码解读-antd.md)
