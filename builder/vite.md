@@ -52,7 +52,7 @@ author: heyunjiang
 2. 自动依赖搜寻：如果 `node_modules/.vite/` 目录下没有缓存，则会从 node_modules 目录继续去找
 3. 构建入口三种：dependencies, lockfile, vite.config.js 中配置的 optimizeDeps.include
 
-如何集成 esbuild 的？
+如何集成 esbuild 的？使用 esbuild npm package
 
 ## 3 静态资源处理
 

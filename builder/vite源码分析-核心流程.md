@@ -15,7 +15,7 @@ vite 核心功能
 2. `done` vue3 组件是如何被编译的？看看 @vitejs/plugin-vue 如何处理。vue 插件调用了 compiler api，`options.compiler.compileTemplate`，也就是调用的 `vue/compiler-sfc` 编译 api
 3. `done` umd, cjs 如何被处理为 esm？esbuild.build
 4. 有的时候，同时存在 script setup + script 时，dev 开发没问题，build 之后访问变量会出现问题？是 compiler 的问题？
-5. vite 插件时如何被调用的？无非初始化 + 每个钩子递归调用插件
+5. `done`vite 插件时如何被调用的？通过实现一个 pluginContainer 来调用每个插件的相关配置
 
 为了解决心中的疑问，特此来分析源码实现。来看看核心流程
 
@@ -27,6 +27,8 @@ const { createServer } = await import('./server')
 const server = await createServer({})
 await server.listen()
 ```
+
+> 初级调试，结合 vscode debug 模式，添加 debug.js 文件，内容为 `require('./node_modules/vite/dist/node/cli.js')`，源码中加入 debugger 即可使用 vscode 的调试模式
 
 ### 1.1 createServer 启动本地 devserver 服务
 
@@ -156,6 +158,7 @@ export async function optimizeDeps(
 3. 首先通过 parse 分析依赖是否有 es export
 4. 对非 esm 使用 esbuild 构建，这里是对每个 import 入口做一次 build，格式是生成 esm
 5. 构建结果写入缓存
+6. 通过断点调试分析 + 官网说明 `默认情况下，不在 node_modules 中的，链接的包不会被预构建`，预构建的范围默认被控制在了 node_modules 中
 
 问题归纳  
 1. 这里知道了预构建转 esm 是使用的 esbuild 实现
@@ -163,9 +166,139 @@ export async function optimizeDeps(
 
 接下来，分析代码 transform 流程
 
-```javascript
+### 1.3 transform
 
+前面总结到了启动服务器之前，会执行 optimizeDeps 依赖预构建，那么实际需要文件是在什么时候被 transform 的呢？猜想是在 middleware 中  
+继续分析各 middleware
+
+在 createServer 流程中，前面知道了它会应用系列内置 middleware，其中有一个 `middlewares.use(transformMiddleware(server))`。
+粗略按照 koa middleware 的理解，在每次 http 请求时，会应用一次 transformMiddleware 返回的中间件
+
+发现一：Promise.race 应用场景，请求超时，实际请求和超时配置只要有其中一个成功就行
+```javascript
+await Promise.race([
+  server._pendingReload,
+  new Promise((_, reject) =>
+    setTimeout(reject, NEW_DEPENDENCY_BUILD_TIMEOUT)
+  )
+])
 ```
+
+通过断点调试分析，transformMiddleware 内部调用了 `transformRequest` 函数，来看看它的核心实现
+```javascript
+export function transformMiddleware(
+  server: ViteDevServer
+) {
+  return async function viteTransformMiddleware(req, res, next) {
+    const result = await transformRequest(url, server, {
+      html: req.headers.accept?.includes('text/html')
+    })
+    return send(req, res, result.code, type, ...)
+  }
+}
+export function transformRequest(
+  url: string,
+  server: ViteDevServer,
+  options: TransformOptions = {}
+): Promise<TransformResult | null> {
+  return doTransform(url, server, options)
+}
+async function doTransform(
+  url: string,
+  server: ViteDevServer,
+  options: TransformOptions
+) {
+  let code, map
+  const loadResult = await pluginContainer.load(id, { ssr }) // id 为 main.ts url，通常 loadResult 为 null
+  if (loadResult == null) {
+    code = await fs.readFile(file, 'utf-8')
+  }
+  // code 是文件源码，transformResult 是编译后的文件了
+  const transformResult = await pluginContainer.transform(code, id, {
+    inMap: map,
+    ssr
+  })
+  code = transformResult.code!
+  map = transformResult.map
+  return (mod.transformResult = {
+    code,
+    map,
+    etag: getEtag(code, { weak: true })
+  } as TransformResult)
+}
+```
+
+归纳分析  
+1. 资源文件编译是在浏览器实际发起请求时处理，包括 ts, vue 文件
+2. 通过 pluginContainer.transform 转换源码
+
+问题：pluginContainer.transform 是怎么调用的？已经知道 @vitejs/plugin-vue 提供了 transform 配置，猜想是被插件容器顺序调用的，这里找寻一下
+
+pluginContainer 核心源码
+```javascript
+const container: PluginContainer = {
+  async load(id, options) {
+    const ssr = options?.ssr
+    const ctx = new Context()
+    ctx.ssr = !!ssr
+    for (const plugin of plugins) {
+      if (!plugin.load) continue
+      ctx._activePlugin = plugin
+      const result = await plugin.load.call(ctx as any, id, { ssr })
+      if (result != null) {
+        if (isObject(result)) {
+          updateModuleInfo(id, result)
+        }
+        return result
+      }
+    }
+    return null
+  },
+
+  async transform(code, id, options) {
+    const inMap = options?.inMap
+    const ssr = options?.ssr
+    const ctx = new TransformContext(id, code, inMap as SourceMap)
+    ctx.ssr = !!ssr
+    for (const plugin of plugins) {
+      if (!plugin.transform) continue
+      ctx._activePlugin = plugin
+      ctx._activeId = id
+      ctx._activeCode = code
+      const start = isDebug ? performance.now() : 0
+      let result: TransformResult | string | undefined
+      try {
+        result = await plugin.transform.call(ctx as any, code, id, { ssr })
+      } catch (e) {
+        ctx.error(e)
+      }
+      if (!result) continue
+      isDebug &&
+        debugPluginTransform(
+          timeFrom(start),
+          plugin.name,
+          prettifyUrl(id, root)
+        )
+      if (isObject(result)) {
+        if (result.code !== undefined) {
+          code = result.code
+          if (result.map) {
+            ctx.sourcemapChain.push(result.map)
+          }
+        }
+        updateModuleInfo(id, result)
+      } else {
+        code = result
+      }
+    }
+    return {
+      code,
+      map: ctx._getCombinedSourcemap()
+    }
+  },
+}
+```
+归纳分析：pluginContainer.transform 是顺序调用插件的各种配置方法，猜想正确
 
 ## 2 插件
 

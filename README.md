@@ -108,6 +108,7 @@
   - ✔ [webpack-plugin](builder/webpack-plugin.md) plugin 开发方式
   - ✔ [webpack-loader](builder/webpack-loader.md) loader 开发方式及原理
   - [vite](builder/vite.md) vite 基本原理
+  - ✔ [vite源码分析-核心流程](builder/vite源码分析-核心流程.md) vite源码分析-核心流程 dev 完整流程，依赖预构建、按需编译文件
   - ✔ [babel plugin](builder/babel.md)
   - ✔ [sourcemap原理](builder/sourcemap原理.md) mappings 单元行列映射
   - [monorepo基础](builder/monorepo基础.md) monorepo 基础学习
