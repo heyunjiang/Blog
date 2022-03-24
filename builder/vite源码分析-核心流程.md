@@ -19,7 +19,7 @@ vite 核心功能
 
 为了解决心中的疑问，特此来分析源码实现。来看看核心流程
 
-## 1 dev 启动流程
+## 1 dev 核心原理
 
 入口 bin/vite.js, `require('../dist/node/cli')`，使用 cac 类似 command 库识别命令，如果是 dev 命令，则会执行如下代码  
 ```javascript
@@ -300,12 +300,61 @@ const container: PluginContainer = {
 ```
 归纳分析：pluginContainer.transform 是顺序调用插件的各种配置方法，猜想正确
 
+扩展学习：ts, jsx, json 等文件是如何 transform 的呢？  
+答：在 plugins 目录下，有20+ vite 内置插件，包括 esbuild, css, json, html 等 plugin 执行相关 transform 转换
+
 ## 2 插件
+
+通过前面学习 dev 运行流程时，发现对各种资源文件的处理都是通过插件来实现，vite 内部实现了一个 pluginContainer 来调用每个插件
 
 在解决 vue3 编译问题，想要实现类似 ast 解析处理特定代码问题，就了解了 vite 如何编译 vue 的。  
 vue 组件的编译，是通过 @vitejs/plugin-vue 实现的。
 ```javascript
+load(id, opt) {
+  const { filename, query } = parseVueRequest(id)
+  if (query.vue) {
+    if (query.src) {
+      return fs.readFileSync(filename, 'utf-8')
+    }
+    const descriptor = getDescriptor(filename, options)!
+    let block: SFCBlock | null | undefined
+    if (query.type === 'script') {
+      // handle <scrip> + <script setup> merge via compileScript()
+      block = getResolvedScript(descriptor, ssr)
+    } else if (query.type === 'template') {
+      block = descriptor.template!
+    } else if (query.type === 'style') {
+      block = descriptor.styles[query.index!]
+    } else if (query.index != null) {
+      block = descriptor.customBlocks[query.index]
+    }
+    if (block) {
+      return {
+        code: block.content,
+        map: block.map as any
+      }
+    }
+  }
+},
+transform(code, id, opt) {
+  const { filename, query } = parseVueRequest(id)
+  // sub block request
+  const descriptor = query.src
+    ? getSrcDescriptor(filename, query)!
+    : getDescriptor(filename, options)!
 
+  if (query.type === 'template') {
+    return transformTemplateAsModule(code, descriptor, options, this, ssr)
+  } else if (query.type === 'style') {
+    return transformStyle(
+      code,
+      descriptor,
+      Number(query.index),
+      options,
+      this
+    )
+  }
+}
 ```
 在查看这个插件源码时，发现它提供了 vite 插件要求的几个配置：buildStart, load, transform 等，先对 vite 插件做个基础学习总结
 

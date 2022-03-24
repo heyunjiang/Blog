@@ -98,6 +98,24 @@ document 获取节点位置信息可以通过 element 获取，包括节点本�
 
 > DOMFrameContentLoaded 只作用于 frames ，同 DOMContentLoaded
 
+### 1.4 xhr vs fetch
+
+区别  
+1. xhr 基于原型对象，fetch 直接使用
+2. xhr 基于事件配置，fetch 根据配置，返回 promise
+3. httpcode 处理方式不同：xhr 非 200 会直接报错，fetch 在非 200 还是返回 resolved 的 promise，只有网络出现问题才会出错
+4. cookie 默认携带：xhr 会携带，fetch 不会，必须显示指定 `credentials`
+5. 请求取消：xhr 支持 abort 取消，fetch 不能取消
+6. 进度提示：xhr 支持，fetch 不支持
+7. fetch 可以搭配 caches api 实现：window fetch event + serviceworker + cache api
+8. fetch 可以拦截 fetch 请求，所以可以处理跨域内容
+9. fetch 支持 response 对流的处理
+
+应用场景  
+1. 普通网络请求直接使用 fetch
+2. 文件上传、进度需要使用 xhr
+3. 请求超时重传需要使用 xhr，因为需要取消
+
 ## 2 ie 专属
 
 ### 2.1 ie 浏览器模式、文本模式
