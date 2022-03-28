@@ -343,17 +343,7 @@ transform(code, id, opt) {
     ? getSrcDescriptor(filename, query)!
     : getDescriptor(filename, options)!
 
-  if (query.type === 'template') {
-    return transformTemplateAsModule(code, descriptor, options, this, ssr)
-  } else if (query.type === 'style') {
-    return transformStyle(
-      code,
-      descriptor,
-      Number(query.index),
-      options,
-      this
-    )
-  }
+  return transformMain(code, filename, options, this, ssr, customElementFilter(filename));
 }
 ```
 在查看这个插件源码时，发现它提供了 vite 插件要求的几个配置：buildStart, load, transform 等，先对 vite 插件做个基础学习总结
