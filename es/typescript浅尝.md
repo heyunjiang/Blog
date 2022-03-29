@@ -2,7 +2,8 @@
 
 time: 2018.8.09  
 update: 2020.12.28  
-update: 2021-09-16 19:24:39
+update: 2021-09-16 19:24:39  
+update: 2022-03-29 14:55:20
 
 一直都没有怎么去学习 typescript ，但是今天阅读 antd 源码的时候，发现它是用 ts 写的，大部分源码都能看懂，但是它的一些语法不是很懂，比如 `export default class Button extends React.Component<ButtonProps, any>` ，它尾巴上的 `<ButtonProps, any>` 是什么，是 React.Component 自带可以这样子写的吗，还是 ts 赋予的？
 
@@ -33,13 +34,16 @@ update: 2021-09-16 19:24:39
 
 问题：  
 1. es6 class 有 static, interface 没？
-2. interface 有哪些用？怎么用？定义接口类型，用于定义函数、class 需要的类型
-3. .d.ts 的 declare 有什么用？怎么用？类型声明，用于编辑器的识别处理，包括错误提示、代码补全
+2. ✔ interface 有哪些用？怎么用？定义接口类型，用于定义函数、class 需要的类型
+3. ✔ .d.ts 的 declare 有什么用？怎么用？类型声明，用于编辑器的识别处理，包括错误提示、代码补全
 4. as 通常用于 ts 报错的不确定性处理，通常在访问可能存在的属性场景，那么在 export 导出中使用怎么理解 `export const createApp = ((...args) => {}) as CreateAppFunction<Element>`
 5. 类型声明，`let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer` 后面的 Renderer 是复合声明吗？
-6. export type 是什么意思？声明类型别名或字面量类型限制
-7. 在 .ts 文件中引入 vue3 ref，会提示 ts 2305 没有导出的成员 ref，怎么解决？
+6. ✔ export type 是什么意思？声明类型别名或字面量类型限制
+7. ✔ 在 .ts 文件中引入 vue3 ref，会提示 ts 2305 没有导出的成员 ref，怎么解决？提供 vue component 声明
 8. `export * from "@vue/runtime-dom";` 在 .d.ts 中 import 导入的是什么？
+9. 除了项目 package.json 制定 types 字段和根项目 index.d.ts 来指定声明解决 2307 2304 问题，项目 .d.ts 一般放在 types/ 目录下吗？
+10. 项目中哪些地方需要编写类型声明？
+11. interface 可以和 function 重名吗？不能
 
 优势  
 1. 语义化增强：完备的类型系统让代码阅读更方便明了
@@ -62,7 +66,7 @@ update: 2021-09-16 19:24:39
 8. 枚举：使用 `enum` 关键字，enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat} 约定取值范围，会被编译为从 0 开始递增的数组。在 ts 中作为一种数据结构，编译之后为数组和对象的结合体
 9. 联合类型：使用单竖线 `|`
 
-问题：es 函数默认值是 `=` 还是 `:`
+问题：es 函数默认值是 `=` 还是 `:`？是=，: 是类型
 
 类型声明  
 1. 普通类型：采用冒号 `:`，例如 let myFavoriteNumber: string | number;
@@ -272,10 +276,9 @@ function identity<T extends hello>(arg: T): T {
 1. 跨过 ts 编译错误：断言为 any 可以跨国 ts 错误，例如 `(window as any).hello`
 2. ts 对全局对象有做类型定义，比如 Math, addEventListener 等，在我们使用的时候，ts 做类型推论，如果类型不匹配则会编译报错
 
-## 6 与es6 class区别
+## 6 ts class与es6 class区别
 
-1. 编译结果: ts class 编译结果为 es5 function，es6 class 由 v8 本身提供
-2. 关键字: ts 支持更完整关键字，而 es6 只支持 static、extends、super 三个
+1. 关键字: ts 支持更完整关键字，而 es6 只支持 static、extends、super 三个
 
 ## 7 ts 踩坑归纳
 
@@ -304,11 +307,20 @@ function identity<T extends hello>(arg: T): T {
 ### 8.2 vite 对 ts 的支持
 
 1. 内部实现了 `.ts` 的转译，生成 .js
-2. 类型检查提示由 IDE 和 构建过程实现。构建过程是指 esbuild 和 rollup 插件吗？
+2. 类型检查提示由 IDE 和 构建过程实现
 3. .vue 文件使用 `vue-tsc` 工具做类型检查
+4. vite 使用 plugin-vue 实现对 vue 的编译处理，内部使用 esbuild.transformWithEsbuild 执行 ts 编译和 treeShaking
 
 ### 8.3 vscode 配置 ts 支持
 
+使用 volar
+
+### 8.4 项目实际使用 ts 场景
+
+主要是写 interface, type, .d.ts 文件
+
+原则是自己编写的组件需要被其他地方引用时，确定好相互之间的参数格式及返回值，提高函数的可读性。  
+可以编写在组件内部、compositionapi、*.d.ts 文件中
 
 ## 参考文档
 
