@@ -152,6 +152,7 @@
       - [vue3 响应式系统](vue/vue3源码解读/vue3响应式系统.md) track and trigger
       - ✔ [vue3 渲染流程](vue/vue3渲染流程.md) 核心点在于 createVnode, createComponentInstance, setupComponent, setRenderEffect
       - ✔ [vue3 setup](vue/vue3-setup.md) setup 啥时候执行的？内部属性怎么被 template 访问到的？
+      - ✔ [vue3组件编码规范](vue/vue3组件编码规范.md)
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
