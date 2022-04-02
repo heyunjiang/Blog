@@ -21,6 +21,7 @@ author: heyunjiang
 14. element-plus :root 选择器在 shadow dom 中怎么处理
 15. reactive([]) 对数组处理，为什么不是响应式的？其实是，如果我们通过数组下标访问是响应式的，但是重新对数组或对象赋值，则会替换掉原本的 proxy 对象
 16. template 内编译结果，结合 setup 变量，会被处理为 `$setup['param']` 方式，动态组件则无法直接 import 之后使用，能不能控制 vue3 编译的结果，类似 webpack loader ast 处理
+17. composables 中声明的组件 ref 无法与获取到对应组件实例，但是组件内部 script setup 却是可以的，需要断点调试一下？
 
 ## 阅读源码目的
 
