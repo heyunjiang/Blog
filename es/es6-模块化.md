@@ -85,13 +85,17 @@ export default world;
 <script type="application/javascript" src="path/to/myModule.js" async></script> // 加载完就执行，暂停渲染
 ```
 
+1. 默认：会阻塞后续 script 加载，在 http 请求结束之后，会立即执行 js 代码，然后继续加载其他 script or dom
+2. defer：不会阻塞后续加载，会在所有 dom 构建结束之后再执行 js 代码
+3. async：自身 http 加载阶段不回阻塞后续加载，但是会在 http 请求结束之后，立即执行 js 代码，然后继续加载其他 script or dom
+
 es6 模块加载
 
 ```javascript
 <script type="module" src="./foo.js"></script> // 默认带有 defer 属性，异步加载，不需要再设置 defer 属性
 ```
 
-### 5.2 nodejs 记载模块
+### 5.2 nodejs 加载模块
 
 commonjs 方式
 
@@ -99,12 +103,10 @@ commonjs 方式
 
 ```javascript
 var mod = require('./lib');
-
 moduel.exports = {}
 ```
 
-es modules 方式
-
+es modules 方式  
 1. 如果想使用 import export 命令，则需要指定文件后缀名 `.mjs` 或者 package.json `type = module`
 2. 如果目录在 package.json 中指定了 `main` 字段，则会直接去加载 main 指定路径文件。也可以指定 exports 字段，优先级 exports > main
 
