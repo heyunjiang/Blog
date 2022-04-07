@@ -19,7 +19,7 @@ vite 核心功能
 
 为了解决心中的疑问，特此来分析源码实现。来看看核心流程
 
-## 1 dev 核心原理
+## 1 dev 核心流程
 
 入口 bin/vite.js, `require('../dist/node/cli')`，使用 cac 类似 command 库识别命令，如果是 dev 命令，则会执行如下代码  
 ```javascript
@@ -28,54 +28,63 @@ const server = await createServer({})
 await server.listen()
 ```
 
-> 初级调试，结合 vscode debug 模式，添加 debug.js 文件，内容为 `require('./node_modules/vite/dist/node/cli.js')`，源码中加入 debugger 即可使用 vscode 的调试模式
-
 ### 1.1 createServer 启动本地 devserver 服务
 
 createServer 核心流程
 ```javascript
-const config = await resolveConfig(inlineConfig, 'serve', 'development')
-const httpsOptions = await resolveHttpsConfig()
-const middlewares = connect() as Connect.Server
-const httpServer = await resolveHttpServer(serverConfig, middlewares, httpsOptions)
-const ws = createWebSocketServer(httpServer, config, httpsOptions)
+export async function createServer(
+  inlineConfig: InlineConfig = {}
+): Promise<ViteDevServer> {
+  // 1 配置读取：识别 config 配置，生成 `config` 对象
+  const config = await resolveConfig(inlineConfig, 'serve', 'development')
+  const httpsOptions = await resolveHttpsConfig()
+  const middlewares = connect() as Connect.Server
+  // 2 http 服务、hmr 服务：生成 `httpServer`, `ws` 2个服务器对象
+  const httpServer = await resolveHttpServer(serverConfig, middlewares, httpsOptions)
+  const ws = createWebSocketServer(httpServer, config, httpsOptions)
 
-const watcher = chokidar.watch(path.resolve(root), {})
-const moduleGraph: ModuleGraph = new ModuleGraph()
-const container = await createPluginContainer(config, moduleGraph, watcher)
-watcher.on('change', async (file) => {})
-
-const postHooks: ((() => void) | void)[] = []
-for (const plugin of config.plugins) {
-  if (plugin.configureServer) {
-    postHooks.push(await plugin.configureServer(server))
+  const watcher = chokidar.watch(path.resolve(root), {})
+  const moduleGraph: ModuleGraph = new ModuleGraph()
+  // 3 插件容器 container 生成
+  const container = await createPluginContainer(config, moduleGraph, watcher)
+  const server: ViteDevServer = {
+    config,
+    middlewares,
+    httpServer,
+    watcher,
+    pluginContainer: container,
+    ws,
+    moduleGraph,
+    ssrTransform,
+    transformWithEsbuild,
+    transformRequest(url, options) {
+      return transformRequest(url, server, options)
+    },
+    listen(port?: number, isRestart?: boolean) {
+      return startServer(server, port, isRestart)
+    },
+    ...
   }
+  // 4 watcher 监听文件变更、新增、删除，实现 hmr
+  watcher.on('change', async (file) => {})
+  // 5 加载内置及自定义 http middleware 插件
+  middlewares.use(...)
+  // 6 执行 `buildStart` 钩子
+  await container.buildStart({})
+  // 7 执行依赖优化
+  server._optimizeDepsMetadata = await optimizeDeps()
+  return server
 }
-middlewares.use(...)
-postHooks.forEach((fn) => fn && fn())
-
-await container.buildStart({})
-server._optimizeDepsMetadata = await optimizeDeps()
-
-server.listen() // 调用 httpServerStart 开始监听服务
 ```
 
-总结步骤事项  
-1. 识别 config 配置，生成 `config` 对象
-2. 生成 `httpServer`, `ws` 2个服务器对象
-3. watcher
-4. 插件容器 container
-5. watcher 监听文件变更、新增、删除，实现 hmr
-6. 加载内置及自定义 http middleware 插件
-7. 执行 `buildStart` 钩子
-8. optimizer.optimizeDeps() 执行优化
-9. 启动 http 服务
-
-optimizeDeps 做了什么事情呢？
+总结归纳，在初始创建 server 期间，做了如下事情  
+1. 生成 http 服务器，并定义好相关的 middelware 处理请求
+2. 实现 hmr 服务
+3. 执行依赖预构建
 
 ### 1.2 optimizeDeps
 
-通过官网信息，大致可以知道 vite 此刻是做依赖预构建，
+依赖预构建大致代码
 
 ```javascript
 import { init, parse } from 'es-module-lexer'
@@ -88,16 +97,19 @@ export async function optimizeDeps(
   ssr?: boolean
 ) {
   const dataPath = path.join(cacheDir, '_metadata.json')
+  // 1 创建 node_modules/.vite 缓存目录
   fs.mkdirSync(cacheDir, { recursive: true })
   // 添加 package.json 目的是让缓存中的文件都被识别为 esm
   writeFile(
     path.resolve(cacheDir, 'package.json'),
     JSON.stringify({ type: 'module' })
   )
+  // 2 依赖对象生成：通常识别是从 node_modules 中引入的依赖，也可以通过 optimizeDeps 配置
   let ({ deps, missing } = await scanImports(config))
 
   const flatIdDeps: Record<string, string> = {}
   await init
+  // 3 分析依赖是否有 es export，使用 hasReExports 标识
   for (const id in deps) {
     const flatId = flattenId(id)
     const filePath = (flatIdDeps[flatId] = deps[id])
@@ -117,6 +129,7 @@ export async function optimizeDeps(
   }
 
   const start = performance.now()
+  // 4 使用 esbuild.build 构建依赖为 esm
   const result = await build({
     absWorkingDir: process.cwd(),
     entryPoints: Object.keys(flatIdDeps),
@@ -133,7 +146,7 @@ export async function optimizeDeps(
   })
   const meta = result.metafile!
   const cacheDirOutputPath = path.relative(process.cwd(), cacheDir)
-
+  // 5 构建 server._optimizeDepsMetadata 对象
   for (const id in deps) {
     const entry = deps[id]
     data.optimized[id] = {
@@ -147,29 +160,26 @@ export async function optimizeDeps(
       )
     }
   }
+  // 6 写入缓存
   writeFile(dataPath, JSON.stringify(data, null, 2))
   debug(`deps bundled in ${(performance.now() - start).toFixed(2)}ms`)
   return data
 }
 ```
-步骤分析总结  
-1. 创建 cachedir，也就是 node_modules/.vite/
-2. scanImports 扫描分析所有依赖并收集
-3. 首先通过 parse 分析依赖是否有 es export
-4. 对非 esm 使用 esbuild 构建，这里是对每个 import 入口做一次 build，格式是生成 esm
-5. 构建结果写入缓存
-6. 通过断点调试分析 + 官网说明 `默认情况下，不在 node_modules 中的，链接的包不会被预构建`，预构建的范围默认被控制在了 node_modules 中
+归纳分析  
+1. optimizeDeps 做了依赖预构建，将 node_modules 中使用到的依赖用 esbuild.build 处理成 esm
+2. 缓存构建结果
 
 问题归纳  
 1. 这里知道了预构建转 esm 是使用的 esbuild 实现
-2. 重写导入是在哪儿处理的呢？
+2. 重写导入是在哪儿处理的呢？猜想是每次请求 transform 时处理的
 
 接下来，分析代码 transform 流程
 
 ### 1.3 transform
 
-前面总结到了启动服务器之前，会执行 optimizeDeps 依赖预构建，那么实际需要文件是在什么时候被 transform 的呢？猜想是在 middleware 中  
-继续分析各 middleware
+前面总结到了启动服务器之前，会执行 optimizeDeps 依赖预构建。
+那么实际需要文件是在什么时候被 transform 的呢？以及导入是在哪里重写的呢？
 
 在 createServer 流程中，前面知道了它会应用系列内置 middleware，其中有一个 `middlewares.use(transformMiddleware(server))`。
 粗略按照 koa middleware 的理解，在每次 http 请求时，会应用一次 transformMiddleware 返回的中间件
@@ -184,6 +194,7 @@ await Promise.race([
 ])
 ```
 
+transformMiddleware 是在 server/middleware 内  
 通过断点调试分析，transformMiddleware 内部调用了 `transformRequest` 函数，来看看它的核心实现
 ```javascript
 export function transformMiddleware(
@@ -230,66 +241,24 @@ async function doTransform(
 
 归纳分析  
 1. 资源文件编译是在浏览器实际发起请求时处理，包括 ts, vue 文件
-2. 通过 pluginContainer.transform 转换源码
+2. 通过 pluginContainer.transform 转换源码，包括 vue, ts, jsx 等语法此刻被编译了
+3. 通过断点调试，发现它的导入也是在 transform 过程中被重写了，比如 `import { createApp } from 'vue'` 会被重写为 `import { createApp } from "/node_modules/.vite/vue.js?v=5f6d4d65";`
 
 问题：pluginContainer.transform 是怎么调用的？已经知道 @vitejs/plugin-vue 提供了 transform 配置，猜想是被插件容器顺序调用的，这里找寻一下
 
 pluginContainer 核心源码
 ```javascript
 const container: PluginContainer = {
-  async load(id, options) {
-    const ssr = options?.ssr
-    const ctx = new Context()
-    ctx.ssr = !!ssr
-    for (const plugin of plugins) {
-      if (!plugin.load) continue
-      ctx._activePlugin = plugin
-      const result = await plugin.load.call(ctx as any, id, { ssr })
-      if (result != null) {
-        if (isObject(result)) {
-          updateModuleInfo(id, result)
-        }
-        return result
-      }
-    }
-    return null
-  },
-
   async transform(code, id, options) {
-    const inMap = options?.inMap
-    const ssr = options?.ssr
     const ctx = new TransformContext(id, code, inMap as SourceMap)
-    ctx.ssr = !!ssr
     for (const plugin of plugins) {
-      if (!plugin.transform) continue
-      ctx._activePlugin = plugin
-      ctx._activeId = id
-      ctx._activeCode = code
-      const start = isDebug ? performance.now() : 0
       let result: TransformResult | string | undefined
       try {
         result = await plugin.transform.call(ctx as any, code, id, { ssr })
       } catch (e) {
         ctx.error(e)
       }
-      if (!result) continue
-      isDebug &&
-        debugPluginTransform(
-          timeFrom(start),
-          plugin.name,
-          prettifyUrl(id, root)
-        )
-      if (isObject(result)) {
-        if (result.code !== undefined) {
-          code = result.code
-          if (result.map) {
-            ctx.sourcemapChain.push(result.map)
-          }
-        }
-        updateModuleInfo(id, result)
-      } else {
-        code = result
-      }
+      code = result
     }
     return {
       code,
@@ -300,8 +269,16 @@ const container: PluginContainer = {
 ```
 归纳分析：pluginContainer.transform 是顺序调用插件的各种配置方法，猜想正确
 
-扩展学习：ts, jsx, json 等文件是如何 transform 的呢？  
-答：在 plugins 目录下，有20+ vite 内置插件，包括 esbuild, css, json, html 等 plugin 执行相关 transform 转换
+扩展学习：ts, jsx, json 等文件是如何 transform 的呢？
+
+### 1.4 核心流程总结
+
+在执行 vite 命令时，默认启动 dev 命令，此刻会做如下事情  
+1. 初始化 http server, ws server
+2. 执行依赖预构建并缓存，内部调用 esbuild.build 构建为 esm
+3. 监听服务 server.listen
+4. 每个请求会被 server.middleware 处理，其中核心使用 transformMiddleware 转换，内部使用插件容器递归处理 code
+5. 返回 http 请求
 
 ## 2 插件
 
