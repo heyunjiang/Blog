@@ -7,34 +7,16 @@ author: heyunjiang
 
 在做动态组件使用 vite 插件修改 $setup 支持时，代码如下  
 ```javascript
-<component :is="$setup[route.path.replace('/', '')]" />
+<component :is="$route.path.replace('/', '')" />
 import ComponentA from './ComponentA.vue'
-```
-
-开发的 vite 插件如下  
-```javascript
-const customCompilerPlugin = () => {
-  return {
-    name: 'customCompilerPlugin',
-    transform(code, id, opt) {
-      if (/ComponentA.vue/.test(id)) {
-        code = code.replace(/_resolveDynamicComponent\(_ctx\.\$setup/g, '_resolveDynamicComponent($setup')
-      }
-      return {
-        code, 
-        map: null
-      }
-    }
-  }
-}
 ```
 
 编译结果  
 ```javascript
-_createBlock(_resolveDynamicComponent($setup[$setup.route.path.replace("/", "")]))
+_createBlock(_resolveDynamicComponent(_ctx.$route.path.replace("/", "")))
 ```
 
-选择已经成功替换了 `_ctx.$setup` 为 `$setup`，但是又带来了新的问题，引入的 ComponentA 被 tree shaking 摇树优化了。  
+存在一个问题，引入的 ComponentA 被 tree shaking 摇树优化了。  
 现在的目的  
 1. tree shake 是在哪里做的？vue 本身，还是 vite or esbuild? esbuild.transformWithEsbuild
 2. 如何把 ComponentA 给补充回来
@@ -50,7 +32,7 @@ _createBlock(_resolveDynamicComponent($setup[$setup.route.path.replace("/", "")]
 ## 2 通过插件定位，确定 vue tree shake 位置
 
 因为 vite 插件可以控制顺序，通过在 `@vitejs/plugin-vue` 插件执行之前执行一个插件，查看 code 实现，发现如下  
-1. 此刻时在 vite 核心插件执行完毕之后。核心插件包括哪些？
+1. 此刻是在 vite 核心插件执行完毕之后。核心插件包括哪些？
 2. 此刻输入的还是 vue 组件源代码
 3. 在 vue compiler 编译之后的插件输出 code ，就是 treeshaking 之后的代码
 
