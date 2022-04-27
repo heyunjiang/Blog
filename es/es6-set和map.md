@@ -79,3 +79,18 @@ Map 构造函数要求是数组或具有 iterable 接口的其他数据结构，
 set, map 在日常项目中就会用到，因为它能带给我们 array, object 不能提供的能力  
 但是 weak 的大特性是其对内部对象的弱应用，有哪些使用场景呢？  
 文档说的是对 dom 元素的引用，那我再看完 vue3 track 收集依赖再来回答这个问题
+
+## 3 set vs array
+
+1. 值的唯一：set 内部值必须唯一。注意 object 时存储的是引用地址
+2. 内部支持方法不一样，通常 set 用于数组去重，无法替代 array
+
+## 4 map vs object
+
+1. 键的类型：map 的键可以是 object 的 string, symbol，也可以是 函数、对象或其他任意基本类型
+2. **键的顺序**：map 的键保存了顺序，所以在使用 for of 或 forEach 遍历时可以保证顺序，而 object 则不能保证顺序
+3. 键的个数：map 可以通过 size 熟悉直接访问到，而 object 则需要 Object.keys 获取然后读取数组属性
+4. 迭代：map 可以使用 for  of 或 forEach 迭代，而 object 则需要使用特有的 for in 循环遍历
+5. 优化：在频繁增删键值对的场景，map 内部做了优化
+
+那是否可以直接使用 map 替代 object 了？多尝试
