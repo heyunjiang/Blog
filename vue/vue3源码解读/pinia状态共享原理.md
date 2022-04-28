@@ -50,6 +50,17 @@ pinia 是需要手动 import，pinia store 存储在什么位置呢？
 
 > router 对象是存储在内存中，通过 $router 或 useRouter 访问
 
-## store 存储位置
+## pinia store 读取原理
 
-## 参考文章
+同 router 一样，核心使用 vue3 provide + inject api 实现  
+1. provide：在 `app.use(createPinia())` 时创建了 pinia 对象，app 通过 provide 保存了对该对象的引用 `app.provide(piniaSymbol, pinia)`
+2. inject: 在组件中使用了通过 `defineStore` 定义好的 store，在 setup 执行过程中会调用 store 的初始化流程: 
+执行 `inject(piniaSymbol)` 加载 pinia 对象和 `createSetupStore(id, setup, options, pinia)` 初始化 store
+
+## 归纳总结
+
+1. pinia 和 router 都是在 app.use 时将 `createRouter | createPinia` 生成的对象绑定到 app 上，使用 app.provide + useRouter | useStore 提供 composition api 使用方式，
+同时也提供了 app.config.globalProperties 绑定全局 $pinia or $router 的 vue option api 使用
+2. 一个 app 对象只使用一个 pinia | router 对象
+3. 核心还是使用的 provide + inject 实现，vue 内部使用的 esm + 闭包提供全局对象快速访问与共享
+4. 修改 ref.value 就可以触发相应组件的更新渲染，这一点同 setup 中定义响应式数据状态变更是一致的，都是通过 proxy + track + trigger 实现的响应式
