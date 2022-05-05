@@ -285,6 +285,17 @@ function createReactiveEffect<T = any>(
 
 思考：通常 reactive 和 ref 是在 setup 函数中使用，而 setup 是在组件 beforeCreate 之前吗？什么时候添加的组件 effect 的呢？
 
+### 1.6 响应式原理总结
+
+1. 使用 ref, reactive 声明响应式数据对象
+2. reactive 内部使用 `proxy` 实现对 object 等对象类型数据的拦截，调用 track 和 trigger api 实现响应式
+3. ref 内部直接使用 track 和 trigger 处理
+4. track 和 trigger 内部使用 `targetMap + depsMap + dep` 对象实现对每个数据的响应式声明
+5. 组件在渲染时会读取声明好的响应式数据，此刻就会被 `track` 收集到
+6. 组件的初次渲染和 update 都是通过 `effect 对象` 处理其渲染函数，而每个 effect 对象会被绑定到组件响应式数据属性相关联的 dep 对象上，通过 targetMap + depsMap 绑定相同 key
+7. 数据改变时，会触发 `trigger` ，此刻会触发属性相关联的 dep 对象对应的 effect 回调函数
+8. effect 对象是通过 esm 共享对象能力实现，使用时直接 import 即可知道当前是哪个组件活跃。在 es5 中是通过全局对象绑定实现类似 esm 共享对象能力
+
 ## 2 独立使用响应式系统
 
 vue3 的响应式系统，也是一套发布-订阅系统 + 观察者模式  

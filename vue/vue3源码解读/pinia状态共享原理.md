@@ -57,6 +57,8 @@ pinia 是需要手动 import，pinia store 存储在什么位置呢？
 2. inject: 在组件中使用了通过 `defineStore` 定义好的 store，在 setup 执行过程中会调用 store 的初始化流程: 
 执行 `inject(piniaSymbol)` 加载 pinia 对象和 `createSetupStore(id, setup, options, pinia)` 初始化 store
 
+provide/inject 原理是使用 appContext.provide 对象保存状态数据，共享响应式对象(ref, reactive) 时，子组件获取就是响应式的
+
 ## 归纳总结
 
 1. pinia 和 router 都是在 app.use 时将 `createRouter | createPinia` 生成的对象绑定到 app 上，使用 app.provide + useRouter | useStore 提供 composition api 使用方式，
