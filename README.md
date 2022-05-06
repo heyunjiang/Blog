@@ -154,6 +154,7 @@
       - ✔ [vue3 setup](vue/vue3源码解读/vue3-setup.md) setup 啥时候执行的？内部属性怎么被 template 访问到的？
       - ✔ [vue3 状态管理工具 pinia 原理](vue/vue3源码解读/pinia状态共享原理.md) 为什么 composition api 可以直接使用全局共享状态数据?看看 pinia store 利用 esm 能力
       - ✔ [vue3 组件编码规范](vue/vue3组件编码规范.md)
+      - ✔ [vue3 组件ref绑定](vue/vue3源码解读/vue3-组件ref绑定.md)
   - [校验：eslint](react/基本使用-eslint.md)
   - 测试：mocha, karma, jest, enzyme  需要注意的有：注释规范、命名规范、语法规范、文件组织结构规范、接口文档规范、设计文档规范等
   - 模拟: mock
