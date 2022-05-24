@@ -506,3 +506,4 @@ quic 协议，也叫 http3，是基于 udp 实现了 tcp 之前的相关功能�
 [http3 了解](https://http3-explained.haxx.se/zh/)  
 [二进制编码传输协议](https://segmentfault.com/a/1190000022356844)  
 [http 传输文本还是二进制](https://segmentfault.com/q/1010000006670932)
+[通过 koa2 服务器实践探究浏览器HTTP缓存机制](https://juejin.cn/post/6844903873333870600)

@@ -93,4 +93,5 @@ set, map 在日常项目中就会用到，因为它能带给我们 array, object
 4. 迭代：map 可以使用 for  of 或 forEach 迭代，而 object 则需要使用特有的 for in 循环遍历
 5. 优化：在频繁增删键值对的场景，map 内部做了优化
 
-那是否可以直接使用 map 替代 object 了？多尝试
+那是否可以直接使用 map 替代 object 了？  
+vue3 for 循环还是支持 object
