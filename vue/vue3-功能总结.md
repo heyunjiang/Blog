@@ -66,7 +66,7 @@ app.use(VueRouter)
 
 ### 1.3 app.config
 
-1. errorHandler
+1. errorHandler: 全局错误处理
 2. warnHandler
 3. globalProperties: 用以替代 vue2 的 Vue.prototype 配置
 4. optionMergeStrategies：mixin 合并规则控制
@@ -88,7 +88,7 @@ app.use(VueRouter)
 9. app.version
 
 问题：  
-1. app 是如何影响到内部其余组件的
+1. app 是如何影响到内部其余组件的？每个组件都会绑定一个应用实例
 2. 它自身就是一个实例吗？它是一个应用实例
 3. 内部组件是如何渲染及挂载的？使用根组件作为渲染起点
 
@@ -164,6 +164,12 @@ toRef 和 toRefs 有什么不同？2者相同点都是对响应式对象结构�
 2. vue2 一些全局对象挂载在 Vue 对象上有什么不好的点？1. 同时实例化多个 Vue 实例，则不能独享私有配置 2. 全局配置污染测试用例，比如全局的 mixin, use 
 3. vue3 响应式系统，对比 vue2，除了使用 proxy 来拦截，是使用什么方式来更新呢？vue2 是 dep + watcher 来实现，vue3 track
 4. vue3 数据驱动原理，也就是编译生成 render 函数，通过 render 生成 vnode，vnode 生成 dom 流程，是否与 vue2 不同
+
+2022-05-25 17:20:41
+1. vue3 对数据操作方法还有做拦截吗，已经基于 proxy 拦截了，proxy 有能力拦截 push 方法吗？
+2. vue3 对事件是如何绑定的？有做什么优化没？
+3. vue3 对 mustache 插入的变量是如何渲染的？即 textContent 如何插入？attribute 如何转译的呢？
+4. 
 
 ## 3 组合式 api
 
@@ -254,6 +260,18 @@ export default defineComponent({
 1. 部门对社招新人有啥培养
 2. 业务开发任务多不
 3. 有哪些前端发展方向，可能有哪些机会
+
+## vue3 框架思考
+
+1. 核心能力：声明式渲染(html)、响应性
+2. 多场景支持：无需构建的纯 html 引入使用、spa、webComponents、ssr、ssg、桌面端等。需要为这些场景配备相应的能力，比如包含 compiler 的 umd 包，支持 webpack 的 vue-loader，nuxtjs ssr 实现。。。
+3. 提供的能力：单文件组件渲染、loader、国际化、测试、ts、极致性能、treeShaking、体积小、编辑器插件、构建工具vite、jsx、less、css、ssr、安全、无障碍
+
+性能优化  
+1. 智能推导需要重新渲染的组件最小数量：patch + diff + patchFlag + key
+2. tree-shaking 减小 bundle
+3. ssr/ssg
+4. v-once/v-memo
 
 ## 参考文章
 

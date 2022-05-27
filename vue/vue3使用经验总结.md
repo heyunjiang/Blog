@@ -29,6 +29,8 @@ author: heyunjiang
 7. v-for renderList 渲染原理
 8. 编码规范
 9. v-bind 在 css 中使用 js 变量
+10. slot 嵌套
+11. v-bind="attrs"
 
 待完善点  
 1. 通读官网文档，补漏学习
