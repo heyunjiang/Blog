@@ -166,10 +166,9 @@ toRef 和 toRefs 有什么不同？2者相同点都是对响应式对象结构�
 4. vue3 数据驱动原理，也就是编译生成 render 函数，通过 render 生成 vnode，vnode 生成 dom 流程，是否与 vue2 不同
 
 2022-05-25 17:20:41
-1. vue3 对数据操作方法还有做拦截吗，已经基于 proxy 拦截了，proxy 有能力拦截 push 方法吗？
-2. vue3 对事件是如何绑定的？有做什么优化没？
-3. vue3 对 mustache 插入的变量是如何渲染的？即 textContent 如何插入？attribute 如何转译的呢？
-4. 
+1. vue3 对数据操作方法还有做拦截吗，已经基于 proxy 拦截了，proxy 有能力拦截 push 方法吗？有，push 也是数组的属性，会被 proxy get 拦截，reactive.proxy.handler.get 中对 array 众多方法做了处理
+2. vue3 对事件是如何绑定的？有做什么优化没？没有，通过 render.patchElement.mountElement.patchProps.patchEvent 实现事件绑定，无其他优化
+3. vue3 对 mustache 插入的变量是如何渲染的？即 textContent 如何插入？attribute 如何转译的呢？`{{item}}` 编译成 `toDisplayString(item)`, 使用 `el.textContent = text` 渲染文本元素
 
 ## 3 组合式 api
 
@@ -268,10 +267,15 @@ export default defineComponent({
 3. 提供的能力：单文件组件渲染、loader、国际化、测试、ts、极致性能、treeShaking、体积小、编辑器插件、构建工具vite、jsx、less、css、ssr、安全、无障碍
 
 性能优化  
-1. 智能推导需要重新渲染的组件最小数量：patch + diff + patchFlag + key
+1. 智能推导需要重新渲染的组件最小数量：patch + diff + patchFlag + key。patchFlag 为 -1 表示静态节点，后续更新会复用，不会再次生成；还有 style, class, props 等标识
 2. tree-shaking 减小 bundle
 3. ssr/ssg
 4. v-once/v-memo
+5. flat tree：打平树结构，createElementBlock 只保留动态子节点，diff 时节省时间
+
+虚拟 dom 的优势  
+1. 提升开发速度：隐藏了实际操作 dom 结构，交给框架 patch 去实现，开发者只需要声明式编写相关数据结构
+2. 规范化开发体系：所有直接操作 dom、内部优化由框架实现
 
 ## 参考文章
 
