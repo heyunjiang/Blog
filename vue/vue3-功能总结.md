@@ -167,7 +167,7 @@ toRef 和 toRefs 有什么不同？2者相同点都是对响应式对象结构�
 
 2022-05-25 17:20:41
 1. vue3 对数据操作方法还有做拦截吗，已经基于 proxy 拦截了，proxy 有能力拦截 push 方法吗？有，push 也是数组的属性，会被 proxy get 拦截，reactive.proxy.handler.get 中对 array 众多方法做了处理
-2. vue3 对事件是如何绑定的？有做什么优化没？没有，通过 render.patchElement.mountElement.patchProps.patchEvent 实现事件绑定，无其他优化
+2. vue3 对事件是如何绑定的？有做什么优化没？没有，通过 render.patchElement.mountElement.patchProps.patchEvent 实现事件绑定，对回调函数做了一层 invoke 包装，解决动态绑定事件的立即执行问题
 3. vue3 对 mustache 插入的变量是如何渲染的？即 textContent 如何插入？attribute 如何转译的呢？`{{item}}` 编译成 `toDisplayString(item)`, 使用 `el.textContent = text` 渲染文本元素
 
 ## 3 组合式 api
