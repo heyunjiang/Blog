@@ -35,7 +35,11 @@ var proxy = new Proxy(target, handler = {
 12. apply(target, object, args) 拦截 proxy 作为普通函数调用
 13. construct(target, args) 拦截 proxy 作为构造函数调用
 
-问题：如果判别一个对象是 Set or Map or Object？可以使用 instanceof
+问题：  
+1. 如果判别一个对象是 Set or Map or Object？可以使用 instanceof
+2. 能拦截数组下标访问吗？proxy 可以拦截，下标也就是数组这个对象上的属性
+3. vue3 为什么还需要对数组方法做拦截？
+4. proxy 对象解构赋值之后还具备响应式吗？明显不具备
 
 ## 2 Reflect
 

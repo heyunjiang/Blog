@@ -149,6 +149,7 @@
     - ✔ [vue2 边角知识](vue/vue2-边角.md)
     - ✔ [vue3 功能总结](vue/vue3-功能总结.md)
     - vue3 深入
+      - ✔ [vue3 compiler](vue/vue3源码解读/vue3-compiler.md) vue3 编译流程
       - ✔ [vue3 响应式系统](vue/vue3源码解读/vue3响应式系统.md) track and trigger
       - ✔ [vue3 渲染流程](vue/vue3源码解读/vue3渲染流程.md) 核心点在于 createVnode, createComponentInstance, setupComponent, setRenderEffect
       - ✔ [vue3 setup](vue/vue3源码解读/vue3-setup.md) setup 啥时候执行的？内部属性怎么被 template 访问到的？

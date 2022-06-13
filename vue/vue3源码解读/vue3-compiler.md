@@ -49,9 +49,13 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
 
 解决思路  
 1. 通过 compiler 配置处理，看看 option 参数是否可以自定义部分编译逻辑
-2. 通过 vite 插件处理源代码，手动 ast 分析替换
+2. 通过 vite 插件处理源代码，借助 compiler ast 分析替换
 
-## 1 compiler 基础知识
+自己在开发 vue3 项目时，有如下问题  
+1. vue compiler 是否借助 ast 解析源码？是
+2. 编译的大体流程是什么？descriptor，ast -> transform ast -> code generate
+
+## 1 compiler 接入流程
 
 vite 使用的是 `@vue/compiler-sfc` 来执行的编译，在 `@vitejs/plugin-vue` 中，调用编译的流程如下
 ```javascript
@@ -61,34 +65,102 @@ export default function vuePlugin(rawOptions: Options = {}): Plugin {
       options.compiler = options.compiler || resolveCompiler(options.root)
     },
     transform(code, id, opt) {
-      const { filename, query } = parseVueRequest(id)
-      const descriptor = query.src
-        ? getSrcDescriptor(filename, query)!
-        : getDescriptor(filename, options)!
-
-      if (query.type === 'template') {
-        return transformTemplateAsModule(code, descriptor, options, this, ssr)
-      }
+      return transformMain(
+        code,
+        filename,
+        options,
+        this,
+        ssr,
+        customElementFilter(filename)
+      )
     }
   }
 }
 export function resolveCompiler(root: string): typeof _compiler {
-  // resolve from project root first, then fallback to peer dep (if any)
   const compiler =
     tryRequire('vue/compiler-sfc', root) || tryRequire('vue/compiler-sfc') // 使用的就是 @vue/compiler-sfc
   return compiler
 }
-export async function transformTemplateAsModule(
+
+export async function transformMain(
+  code: string,
+  filename: string,
+  options: ResolvedOptions,
+  pluginContext: TransformPluginContext,
+  ssr: boolean,
+  asCustomElement: boolean
+) {
+  // 1 descriptor
+  const { descriptor, errors } = createDescriptor(filename, code, options)
+  // 2 script
+  const { code: scriptCode, map } = await genScriptCode(
+    descriptor,
+    options,
+    pluginContext,
+    ssr
+  )
+  // 3 template
+  let templateCode = ''
+  let templateMap: RawSourceMap | undefined
+  if (hasTemplateImport) {
+    ;({ code: templateCode, map: templateMap } = await genTemplateCode(
+      descriptor,
+      options,
+      pluginContext,
+      ssr
+    ))
+  }
+  // 4 styles
+  const stylesCode = await genStyleCode(
+    descriptor,
+    pluginContext,
+    asCustomElement,
+    attachedProps
+  )
+  ...
+}
+
+export function createDescriptor(
+  filename: string,
+  source: string,
+  { root, isProduction, sourceMap, compiler }: ResolvedOptions
+): SFCParseResult {
+  const { descriptor, errors } = compiler.parse(source, {
+    filename,
+    sourceMap
+  })
+  return { descriptor, errors }
+}
+
+async function genTemplateCode(
+  descriptor: SFCDescriptor,
+  options: ResolvedOptions,
+  pluginContext: PluginContext,
+  ssr: boolean
+) {
+  const template = descriptor.template!
+  return transformTemplateInMain(
+    template.content,
+    descriptor,
+    options,
+    pluginContext,
+    ssr
+  )
+}
+export function transformTemplateInMain(
   code: string,
   descriptor: SFCDescriptor,
   options: ResolvedOptions,
-  pluginContext: TransformPluginContext,
+  pluginContext: PluginContext,
   ssr: boolean
-) {
+): SFCTemplateCompileResults {
   const result = compile(code, descriptor, options, pluginContext, ssr)
   return {
-    code: result.code,
-    map: result.map
+    ...result,
+    code: result.code.replace(
+      /\nexport (function|const) (render|ssrRender)/,
+      '\n$1 _sfc_$2'
+    )
   }
 }
 export function compile(
@@ -105,52 +177,117 @@ export function compile(
   })
   return result
 }
-export function resolveTemplateCompilerOptions(
-  descriptor: SFCDescriptor,
-  options: ResolvedOptions,
-  ssr: boolean
-) {
-  return {
-    ...options.template,
-    id,
-    filename,
-    scoped: hasScoped,
-    slotted: descriptor.slotted,
-    isProd: options.isProduction,
-    inMap: block.src ? undefined : block.map,
-    ssr,
-    ssrCssVars: cssVars,
-    transformAssetUrls,
-    preprocessLang: block.lang,
-    preprocessOptions,
-    compilerOptions: {
-      ...options.template?.compilerOptions,
-      scopeId: hasScoped ? `data-v-${id}` : undefined,
-      bindingMetadata: resolvedScript ? resolvedScript.bindings : undefined,
-      expressionPlugins,
-      sourceMap: options.sourceMap
-    }
+```
+
+流程归纳  
+1. 生成 descriptor ： compiler.parse 分析 source string
+2. 生成 templateCode: compiler.compileTemplate(descriptor.template) 生成包含 code 的对象
+
+## 2 compiler.parse
+
+tryRequire('vue/compiler-sfc')，这里的 parse 也就是 `@vue/compiler-sfc` 里面的 parse，用于生成 descriptor 对象  
+```javascript
+import * as CompilerDOM from '@vue/compiler-dom'
+export function parse(
+  source: string,
+  {
+    ...
+    compiler = CompilerDOM
+  }: SFCParseOptions = {}
+): SFCParseResult {
+  const descriptor: SFCDescriptor = {...}
+  const ast = compiler.parse(source, {...})
+  ast.children.forEach(node => {...})
+  const result = {
+    descriptor,
+    errors
   }
+  return result
 }
 ```
 
-归纳分析  
-1. vuePlugin 使用了 `@vue/compiler-sfc` 作为编译工具 compiler
-2. 传递给 vuePlugin 的参数 option 会透传给 compiler.compileTemplate 方法，该方法还接受了其他 vite 其他中间件处理后的源代码
+而 `@vue/compiler-dom` 里面调用的 parse 才是实际调用 `@vue/compiler/core` 里面的 baseParse 实现
 
-现在开始分析 compiler.compileTemplate 的 option 配置
+```javascript
+import {
+  baseParse
+} from '@vue/compiler-core'
+export function parse(template: string, options: ParserOptions = {}): RootNode {
+  return baseParse(template, extend({}, parserOptions, options))
+}
+```
 
-## 2 todo
+baseParse 用于生成 ast，看下节分析
 
-目前 vue3 开发成为主流，它的生态比较完善：框架实现、编码工具支持、路由、状态管理、构建工具。  
-怎么提高自己的职业能力呢？  
-1. 精通 vue 系列：生态源码学习、优化实现方案、开源 pr 贡献
-2. 前端能力：降本增效？前端生态实现，构建工具、错误监控及告警、mock、nodejs 等
+## 3 compiler.compileTemplate
 
-思考在学习了 vue3 组件渲染流程、响应式原理、编译原理、vite 原理之后  
-1. 自己在回答这些问题时，能对答如流吗
-2. 结合实际组件思考，一个框架做了什么事情：约定代码编码格式、配套编码工具
-3. 还有哪些事情可以完善、优化的
+这里作为 template 核心编译流程解析
+
+1. `@vue/compiler-sfc` 初次调用 compileTemplate
+```javascript
+export function compileTemplate(
+  options: SFCTemplateCompileOptions
+): SFCTemplateCompileResults {
+  return doCompileTemplate(options)
+}
+function doCompileTemplate({
+  filename,
+  id,
+  scoped,
+  slotted,
+  inMap,
+  source,
+  ssr = false,
+  ssrCssVars,
+  isProd = false,
+  compiler = ssr ? (CompilerSSR as TemplateCompiler) : CompilerDOM,
+  compilerOptions = {},
+  transformAssetUrls
+}: SFCTemplateCompileOptions): SFCTemplateCompileResults {
+  let { code, ast, preamble, map } = compiler.compile(source, {...})
+  return { code, ast, preamble, source, errors, tips, map }
+}
+```
+2. compileTemplate 调用 CompilerDOM.compile 生成 code, ast 等对象
+3. CompilerDOM.compile 又调用 `@vue/compiler-core` baseCompile 方法实现
+```javascript
+export function baseCompile(
+  template: string | RootNode,
+  options: CompilerOptions = {}
+): CodegenResult {
+  const ast = isString(template) ? baseParse(template, options) : template
+  const [nodeTransforms, directiveTransforms] =
+    getBaseTransformPreset(prefixIdentifiers)
+
+  transform(
+    ast,
+    extend({}, options, {
+      prefixIdentifiers,
+      nodeTransforms: [
+        ...nodeTransforms,
+        ...(options.nodeTransforms || []) // user transforms
+      ],
+      directiveTransforms: extend(
+        {},
+        directiveTransforms,
+        options.directiveTransforms || {} // user transforms
+      )
+    })
+  )
+
+  return generate(
+    ast,
+    extend({}, options, {
+      prefixIdentifiers
+    })
+  )
+}
+```
+
+归纳一下 compiler 编译 template 流程  
+1. 生成 ast：调用 `@vue/compiler-core` parse 生成 ast，这里使用正则匹配生成 vue 特定 ast 对象
+2. 转换 ast 对象：处理 v-if, patchFlag 等 vue 语法
+3. 再将 ast 生成 code：将转换后的 ast 生成目标 code
 
 ## 参考文章
 
