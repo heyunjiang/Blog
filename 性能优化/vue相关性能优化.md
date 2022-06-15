@@ -16,20 +16,17 @@ author: heyunjiang
 
 ## 3 运行时
 
-### 3.1 函数式组件
+1. 合理使用 keep-alive 优化，内存占用太多会卡
+2. 异步组件懒加载
+3. 合理使用 transition 动画组件减少非必要开销
+4. 长列表性能优化可以使用 shallowRef 代替 ref 操作数组，因为 shallowRef 不会对数组做深层次响应式处理
 
-[vue深入 - 组件化](vue/vue高能/函数式组件.md) vue 组件化原理，函数式组件和普通组件的对比
+函数式组件
 
+[vue深入 - 组件化](vue/vue高能/函数式组件.md) vue 组件化原理，函数式组件和普通组件的对比  
 对于没有自身状态的组件，可以改为函数式组件。`router-view` 就是典型的函数式组件
 
-### 3.2 keep-alive 优化
-
-[vue深入 - keepAlive组件原理](vue/vue源码解读/源码解读-keepAlive.md) 源码解读-keepAlive，来看看它的缓存实现原理
-
-通过 include, exclude, max 合理控制需要缓存的组件
-
-### 3.3 动态组件和异步组件
-
-### 3.4 善用 transition 动画组件
+该点针对 vue2 有效，vue3 优化不大，因为 vue3 同时存在了应用实例 app 和组件实例，并且组件实例自身很简单，不用再包含 vue2 的众多属性，并且纯 script + setup 渲染速度更快。  
+vue3 虽然支持了纯函数创建组件，并且废弃了 functional 关键字，但是不建议使用，因为优化可以忽略不计，同普通组件一样
 
 ## 参考文章

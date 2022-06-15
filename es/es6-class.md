@@ -54,7 +54,9 @@ class 类和 function 实现的对象，有什么不同？
 3. es6 class 内部定义方法同 function.prototype，都是挂在原型上
 4. 多态：2种继承之后，都可以对相同方法重新实现，达到多态
 5. this 实现：在实例化时，都是通过将类属性添加到 this 对象上，包括从父类继承的属性
-6. 
+6. name：2者都可以直接访问原对象 name 属性
+7. 解构赋值：2者实例都可以解构赋值获取内部属性，但是一般不这么做
+8. new.target：2者都可以通过在内部判断 new.target 是否是通过 new 执行的
 
 不同点：  
 1. 关键字支持：es6 class 支持 static 关键字，表现同 function 对象直接挂载属性
@@ -63,5 +65,8 @@ class 类和 function 实现的对象，有什么不同？
 4. class 不可执行：不可直接像函数一样加括号执行 class，即使 typeof class 为 function；必须通过 new 来执行
 5. 严格模式：es6 class 默认全局严格模式
 6. 变量提升：class 名不可提升，提前访问会出问题
+7. constructor: 执行默认返回实例本身，也可以手动返回另一个对象
+8. get/set: class 支持 get/set，比如 vue3.ref 实现，但是 function 不支持
+9. static.this：class static 方法内部 this 指向类本身
 
 > ts class：与 es6 class 和 function 有差别
