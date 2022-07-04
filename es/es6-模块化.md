@@ -165,6 +165,16 @@ Components.utils.unload()
 1. jsm 被加载之后由浏览器缓存起来，后续所有其他地方引用组件，是属于对象内存共享，不同于 esm 的独立
 2. 引入方式：resource(常用), chrome mainfest
 
+## 7 cjs vs esm
+
+cjs 作为 nodejs 早期模块化的实现方式，在 12.22 和 14.17 版本就稳定支持了 esm；
+esm 在浏览器支持 es6 之后就支持了
+
+esm 较于 cjs 的优势  
+1. 语言统一实现的模块加载方式，规范化实现，用于替代 amd, umd, cjs 之类的模块，大趋势
+2. esm 性能比 cjs 更优：代码编译(扫描)阶段可以实现优化，共享内存使内存占用更少，treeshaking 优化
+3. 生态统一：新版本都支持 esm，比如 chalk, inquire, monaco, codemirror 等
+
 ## 参考文章
 
 [es6 阮一峰](https://es6.ruanyifeng.com/#docs/module)  
