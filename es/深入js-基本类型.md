@@ -453,7 +453,7 @@ Object.getOwnPropertyDescriptor(obj, 'foo')
 
 1. for...in 循环
 2. Object.keys()
-3. Json.stringify()
+3. JSON.stringify()
 4. Object.assing()
 
 下列操作可以获取到 `enumerable` 值为 false 的属性
@@ -587,6 +587,14 @@ const obj = {
 const arr = [{"hello": 'world'}, {"hello": 'world'}]
 console.log(arr === arr, arr[0] === arr[1]) //true, false
 ```
+
+## JSON vs js object
+
+1. JSON 只支持字符串、数值、对象、数组，不支持函数、set等其他对象
+2. JSON 只支持双引号，不支持单引号，并且 key 必须双引号包起来
+3. 尾逗号不支持
+4. 数值：不支持0开头；小数点后必须接值
+5. 字符串转译：只支持有限的字符转译
 
 ## 4 参考文章
 
