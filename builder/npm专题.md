@@ -39,14 +39,11 @@ nodejs 作为前端开发环境，使用 npm 作为包管理器，第三方包�
 14. npm 常用钩子：`preinstall`, `postinstall` 可以在我们执行 `npm install` 的过程前后执行对应的 script 命令
 
 较深入问题：  
-1. webpack 是显示从 node_modules 中去查找模块吗？
+1. webpack 是显示从 node_modules 中去查找模块吗？会，并且受 webpack.config resolve 的限制
 2. package.json 字段 type 表示什么？
-3. module, main 加载优先级是啥？
-4. 为什么我 install 一个 webpack 就会在 node_modules 下面生产多个模块？
+3. module, main 加载优先级是啥？分别是 esm, cjs 的入口，不影响
+4. 为什么我 install 一个 webpack 就会在 node_modules 下面生产多个模块？因为 webpack package.json 中包含了 dependency, peerDependency，并且依赖的模块又回依赖其他模块
 5. 一个项目中不同的模块指定了不同的 webpack 版本，最终使用的是哪个？
-
-在学习分析 npm package.json 文档，和实践学习 webpack 之后，问题解答：  
-1. 
 
 ### 1.1 包入口
 
