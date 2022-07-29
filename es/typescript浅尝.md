@@ -47,7 +47,7 @@ update: 2022-03-29 14:55:20
 
 优势  
 1. 语义化增强：完备的类型系统让代码阅读更方便明了
-2. 语法错误提前暴露，在 ts 编译为 js 时报错、在编辑器内部检查报错
+2. 语法错误提前暴露，在 ts 编译为 js 时报错、在编辑器内部检查报错，比如函数参数传入的变量类型错误(可能是顺序不对)、返回的对象数据少了某一项等
 3. 编辑器和ide代码补全、智能提示、跳转
 4. 类型系统包容性强：类型推论、第三方系统兼容性强
 5. 社区活跃：vue、antd 都是用 ts 写的
@@ -119,6 +119,11 @@ interface MyFun {
 5. 返回值：function(hello: string): boolean {}
 6. this 参数：为了解决 ts 函数内部访问 this 警告或报错问题，可以生命一个 this 函数参数并指明类型
 7. 函数重载：参数不同，返回值不同。通过多行定义函数
+
+定义函数类型方式  
+1. 变量方式 let myAdd: (x: number) => number
+2. type 方式 type myAdd = (x: number) => number
+3. interface 方式 interface myAdd { (x: number): number }
 
 完整函数类型  
 ```javascript

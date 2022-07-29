@@ -54,6 +54,7 @@ author: heyunjiang
 2. useCustomStore 读取响应式数据
 3. createPinia 主要是挂载 $store 对象到 globalProperties 对象上，并且 provide 对象挂载到 app 对象上
 4. useStore 同 useRoute 一样，内部使用 inject 读取当前组件相关联的 app 对象上 provide 数据
+5. 直接同 ref 更新数据一样，即可实现响应式
 
 ## 其他总结
 

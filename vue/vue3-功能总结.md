@@ -158,6 +158,15 @@ ref
 
 toRef 和 toRefs 有什么不同？2者相同点都是对响应式对象结构，不同的是 toRefs 是返回的对象，toRef 返回的具体属性，如果想获取原对象不存在的属性，则需要使用 toRef 来添加响应式数据
 
+### 1.8 jsx
+
+需要配合构建构建使用 jsx 转译实现
+
+1. jsx 知识 h 函数的语法糖，本质会被编译成 createElementVnode 实现
+2. jsx 的优势：能处理动态组件，比如需要根据 props 动态渲染，有动态 table td 渲染
+3. template 的优势：能利用 vue 自带的指令、渲染时标记实现性能优化（编译时增加了标记）
+4. 动态要求高的地方使用 jsx，其他默认 template
+
 ## 2 问题归纳
 
 1. vue2 各组件是 vm.$options._base.extend(object) 对象，生成的 vue 实例，那么 vue3 组件是继续使用 createApp 来生成实例的吗？

@@ -20,6 +20,7 @@ author: heyunjiang
 2. 异步组件懒加载
 3. 合理使用 transition 动画组件减少非必要开销
 4. 长列表性能优化可以使用 shallowRef 代替 ref 操作数组，因为 shallowRef 不会对数组做深层次响应式处理
+5. v-for 加上 key，可以减少 diff 时长，复用节点
 
 函数式组件
 
