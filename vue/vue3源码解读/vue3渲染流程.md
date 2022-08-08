@@ -742,7 +742,7 @@ const setupRenderEffect: SetupRenderEffectFn = (
 
 需要解决的点  
 1. patch 对比优化时，时哪个标识可以跳过对比渲染 - patchFlag 标识，在 compiler 编译 template 为 _sfc_render 时会为 `_createElementBlock` 等方法添加 patchFlag 值
-2. 组件渲染 diff 算法
+2. 组件渲染 diff 算法：双端对比保留原始节点，剩余节点获取最长公共子串，其余节点再 mount or unmount
 
 updateComponent
 ```javascript
@@ -776,7 +776,7 @@ patchKeyedChildren diff 核心算法
 4. render 渲染 vnode，内部调用 patch 方法
 5. `patch` 判断为组件时，调用 mountComponent 开始渲染
 6. mountComponent 内部依次调用 `createComponentInstance, setupComponent, setupRenderEffect` 生成组件实例和渲染
-7. 组件 setupRenderEffect.update 方法内部，在 beforeMount 和 mounted 生命周期之间，使用了 renderComponentRoot 执行 render 方法生成组件内部的子 vnodeTree，然后调用 patch 渲染这颗 vnodeTree，形成递归
+7. 组件 **setupRenderEffect.update** 方法内部，在 beforeMount 和 mounted 生命周期之间，使用了 renderComponentRoot 执行 **render** 方法生成组件内部的子 vnodeTree，然后调用 **patch** 渲染这颗 vnodeTree，形成递归
 
 ## 2 vue3 vs vue2
 

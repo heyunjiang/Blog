@@ -4,6 +4,7 @@ time: 2018.8.09
 update: 2020.12.28  
 update: 2021-09-16 19:24:39  
 update: 2022-03-29 14:55:20
+update: 2022-08-08 19:32:54
 
 一直都没有怎么去学习 typescript ，但是今天阅读 antd 源码的时候，发现它是用 ts 写的，大部分源码都能看懂，但是它的一些语法不是很懂，比如 `export default class Button extends React.Component<ButtonProps, any>` ，它尾巴上的 `<ButtonProps, any>` 是什么，是 React.Component 自带可以这样子写的吗，还是 ts 赋予的？
 
@@ -23,6 +24,7 @@ update: 2022-03-29 14:55:20
 [6 与es6 class区别](#6-与es6-class区别)  
 [7 ts 踩坑归纳](#7-ts-踩坑归纳)  
 [8 vue3 使用 ts](#8-vue3-使用-ts)  
+[9 关键字](#9-关键字)  
 
 ## 1 typescript 简介
 
@@ -200,6 +202,10 @@ type 的作用
 1. 定义类型别名：type Name = string; 接着使用 let hello: Name 即可
 2. 定义字符串字面量类型：type Names = 'jack' | 'tom' | 'andy'; 然后使用 function hello(name: Names): any {} 即可。它的作用是限制了对应参数的取值只能是字面量中的一个
 
+type vs interface  
+1. 编辑器提示：interface 定义了一个类型名，而 type 只是定义的别名，编辑器只会提示类型名，不会提示别名
+2. 扩展方式不同：type 的扩展只能添加，不能修改；interface 可以通过 extends 添加与修改
+
 ## 3 tsx
 
 在 typescript 实现的 jsx 命名为 `tsx`
@@ -327,7 +333,63 @@ function identity<T extends hello>(arg: T): T {
 原则是自己编写的组件需要被其他地方引用时，确定好相互之间的参数格式及返回值，提高函数的可读性。  
 可以编写在组件内部、compositionapi、*.d.ts 文件中
 
+## 9 关键字
+
+keyof, extends, in, Pick, Record, 同态
+
+### 9.1 keyof
+
+名称：索引类型查询操作符  
+作用：用于限制属性名范围。比如函数参数必须是接口中的一种  
+索引访问操作符：`T[K]`  
+```typescript
+function pluck<T, K extends keyof T>(o: T, names: K[]): T[K][] {
+  return names.map(n => o[n]);
+}
+
+interface Person {
+    name: string;
+    age: number;
+}
+let person: Person = {
+    name: 'Jarid',
+    age: 35
+};
+let strings: string[] = pluck(person, ['name']);
+```
+
+使用方式解析  
+1. keyof 用于获取 interface | 字符串字面量 的索引集合
+2. `keyof T` 可以理解为返回的是 `name | age`
+
+### 9.2 in
+
+名称：遍历属性  
+使用场景：属性映射  
+```typescript
+interface PersonPartial {
+    name: string;
+    age: number;
+}
+type Readonly<T> = {
+    readonly [P in keyof T]: T[P];
+}
+type ReadonlyPerson = Readonly<PersonPartial>;
+```
+
+使用方式解析  
+1. 使用 `in` + `keyof` 关键字
+2. 使用 `[]` 包围
+3. 使用 type 定义了一个别名
+
+内部原理：  
+1. 使用 for in 循环
+2. 定义变量 p ，表示每次的属性
+
+### 9.3 extends
+
 ## 参考文档
 
 [ts 中文](https://www.tslang.cn/docs/handbook/modules.html)  
-[打造TypeScript的Visual Studio Code开发环境](https://zhuanlan.zhihu.com/p/21611724)
+[打造TypeScript的Visual Studio Code开发环境](https://zhuanlan.zhihu.com/p/21611724)  
+[深入理解 typescript](https://jkchao.github.io/typescript-book-chinese/#why)

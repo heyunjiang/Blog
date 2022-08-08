@@ -13,7 +13,7 @@ vue2 到 vue3 变化总结归纳：
 
 内部原理性变化  
 1. 组件轻量化：使用 plain object 替代 vue2 的函数实例对象，use、config、mixin 等方法定义在了应用实例上；
-2. 渲染性能优化：使用 patchFlags 处理了无响应式数据节点对象，直接跳过 diff
+2. 渲染性能优化：使用 patchFlags 处理了无响应式数据节点对象，使用位运算 & 快速匹配，按需更新 class, style, props 等
 3. 响应式变化：拆分响应式模块，提供 ref, reactive, track, trigger 等 api，内部使用 proxy 简化，使用比较灵活
 
 ## 1 功能总结
