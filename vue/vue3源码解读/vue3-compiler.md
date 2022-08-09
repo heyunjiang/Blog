@@ -55,7 +55,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
 1. vue compiler 是否借助 ast 解析源码？是
 2. 编译的大体流程是什么？descriptor，ast -> transform ast -> code generate
 
-## 1 compiler 接入流程
+## 1 sfc.compiler 接入流程
 
 vite 使用的是 `@vue/compiler-sfc` 来执行的编译，在 `@vitejs/plugin-vue` 中，调用编译的流程如下
 ```javascript
@@ -183,7 +183,7 @@ export function compile(
 1. 生成 descriptor ： compiler.parse 分析 source string
 2. 生成 templateCode: compiler.compileTemplate(descriptor.template) 生成包含 code 的对象
 
-## 2 compiler.parse
+## 2 sfc.compiler.parse
 
 tryRequire('vue/compiler-sfc')，这里的 parse 也就是 `@vue/compiler-sfc` 里面的 parse，用于生成 descriptor 对象  
 ```javascript
@@ -219,7 +219,7 @@ export function parse(template: string, options: ParserOptions = {}): RootNode {
 
 baseParse 用于生成 ast，看下节分析
 
-## 3 compiler.compileTemplate
+## 3 sfc.compiler.compileTemplate
 
 这里作为 template 核心编译流程解析
 
@@ -288,6 +288,16 @@ export function baseCompile(
 1. 生成 ast：调用 `@vue/compiler-core` parse 生成 ast，这里使用正则匹配生成 vue 特定 ast 对象
 2. 转换 ast 对象：处理 v-if, patchFlag 等 vue 语法
 3. 再将 ast 生成 code：将转换后的 ast 生成目标 code
+
+## 4 core.baseParse
+
+前面3节都是讲述的 sfc 如何接入 baseParse 生成的 ast，现在开始分析
+
+## 总结
+
+1. 核心渲染流程：baseParse -> transform -> codeGenerate
+2. 其中 baseParse 包含了：词法分析 tokenizer + ast 生成
+3. transform 做语法分析转换，通过各种 transform 中间件实现
 
 ## 参考文章
 

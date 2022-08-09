@@ -77,6 +77,65 @@ export async function createServer(
 }
 ```
 
+hmt client 关键代码
+```javascript
+const socket = new WebSocket(`${socketProtocol}://${socketHost}`, 'vite-hmr')
+socket.addEventListener('message', async ({ data }) => {
+  handleMessage(JSON.parse(data))
+})
+async function handleMessage(payload: HMRPayload) {
+  switch (payload.type) {
+    case 'update':
+      notifyListeners('vite:beforeUpdate', payload)
+      if (isFirstUpdate && hasErrorOverlay()) {
+        window.location.reload()
+        return
+      } else {
+        clearErrorOverlay()
+        isFirstUpdate = false
+      }
+      payload.updates.forEach((update) => {
+        if (update.type === 'js-update') {
+          queueUpdate(fetchUpdate(update))
+        } else {
+          let { path, timestamp } = update
+          path = path.replace(/\?.*/, '')
+          const el = Array.from(
+            document.querySelectorAll<HTMLLinkElement>('link')
+          ).find((e) => e.href.includes(path))
+          if (el) {
+            const newPath = `${base}${path.slice(1)}${
+              path.includes('?') ? '&' : '?'
+            }t=${timestamp}`
+            el.href = new URL(newPath, el.href).href
+          }
+          console.log(`[vite] css hot updated: ${path}`)
+        }
+      })
+      break
+  }
+}
+let pending = false
+let queued: Promise<(() => void) | undefined>[] = []
+async function queueUpdate(p: Promise<(() => void) | undefined>) {
+  queued.push(p)
+  if (!pending) {
+    pending = true
+    await Promise.resolve()
+    pending = false
+    const loading = [...queued]
+    queued = []
+    ;(await Promise.all(loading)).forEach((fn) => fn && fn())
+  }
+}
+```
+
+hmr 归纳总结  
+1. 服务端监听文件变更，通过 websocket 去客户端通信
+2. 客户端收到更新信息，主动获取更新文件
+3. 更新方式：全量 reload(页面错误重刷)、js 独立更新(执行 module.hot.accept 收集到的函数，构建的时候会在每个 vue 文件插入 accept)、css 更新
+4. 提供 hot api
+
 总结归纳，在初始创建 server 期间，做了如下事情  
 1. 生成 http 服务器，并定义好相关的 middelware 处理请求
 2. 实现 hmr 服务
