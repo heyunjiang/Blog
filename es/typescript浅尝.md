@@ -52,7 +52,7 @@ update: 2022-08-08 19:32:54
 2. 语法错误提前暴露，在 ts 编译为 js 时报错、在编辑器内部检查报错，比如函数参数传入的变量类型错误(可能是顺序不对)、返回的对象数据少了某一项等
 3. 编辑器和ide代码补全、智能提示、跳转
 4. 类型系统包容性强：类型推论、第三方系统兼容性强
-5. 社区活跃：vue、antd 都是用 ts 写的
+5. 社区活跃：vue、antd 都是用 ts 写的，并且大部分库都支持了 @types 类型
 
 目的：提供类型系统，完善 javascript 过于灵活导致的代码质量参差不齐的问题
 
@@ -67,14 +67,28 @@ update: 2022-08-08 19:32:54
 7. 类型别名：使用 `type` 关键字，type NameOrResolver = Name | NameResolver
 8. 枚举：使用 `enum` 关键字，enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat} 约定取值范围，会被编译为从 0 开始递增的数组。在 ts 中作为一种数据结构，编译之后为数组和对象的结合体
 9. 联合类型：使用单竖线 `|`
+10. null, undefined：这2个值可以赋值给任意类型变量
 
-问题：es 函数默认值是 `=` 还是 `:`？是=，: 是类型
+问题：es 函数默认值是 `=` 还是 `:`？  
+答：是 = ，: 是类型
 
 类型声明  
-1. 普通类型：采用冒号 `:`，例如 let myFavoriteNumber: string | number;
+1. 普通类型：采用冒号 `:`，例如 let myFavoriteNumber: string | number | boolean;
 2. 数组：let hello: number[], 泛型 `let hello: Array<number>`，类数组 `let hello: IArguments = arguments`
 3. 对象：使用 `interface` 声明属性及值类型，或者简单对象则使用 `object` 声明
 4. 函数：(data: object) => boolean，参数可以直接使用 object 关键字或者使用 interface 来声明
+
+对象声明方式  
+1. interface 声明
+2. 内联方式：内联方式相比 interface，优点是省略了新建类型名称，缺点是不能服用  
+```typescript
+let hello: {
+  first: string
+}
+hello = {
+  first: 'world'
+}
+```
 
 > 尖括号里面始终表示类型，可以是基础类型，有可以是定义好的 interface、object 等数据类型，也又可能是定义的泛型
 
@@ -165,18 +179,20 @@ class 包含了 属性、constructor、方法
 8. readonly：可以用在属性、索引签名或 contructor 中
 9. interface: 定义接口，接口之间也可以继承，接口还可以继承类(ts 特有，并且只会继承类的非静态属性、非静态方法)
 10. implements：实现接口，多个接口用逗号隔开
+11. constructor 执行返回结果：默认返回 this；如果有明确返回值则为其返回值
 
 ### 2.5 declare
 
-作用：方便编辑器定位、代码补全
+声明文件 `.d.ts`
 
-1. 使用 `declare`、`interface`、`type` 关键字定义声明语句
-2. 声明文件以 `.d.ts` 结尾
-3. 在 package.json 中使用 `types` 字段指向项目的声明文件。如果项目根目录存在 index.d.ts，那么则不需要指明该字段
+1. 使用 `declare`、`interface` 关键字开头定义全局声明语句，如果全局定义了变量，那么内部可以直接使用吗？
+2. 三方库：在 package.json 中使用 `types` 字段指向项目的声明文件。如果项目根目录存在 index.d.ts，那么则不需要指明该字段
+3. 自身项目：可以直接使用 global.d.ts 声明全局类型，只对当前项目起效
 
-作用  
-1. 引用第三方库时，需要引用它的声明文件，获取代码提示和补全
+作用: 编辑器定位、代码补全，不会影响到实际代码运行
 
+特点  
+1. 声明在多个 .d.ts 中的 interface 会 extends
 ### 2.6 module
 
 在 nodejs 中，默认采用的是 commonjs 规范，如果想使用 es6 规范，则必须声明为 .mjs，在 ts 中对于模块有不同的实现
@@ -205,6 +221,41 @@ type 的作用
 type vs interface  
 1. 编辑器提示：interface 定义了一个类型名，而 type 只是定义的别名，编辑器只会提示类型名，不会提示别名
 2. 扩展方式不同：type 的扩展只能添加，不能修改；interface 可以通过 extends 添加与修改
+
+### 2.8 enum
+
+编译结果  
+```javascript
+enum Tristate {
+  False,
+  True,
+  Unknown
+}
+
+// compile result
+var Tristate;
+(function(Tristate) {
+  Tristate[(Tristate['False'] = 0)] = 'False';
+  Tristate[(Tristate['True'] = 1)] = 'True';
+  Tristate[(Tristate['Unknown'] = 2)] = 'Unknown';
+})(Tristate || (Tristate = {}));
+```
+
+解析特点  
+1. 枚举默认从 0 开始编号
+2. 每一项可以通过数字和字符串互相访问
+
+也可以自定义每一项的值  
+```javascript
+enum EvidenceTypeEnum {
+  UNKNOWN = '',
+  PASSPORT_VISA = 'passport_visa',
+  PASSPORT = 'passport',
+  SIGHTED_STUDENT_CARD = 'sighted_tertiary_edu_id',
+  SIGHTED_KEYPASS_CARD = 'sighted_keypass_card',
+  SIGHTED_PROOF_OF_AGE_CARD = 'sighted_proof_of_age_card'
+}
+```
 
 ## 3 tsx
 
@@ -241,7 +292,9 @@ class MyComponent extends React.Component<Props, {}> {
 这里解释了最开始提出的问题，React.Component 的尾巴上的 `<Props, {}>` 这个是什么。原来这个是它的类型定义，是typescript约定的，不是 react 的
 
 
-## 4 泛型
+## 4 高级类型
+
+### 4.1 泛型
 
 泛型是使用尖括号定义泛型变量，`<T>`，其他使用跟函数、数组这些没变化。  
 > 在定义函数、接口、类时不指定类型，在使用时再确定。一般很少使用泛型，都使用 any 替代了  
@@ -279,6 +332,14 @@ interface hello {
 }
 function identity<T extends hello>(arg: T): T {
   return arg.world
+}
+```
+
+### 4.2 交叉类型
+
+```typescript
+function conbine<T extends object, U extends object>(a: T, b: U): T&U {
+  return Object.assign(a, b)
 }
 ```
 
